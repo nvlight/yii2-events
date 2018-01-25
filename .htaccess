@@ -1,0 +1,31 @@
+Options +FollowSymLinks
+IndexIgnore */*
+RewriteEngine on
+
+RewriteCond %{REQUEST_URI} !^/(web)
+RewriteRule ^assets/(.*)$ /web/assets/$1 [L]
+RewriteRule ^css/(.*)$ web/css/$1 [L]
+RewriteRule ^fonts/(.*)$ web/fonts/$1 [L]
+RewriteRule ^js/(.*)$ web/js/$1 [L]
+RewriteRule ^images/(.*)$ web/images/$1 [L]
+RewriteRule (.*) /web/$1
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /web/index.php
+
+
+# Устанавливаем корневой директорией "basic/web"
+#DocumentRoot "web"
+#
+#<Directory "web">
+#    RewriteEngine on
+#
+#    # Если запрашиваемая в URL директория или файл существуют обращаемся к ним напрямую
+#    RewriteCond %{REQUEST_FILENAME} !-f
+#    RewriteCond %{REQUEST_FILENAME} !-d
+#    # Если нет - перенаправляем запрос на index.php
+#    RewriteRule . /web/index.php
+#
+#    # ...прочие настройки...
+#</Directory>
