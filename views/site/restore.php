@@ -17,7 +17,7 @@ $this->title = 'Events | Восстановление пароля';
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page restore'], 'keywords');
 
-
+//$_SERVER['REQUEST_METHOD'] === 'POST'
 
 ?>
 

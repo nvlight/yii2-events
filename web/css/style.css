@@ -737,3 +737,14 @@ label.sogl:active{
 	top: 2px;
 	left: 0;
 }
+
+.dg_type_style{
+	color: #ffffff;
+	padding: 5px 8px;
+	border-radius: 3px;
+	background-color: #a59;
+	display: block;
+	text-align: center;
+	margin: 0 auto;
+	/*width: calc(100% - 40px);*/
+}

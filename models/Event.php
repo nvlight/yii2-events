@@ -31,13 +31,18 @@ class Event extends \yii\db\ActiveRecord
             //->viaTable('art_tag', ['tag_id' => 'id']);
     }
 
+    public function getTypes() {
+        return $this->hasOne(Type::className(), ['id' => 'type']);
+        //->viaTable('art_tag', ['tag_id' => 'id']);
+    }
+
     /**
      * @inheritdoc
      */
     public function rules()
     {
         return [
-            [['i_user', 'i_cat', 'desc', 'dtr'], 'required'],
+            [['i_user', 'i_cat', 'desc', 'dtr','type'], 'required'],
             [['i_user', 'i_cat', 'summ', 'type'], 'integer'],
             [['dt'], 'safe'],
             [['dtr'], 'string', 'length' => [8]],

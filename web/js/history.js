@@ -78,8 +78,6 @@
 
     /* */
     $('.changeSubmitButton').on('click', function (e) {
-        //$('form.changeEvent').on('beforeSubmit', function(e){
-        //var data = $(this).serialize();
         var data = $('form.changeEvent').serialize();
         var params = {};
         params['evid'] = $('#evid').val();
@@ -87,40 +85,35 @@
         params['event-desc'] = $('#event-desc').val();
         params['event-catid'] = $('#changeEventModal_catId option:selected').val();
         params['event-date'] = $('#changeEventModal_datePicker').val();
-        params['event-type'] = 1;
-        if ($('#changeEventModal_radioId').find('label').last().find('input').prop("checked")) {
-            params['event-type'] = 2;
-        }
-
-        //console.log('changeEvent by modal form...');
+        params['event-typeid'] = $('#changeEventModal_typeId option:selected').val();
+        // params['event-type'] = 1;
+        // if ($('#changeEventModal_radioId').find('label').last().find('input').prop("checked")) {
+        //     params['event-type'] = 2;
+        // }
         $.ajax({
             url: '/web/site/change-post-modal',
             type: 'POST',
             data: params,
             success: function (res) {
-                //console.log(res);
                 var np = $.parseJSON(res);
-                //alert(np['message']);
                 $('#modalEventEdit').modal('hide');
                 if (np['success'] === 'yes') {
-                    //console.log('id: '+np['item']['id']);
-                    // item['cat']  item['summ'] item['type']
-                    // item['dtr']    item['desc'] item['id']
                     var c = $('.actionId_' + np['item']['id']);
                     c.find('td[class=item_cat]').text(np['item']['cat']);
                     c.find('td[class=item_summ]').text(np['item']['summ']);
                     c.find('td[class=item_dtr]').text(np['item']['dtr']);
                     c.find('td[class=item_desc]').text(np['item']['desc']);
-                    var itype = c.find('td[class=item_type] span').removeClass('danger').removeClass('success');
-                    if (np['item']['type'] == 1) {
-                        itype.addClass('success');
-                        itype.text('доход');
-                    } else {
-                        itype.addClass('danger');
-                        itype.text('расход');
-                    }
+                    c.find('td[class=item_type] span').text(np['item']['types']['name'])
+                        .css('background-color', '#'+np['item']['types']['color']);
+                    // var itype = c.find('td[class=item_type] span').removeClass('danger').removeClass('success');
+                    // if (np['item']['type'] == 1) {
+                    //     itype.addClass('success');
+                    //     itype.text('доход');
+                    // } else {
+                    //     itype.addClass('danger');
+                    //     itype.text('расход');
+                    // }
                     $('#modalEventEdit').modal('hide');
-                    //
                 }
 
             },
@@ -128,7 +121,6 @@
                 console.log(res);
             }
         });
-
         return false;
     });
 
@@ -141,18 +133,11 @@
             type: 'GET',
             data: {'id': tid},
             success: function (res) {
-                //console.log(res);
                 var np = $.parseJSON(res);
                 if (np['success'] === 'yes') {
                     $('#event-summ').val(np['event']['summ']);
                     $('#event-desc').val(np['event']['desc']);
-                    if (np['event']['type'] === 1) {
-                        $('#changeEventModal_radioId').find('label').last().find('input').removeAttr('checked');
-                        $('#changeEventModal_radioId').find('label').first().find('input').prop("checked", true);
-                    } else {
-                        $('#changeEventModal_radioId').find('label').first().find('input').removeAttr('checked');
-                        $('#changeEventModal_radioId').find('label').last().find('input').prop("checked", true);
-                    }
+                    $('#changeEventModal_typeId option[value="' + np['event']['types']['id'] + '"]').prop('selected', true);
                     $('#changeEventModal_catId option[value="' + np['event']['i_cat'] + '"]').prop('selected', true);
                     $('#changeEventModal_datePicker').val(np['event']['dtr']);
                     $('#evid').val(tid);
@@ -209,13 +194,14 @@
                 if (np['success'] === 'yes') {
                     $('#event-summ').val(np['event']['summ']);
                     $('#event-desc').val(np['event']['desc']);
-                    if (np['event']['type'] === 1) {
-                        $('#changeEventModal_radioId').find('label').last().find('input').removeAttr('checked');
-                        $('#changeEventModal_radioId').find('label').first().find('input').prop("checked", true);
-                    } else {
-                        $('#changeEventModal_radioId').find('label').first().find('input').removeAttr('checked');
-                        $('#changeEventModal_radioId').find('label').last().find('input').prop("checked", true);
-                    }
+                    // if (np['event']['type'] === 1) {
+                    //     $('#changeEventModal_radioId').find('label').last().find('input').removeAttr('checked');
+                    //     $('#changeEventModal_radioId').find('label').first().find('input').prop("checked", true);
+                    // } else {
+                    //     $('#changeEventModal_radioId').find('label').first().find('input').removeAttr('checked');
+                    //     $('#changeEventModal_radioId').find('label').last().find('input').prop("checked", true);
+                    // }
+                    $('#changeEventModal_typeId option[value="' + np['event']['types']['id'] + '"]').prop('selected', true);
                     $('#changeEventModal_catId option[value="' + np['event']['i_cat'] + '"]').prop('selected', true);
                     $('#changeEventModal_datePicker').val(np['event']['dtr']);
                     $('#evid').val(id);
@@ -237,15 +223,25 @@
         var params = {};
         // 1
         params['event_type'] = '';
-        if ($('#simpleFilterModal_radioCheckBox').find('label input').first().is(':checked')) {
-            params['event_type'] = '1'
-        }
-        if ($('#simpleFilterModal_radioCheckBox').find('label input').last().is(':checked')) {
-            params['event_type'] = params['event_type'] + ' 2'
-        }
+        // if ($('#simpleFilterModal_radioCheckBox').find('label input').first().is(':checked')) {
+        //     params['event_type'] = '1'
+        // }
+        // if ($('#simpleFilterModal_radioCheckBox').find('label input').last().is(':checked')) {
+        //     params['event_type'] = params['event_type'] + ' 2'
+        // }
         //2
         // .class-catsCheckBox
         // $('.class-catsCheckBox').find('label input').first().is(':checked')
+        var cd = $('.class-radioCheckBox').find('label input');
+        var tc = '';
+        $.each(cd, function (index, value) {
+            if ($(this).is(':checked')) {
+                tc += $(this).val() + ' ';
+            }
+            //console.log( index + ": " + $(this).val() );
+        });
+        params['event_type'] = tc;
+        //
         var c = $('.class-catsCheckBox').find('label input');
         var rc = '';
         $.each(c, function (index, value) {
@@ -281,9 +277,11 @@
                             //console.log(rs['rs'][i]);
                         }
                         // и добавляем строку с доходами и расходами
-                        $('table.gg-history').append(rs['trs'][0]);
-                        $('table.gg-history').append(rs['trs'][1]);
-                        $('table.gg-history').append(rs['trs'][2]);
+                        var trs_count = rs['trs'].length;
+                        for (var i = 0; i < trs_count; i++) {
+                            $('table.gg-history').append(rs['trs'][i]);
+                            //console.log(rs['rs'][i]);
+                        }
                     }
                 } else {
                     alert('Ничего не найдено!');
@@ -305,6 +303,18 @@
 
 //});
 
+
+$('.forSimpleFilter-ckeckAndUncheckAllTypes').find('label').first().find('span').on('click', function () {
+    // find('input').prop("checked")
+    if (!$(this).parent().find('input').prop("checked")){
+        //console.log('check_all');
+        $('#simpleFilterModal_radioCheckBox').find('input').prop("checked", true);
+    }else{
+        //console.log('Uncheck_all');
+        $('#simpleFilterModal_radioCheckBox').find('input').prop("checked", false);
+    }
+
+});
 
 $('.forSimpleFilter-ckeckAndUncheckAll').find('label').first().find('span').on('click', function () {
     // find('input').prop("checked")

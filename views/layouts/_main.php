@@ -11,6 +11,7 @@ use app\models\Category;
 use app\models\Event;
 use kartik\date\DatePicker;
 use app\components\Debug;
+use app\models\Type;
 
 AppAssetEvents::register($this);
 
@@ -111,7 +112,7 @@ if (array_key_exists('1',$rr0)) {
                                     Здравствуйте,
                                     <?php
                                         $uname = '[UNDEFINED]';
-                                        if (isset($_SESSION['user']['uname'])){
+                                        if (isset($_SESSION['user']['uname']) && !empty($_SESSION['user']['uname']) ){
                                             $uname = $_SESSION['user']['uname'];
                                         }
                                         echo Html::encode($uname);
@@ -170,39 +171,48 @@ if (array_key_exists('1',$rr0)) {
                         <?php
                         // need ?! --- cats, $event
                         $catsMain = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                        //echo Debug::d($cats);
+                        $types2 = Type::find()->all();
+                        //echo Debug::d($types); die;
                         $eventMain = new Event();
 
                         // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
                         $cats3 = ArrayHelper::map($catsMain,'id','name');
-                        $params = [
+                        $types3 = ArrayHelper::map($types2,'id','name');
+                        $params1 = [
                             //'prompt' => 'Выберите категорию'
                             'id' => 'dropDownId_3'
                         ];
+                        $params2 = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'idDropDownTypes'
+                        ];
                         ?>
-                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params)->label('Выберите категорию'); ?>
+                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params1)->label('Выберите категорию'); ?>
+                        <?= $form->field($eventMain, 'type')->dropDownList($types3,$params2)->label('Выберите тип события'); ?>
 
-                        <?= $form->field($eventMain,'type',[
-                            'template' => '<label for="">Выберите тип</label><div>{input}</div>',
-                        ])->radioList(
-                            [1 => 'Доход', 2 => 'Расход'],
-                            [
-                                'item' => function($index, $label, $name, $checked, $value) {
-                                    $ch = '';
-                                    if ($index === 0) {
-                                        $ch = "checked=''";
-                                    }
-                                    $return = '<label>';
-                                    $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
-                                    $return .= '<i class="fa fa-circle-o fa-2x"></i>' ."\n" .
-                                        '<i class="fa fa-dot-circle-o fa-2x"></i>' ."\n";
-                                    $return .= '<span>' . ucwords($label) . '</span>' ."\n";
-                                    $return .= '</label><br/>';
-
-                                    return $return;
-                                }
-                            ]
-                        ); ?>
+                        <?php
+//                            $form->field($eventMain,'type',[
+//                            'template' => '<label for="">Выберите тип</label><div>{input}</div>',
+//                            ])->radioList(
+//                                [1 => 'Доход', 2 => 'Расход'],
+//                                [
+//                                    'item' => function($index, $label, $name, $checked, $value) {
+//                                        $ch = '';
+//                                        if ($index === 0) {
+//                                            $ch = "checked=''";
+//                                        }
+//                                        $return = '<label>';
+//                                        $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
+//                                        $return .= '<i class="fa fa-circle-o fa-2x"></i>' ."\n" .
+//                                            '<i class="fa fa-dot-circle-o fa-2x"></i>' ."\n";
+//                                        $return .= '<span>' . ucwords($label) . '</span>' ."\n";
+//                                        $return .= '</label><br/>';
+//
+//                                        return $return;
+//                                    }
+//                                ]
+//                            );
+                        ?>
 
                         <?php
                             echo $form->field($eventMain, 'dtr')->widget(DatePicker::className(),[

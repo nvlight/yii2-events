@@ -3,6 +3,7 @@ use yii\widgets\ActiveForm;
 use yii\helpers\Html;
 use yii\helpers\ArrayHelper;
 use kartik\date\DatePicker;
+use yii\widgets\ActiveField;
 
 $this->title = 'Events | Категории';
 
@@ -128,8 +129,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 </section>
 
             </div>
-        </div>
-        <div class="row">
+
             <div class="col-md-6">
                 <section class="editCat">
                     <header>
@@ -177,14 +177,57 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 </section>
             </div>
 
+            <div class="col-md-6">
+                <section class="editCat">
+                    <header>
+                        <h4>Добавить тип события</h4>
+                    </header>
+                    <div class="inner">
+
+                        <?php
+                            $types2 = ArrayHelper::map($types,'id','name');
+                            $typeParams = [
+                                //'prompt' => 'Выберите категорию'
+                                'class' => 'dropDownType_Class',
+                                'id' => 'dropDownType_Id'
+                            ];
+                        ?>
+                        <?php $typeForm = ActiveForm::begin([
+                            'action' => ['/site/tryaction'],
+                            'options' => [
+                                'class' => 'addType',
+                            ]
+                        ]); ?>
+
+                        <div class="form-group field-type-curr required has-success">
+                            <label class="control-label" for="type-curr">Существующие типы событий</label>
+                            <?php echo Html::dropDownList('select', '', $types2,['id' => 'types_id', 'class' => 'types_class']); ?>
+                            <div class="help-block"></div>
+                        </div>
+
+                        <?= $typeForm->field($type, 'name') ?>
+                        <?= $typeForm->field($type, 'color') ?>
+
+                        <div class="form-group">
+                            <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg']) ?>
+                        </div>
+                        <?php ActiveForm::end(); ?>
+
+                    </div>
+                </section>
+            </div>
+
         </div>
+
+
+
+
 
     </div>
 
 </div>
 
 <?php
-$url_part = ($_SERVER['HTTP_HOST'] === 'yii2.loc:82') ? '' : Yii::$app->params['additional_url_part'];
 $js1 = <<<JS
  $('form.addCategory').on('beforeSubmit', function(e){
  //e.preventDefault();
@@ -192,7 +235,7 @@ $js1 = <<<JS
  //alert('add category...')
  console.log('add category...');
  $.ajax({
-     url: '{$url_part}/web/site/add-category',
+     url: '/web/site/add-category',
      type: 'POST',
      data: data,
      success: function(res){
@@ -229,7 +272,7 @@ $js2 = <<<JS
  //alert('add category...')
  console.log('change category...');
  $.ajax({
-     url: '{$url_part}/web/site/change-category',
+     url: '/web/site/change-category',
      type: 'POST',
      data: {p1,p2,p3},
      success: function(res){
@@ -255,7 +298,34 @@ $js2 = <<<JS
  });
 JS;
 
+$js3 = <<<JS
+$('form.addType').on('beforeSubmit', function(e){
+    var data = $(this).serialize();
+    $.ajax({
+        url: '/web/site/add-type',
+        type: 'POST',
+        data: data,
+        success: function(res){
+            var np = $.parseJSON(res);
+            console.log(np);
+            if (np['success'] === 'yes'){
+                $('#types_id').append($('<option>', {
+                    value: np['id'],
+                    text: np['name']
+                }));
+                $("#types_id > option[value="+np['id']+"]").attr('selected','selected');
+            }   
+        },
+        error: function(res){
+            console.log(res);
+        }
+    });
+    return false;
+});
+JS;
+
 $this->registerJs($js1);
 $this->registerJs($js2);
+$this->registerJs($js3);
 
 ?>

@@ -7,6 +7,8 @@ use app\models\Event;
 use yii\helpers\ArrayHelper;
 use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
+use app\components\Debug;
+use app\models\Type;
 
 $css1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css";
 $js1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js";
@@ -115,12 +117,9 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         </thead>
                         <tbody>
                         <?php
+                            //echo Debug::d($events); die;
+                            if (count($events)) :
                             foreach ($events as $ek => $ev):
-                            switch ($ev->type){
-                                case 1: $evtype[1] = ['success', 'доход']; $evtypeid = 1;  break;
-                                case 2: $evtype[2] = ['danger',  'расход'];  $evtypeid = 2; break;
-                                default:$evtype[3] = ['type_undefined', 'просто событие']; $evtypeid = 0;
-                            }
                         ?>
                             <tr class="actionId_<?=$ev->id?>">
                                 <td class="item_eid"><?=$ev->id?></td>
@@ -128,19 +127,9 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                 <td class="item_desc"><?=$ev->desc?></td>
                                 <td class="item_summ"><?=$ev->summ?></td>
                                 <td class="item_dtr"><?= Yii::$app->formatter->asDate($ev->dtr);?></td>
-                                <?php
-//                                    echo DatePicker::widget([
-//                                            'name' => 'check_issue_date',
-//                                            'value' => date('d-m-Y'), //strtotime('+2 days')),
-//                                            'options' => ['placeholder' => 'выберите дату'],
-//                                            'pluginOptions' => [
-//                                                'format' => 'dd-mm-yyyy',
-//                                                'todayHighlight' => true
-//                                            ]
-//                                        ]
-//                                    );
-                                ?>
-                                <td class="item_type"><span class="<?= $evtype[$evtypeid][0] ?>"><?= $evtype[$evtypeid][1] ?></span></td>
+                                <td class="item_type"><span class="dg_type_style" style="background-color: #<?=$ev['types']['color']?>;  " >
+                                        <?=$ev->types->name?></span>
+                                </td>
                                 <td>
                                     <span class="btn-action" title="Просмотр">
                                         <a class="evActionView"
@@ -172,6 +161,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
                         <?php
                             endforeach;
+                            endif;
                         ?>
                         </tbody>
                     </table>
@@ -233,11 +223,13 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
                     <div class="modal-period" style="width: 250px; margin-bottom: 10px;">
                         <?php
+                            $dtr1 = Event::find()->min('dtr');
+                            $dtr2 = Yii::$app->formatter->asTime($dtr1, 'dd-MM-yyyy');
                             echo '<label class="control-label">Выберите период</label>';
                             echo DatePicker::widget([
                                 'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
                                 'name' => 'from_date',
-                                'value' => date('d-m-Y'),
+                                'value' => $dtr2,
                                 'type' => DatePicker::TYPE_RANGE,
                                 'name2' => 'to_date',
                                 'value2' => date('d-m-Y'),
@@ -262,11 +254,35 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         ?>
                     </div>
 
-                    <?= $form->field($eventMain,'type',[
-                            'template' => '<label for="">Выберите тип</label><div>{input}</div>',
+                    <?php
+                    $chechBoxexForTypeFilter = <<<CFCF
+                        <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
+                            <label>
+                                <input type="checkbox" name="" value="">
+                                <i class="fa fa-square-o fa-2x"></i>
+                                <i class="fa fa-check-square-o fa-2x"></i>
+                                <span>Выбрать все типы событий</span>
+                            </label>
+                        </div>
+CFCF;
+                    ?>
+
+                    <?php
+                        // получение массива для 2-го параметра чекбоксЛиста
+                        $types = Type::find()->asArray()->all();
+                        $naa = [];
+                        foreach($types as $ck => $cv){
+                            $naa[$cv['id']] = $cv['name'];
+                        }
+
+                        echo $form->field($eventMain,'type',[
+                            'template' => "<label for=''>Выберите тип</label>                                             
+                                             $chechBoxexForTypeFilter
+                                           <div>{input}</div>",
                             'options' => ['class' => 'class-radioCheckBox']
                         ])->checkboxList(
-                            [1 => 'Доход', 2 => 'Расход'],
+                            //[1 => 'Доход', 2 => 'Расход'],
+                            $naa,
                             [
                                 'item' => function($index, $label, $name, $checked, $value) {
                                     $ch = '';
@@ -309,7 +325,9 @@ CFCF;
                     //echo \app\components\Debug::d($na);
 
                     echo $form->field($eventMain,'i_cat',[
-                        'template' => "<label for=''>Выберите категории</label>$chechBoxexForCatFilter<div>{input}</div>",
+                        'template' => "<label for=''>Выберите категории</label>
+                                            $chechBoxexForCatFilter
+                                        <div>{input}</div>",
                         'options' => ['class' => 'class-catsCheckBox']
                     ])->checkboxList(
                         //[1 => 'Доход', 2 => 'Расход'],
@@ -370,33 +388,19 @@ CFCF;
                         <input type="hidden" value="" id="evid">
 
                         <?php
-
+                            $types2 = Type::find()->all();
+                            $types30 = ArrayHelper::map($types2,'id','name');
+                            $params21 = [
+                                //'prompt' => 'Выберите категорию'
+                                'id' => 'changeEventModal_typeId'
+                            ];
+                            $params = [
+                                //'prompt' => 'Выберите категорию'
+                                'id' => 'changeEventModal_catId'
+                            ];
                         ?>
                         <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params)->label('Выберите категорию'); ?>
-
-                        <?= $form->field($eventMain,'type',[
-                            'template' => '<label for="">Выберите тип</label><div>{input}</div>',
-                            'options' => ['class' => 'chichhch_field_options']
-                        ])->radioList(
-                            [1 => 'Доход', 2 => 'Расход'],
-                            [
-                                'item' => function($index, $label, $name, $checked, $value) {
-                                    $ch = '';
-                                    if ($index === 0) {
-                                        $ch = "checked=''";
-                                    }
-                                    $return = '<label>';
-                                    $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
-                                    $return .= '<i class="fa fa-circle-o fa-2x"></i>' ."\n" .
-                                        '<i class="fa fa-dot-circle-o fa-2x"></i>' ."\n";
-                                    $return .= '<span>' . ucwords($label) . '</span>' ."\n";
-                                    $return .= '</label><br/>';
-
-                                    return $return;
-                                },
-                                'id' => 'changeEventModal_radioId'
-                            ]
-                        ); ?>
+                        <?= $form->field($eventMain, 'type')->dropDownList($types30,$params21)->label('Выберите тип события'); ?>
 
                         <?php
                             echo $form->field($eventMain, 'dtr', ['options' => ['class' => 'changeEventModal_date']])
