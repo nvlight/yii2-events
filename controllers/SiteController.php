@@ -50,7 +50,6 @@ class SiteController extends Controller{
         ];
     }
 
-
     /*
      *
      *
@@ -149,30 +148,6 @@ class SiteController extends Controller{
         ]);
     }
 
-
-
-    /*
-     *
-     *
-     * */
-    public function actionBilling(){
-        //AuthLib::appSessionStart();
-
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            //return $this->goBack(['']);
-            return $this->redirect(['site/index']);
-
-            //return $this->render('index', [ 'message' => $message ]);
-        }
-        $uid = $_SESSION['user']['id'];
-        $remains = User::findOne(['id' => $uid])->remains;
-        //$remains = number_format($remains, 2, ',', ' ');
-        //echo Debug::d($remains,'remains');
-        $this->layout = '_main';
-        return $this->render('billing', compact('remains'));
-    }
-
     /*
      *
      *
@@ -200,8 +175,8 @@ class SiteController extends Controller{
             default: { echo 'vi doigralis!'; die;  }
         }
         switch ($sort){
-            case 'desc': { $sort = 'asc';  $rsort2 = [$sortcol => SORT_DESC]; break; }
-            default:     { $sort = 'desc'; $rsort2 = [$sortcol =>  SORT_ASC]; }
+            case 'desc': { $sort = 'asc';  $rsort2 = [$sortcol => SORT_DESC, 'id' => SORT_DESC]; break; }
+            default:     { $sort = 'desc'; $rsort2 = [$sortcol =>  SORT_ASC, 'id' => SORT_DESC]; }
         }
         //echo $sort;
         $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
@@ -285,27 +260,7 @@ class SiteController extends Controller{
      **/
     public function actionPost(){
 
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            //return $this->goBack(['']);
-            return $this->redirect(['site/index']);
 
-            //return $this->render('index', [ 'message' => $message ]);
-        }
-        $this->layout = '_main';
-        $model = new Category();
-        //$cats = Category::findAll(['>=','id',0]);
-        $cats = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-        $event = new Event();
-        $type = new Type();
-        $types = Type::find()->all();
-        //echo Debug::d($types); die;
-
-        //$cats = $cats->asArray();
-        //echo Debug::d($cats,'cats');
-        return $this->render('post', compact('model','cats','event','type','types') );
-
-        //echo "3";
 
     }
 
@@ -315,12 +270,11 @@ class SiteController extends Controller{
      * */
     public function actionIndex(){
 
-        //echo Debug::d($_SESSION); die;
         if (AuthLib::appIsAuth()){
             $this->layout = '_main';
-            return $this->redirect('/web/site/billing');
+            return $this->redirect(AuthLib::AUTHED_PATH);
         }
-        return $this->redirect('/web/site/login');
+        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
     }
 
     /*
@@ -362,7 +316,7 @@ class SiteController extends Controller{
                     Yii::$app->session->setFlash('logined', 'Вы успешно авторизовались!');
                     // Yii::$app->session->getFlash('logined')
                     // Yii::$app->session->hasFlash('logined')
-                    return $this->redirect('/web/site/billing');
+                    return $this->redirect(AuthLib::AUTHED_PATH);
                 }else{
                     $err1 = 'Неверный Емеил и/или пароль!';
                     return $this->render('login', compact('model', 'err1') );
@@ -372,7 +326,7 @@ class SiteController extends Controller{
         }
 
         $this->layout = '_main';
-        return $this->redirect('/web/site/billing');
+        return $this->redirect(AuthLib::AUTHED_PATH);
     }
 
     /*
@@ -440,7 +394,7 @@ class SiteController extends Controller{
                     //$getUser = User::findOne(['mail' => $parMail, 'upass' => $hashedPass]);
 
                     AuthLib::appLogin($user);
-                    return $this->redirect('/web/site/billing');
+                    return $this->redirect('AuthLib::AUTHED_PATH');
                 }else{
                     $err1 = 'Ошибка при регистрации!';
                     return $this->render('login', compact('model', 'err1') );
@@ -451,7 +405,7 @@ class SiteController extends Controller{
         }
         //die('err 2');
         $this->layout = '_main';
-        return $this->redirect('/web/site/registration');
+        return $this->redirect('/registration');
     }
 
 
@@ -493,7 +447,7 @@ class SiteController extends Controller{
 
                     //$p[4] = "<p>hash: {$restore_hash}</p>";
                     $real_link = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT']
-                        .'/web/site/do-restore?'.'hash='.$restore_hash;
+                        .'/do-restore?'.'hash='.$restore_hash;
                     $real_link = Url::to(['site/do-restore','hash' => $restore_hash ], true);
                     $p[4] = Html::a('Восстановить доступ!', ['site/do-restore?hash='.$restore_hash], ['class' => 'btn btn-success']);
                     $text_body = <<<TB
@@ -521,7 +475,7 @@ TB;
             $this->layout = 'for_auth';
             return $this->render('restore',compact('model','isRestore','mail','res_dt'));
         }
-        return $this->redirect('/web/site/login');
+        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
     }
 
     /*
@@ -564,7 +518,7 @@ TB;
             return $this->render('dorestore',compact('np','uname','err_msg'));
 
         }
-        return $this->redirect('/web/site/login');
+        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
     }
 
     /**
@@ -859,7 +813,6 @@ TRH;
                     'post' => $r1,
                     'id' => $r1->id,
                     'desc' => $r1->desc,
-                    'dt' => $r1->dt,
                     'summ' => $r1->summ,
                     'type' => $r1->type,
                     'category' => $r1['category']['name'],
@@ -988,6 +941,7 @@ TRH;
             $ulimit->remains = $val;
             $rs = $ulimit->update();
             // обновление не работает ! придется сделать как приведено ниже!
+            // а еще может не работать потому, что это update а не save();
             // а не работает он потому, что в модель введена капча!
             $rs = Yii::$app->db->createCommand("UPDATE `user` SET remains={$val} WHERE `id`={$_SESSION['user']['id']} ")->execute();
             // также нужно обновить и сессионную переменную remains
@@ -1135,7 +1089,7 @@ TRH;
                 ->andWhere(['in', 'i_cat', $ids_cats])
                 ->andWhere(['in', 'type',  $ids_type])
                 ->andWhere(['>', 'summ',  0])
-                ->orderBy(['type' => SORT_ASC])
+                ->orderBy(['type' => SORT_ASC, 'id' => SORT_ASC])
                 ;
                 //->asArray()->all();
             //echo Debug::d($query,'in weight');

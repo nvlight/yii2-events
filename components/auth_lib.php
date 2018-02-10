@@ -12,6 +12,9 @@ use Yii;
 
 class AuthLib
 {
+    const NOT_AUTHED_PATH = "user/login";
+    const AUTHED_PATH = "billing/index";
+    const LOG_OUT_PATH = "user/logout";
     //
     public static function appSessionStart(){
         //$session = new Yii::$app->session;

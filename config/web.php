@@ -13,7 +13,7 @@ $config = [
     'name' => 'Events^',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
-    'defaultRoute' => 'site/index',
+    'defaultRoute' => 'user/login',
     'layout' => false,
     'language' => 'ru-RU',
     'sourceLanguage' => 'ru-RU',
@@ -32,7 +32,7 @@ $config = [
         'user' => [
             'identityClass' => 'app\models\User2',
             'enableAutoLogin' => true,
-            'loginUrl' => '/site/login',
+            'loginUrl' => '/log/in',
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',

@@ -20,7 +20,7 @@
         if (iv === 0) {
             console.log('поле ввода очищено');
             $.ajax({
-                url: '/web/site/search-by-colval',
+                url: '/site/search-by-colval',
                 method: 'GET',
                 data: {idCol: 5},
                 success: function (res, status) {
@@ -48,7 +48,7 @@
         if (iv >= 3) {
             //console.log('current: '+val);
             $.ajax({
-                url: '/web/site/search-by-colval',
+                url: '/site/search-by-colval',
                 method: 'GET',
                 data: {text: val, idCol: $('#selectSearchColumn option:selected').val()},
                 success: function (res, status) {
@@ -91,7 +91,7 @@
         //     params['event-type'] = 2;
         // }
         $.ajax({
-            url: '/web/site/change-post-modal',
+            url: '/site/change-post-modal',
             type: 'POST',
             data: params,
             success: function (res) {
@@ -129,7 +129,7 @@
         var tid = $(this).data('id');
         $('form.changeEvent').trigger('reset');
         $.ajax({
-            url: '/web/site/get-post',
+            url: '/site/get-post',
             type: 'GET',
             data: {'id': tid},
             success: function (res) {
@@ -161,7 +161,7 @@
         }
         var id = $(this).data('id');
         $.ajax({
-            url: '/web/site/event-del',
+            url: '/site/event-del',
             type: 'POST',
             data: {'id': id},
             success: function (res) {
@@ -185,7 +185,7 @@
         $('form.changeEvent').trigger('reset');
 
         $.ajax({
-            url: '/web/site/get-post',
+            url: '/site/get-post',
             type: 'GET',
             data: {'id': id},
             success: function (res) {
@@ -259,7 +259,7 @@
 
         //console.log('doFilter: starting...');
         $.ajax({
-            url: '/web/site/simple-filter',
+            url: '/site/simple-filter',
             type: 'GET',
             data: params,
             success: function (res, status) {
@@ -326,6 +326,34 @@ $('.forSimpleFilter-ckeckAndUncheckAll').find('label').first().find('span').on('
         $('#simpleFilterModal_radioCheckBox2').find('input').prop("checked", false);
     }
 
+});
+
+$('form.addEvent').on('beforeSubmit', function(e){
+    //e.preventDefault();
+    var data = $(this).serialize();
+    //alert('add category...')
+    //console.log('add event by modal form...');
+    $.ajax({
+        url: '/site/add-post-modal',
+        type: 'POST',
+        data: data,
+        success: function(res){
+            //console.log(res);
+            var np = $.parseJSON(res);
+            //alert(np['message']);
+            $('#modalAddPost').modal('hide');
+            if (np['success'] === 'yes'){
+                $('form.addEvent').trigger( 'reset' );
+            }
+            $('table.gg-history').prepend(np['trh']);
+
+        },
+        error: function(res){
+            console.log(res);
+        }
+    });
+
+    return false;
 });
 
 //$('#modalSimpleFilter').modal('show');

@@ -35,6 +35,10 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <span id="gg-filter" class="reload pull-right" data-toggle="modal" data-target="#modalSimpleFilter">
                     <i class="fa fa-filter" aria-hidden="true"></i>
         </span>
+        <span id="gg-filter" class="reload pull-right" data-toggle="modal" data-target="#modalAddPost">
+                    <i class="fa fa-gear icon"></i>
+        </span>
+
         <div class="pull-right">
             <?php
             $dataProvider = new ActiveDataProvider([
@@ -445,7 +449,108 @@ CFCF;
     </div>
 </div>
 
+<div class="modal fade" id="modalAddPost" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Добавление нового события
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <section class="addEventModal">
+                    <div class="inner">
+
+                        <?php $form = ActiveForm::begin([
+                            'method'=>'post',
+                            'action' => ['/site/add-event'],
+                            'options' => [
+                                'class' => 'addEvent',
+                            ]
+                        ]); ?>
+
+                        <?php
+                        // need ?! --- cats, $event
+                        $catsMain = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+                        $types2 = Type::find()->all();
+                        //echo Debug::d($types); die;
+                        $eventMain = new Event();
+
+                        // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
+                        $cats3 = ArrayHelper::map($catsMain,'id','name');
+                        $types3 = ArrayHelper::map($types2,'id','name');
+                        $params1 = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'dropDownId_3'
+                        ];
+                        $params2 = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'idDropDownTypes'
+                        ];
+                        ?>
+                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params1)->label('Выберите категорию'); ?>
+                        <?= $form->field($eventMain, 'type')->dropDownList($types3,$params2)->label('Выберите тип события'); ?>
+
+                        <?php
+                        //                            $form->field($eventMain,'type',[
+                        //                            'template' => '<label for="">Выберите тип</label><div>{input}</div>',
+                        //                            ])->radioList(
+                        //                                [1 => 'Доход', 2 => 'Расход'],
+                        //                                [
+                        //                                    'item' => function($index, $label, $name, $checked, $value) {
+                        //                                        $ch = '';
+                        //                                        if ($index === 0) {
+                        //                                            $ch = "checked=''";
+                        //                                        }
+                        //                                        $return = '<label>';
+                        //                                        $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
+                        //                                        $return .= '<i class="fa fa-circle-o fa-2x"></i>' ."\n" .
+                        //                                            '<i class="fa fa-dot-circle-o fa-2x"></i>' ."\n";
+                        //                                        $return .= '<span>' . ucwords($label) . '</span>' ."\n";
+                        //                                        $return .= '</label><br/>';
+                        //
+                        //                                        return $return;
+                        //                                    }
+                        //                                ]
+                        //                            );
+                        ?>
+
+                        <?php
+                        echo $form->field($eventMain, 'dtr')->widget(DatePicker::className(),[
+                            'language' => 'ru',
+                            'name' => 'check_issue_date',
+                            "value" =>  '16-11-2017',
+                            'options' => ['placeholder' => 'выберите дату', 'id' => 'addEventModal_datePicker'],
+                            'pluginOptions' => [
+                                'autoclose'=>true,
+                                'todayHighlight' => true,
+                                'format' => 'dd-mm-yyyy',
+                            ]
+                        ]);
+                        ?>
+
+                        <?= $form->field($eventMain, 'summ')->label('Введите сумму') ?>
+                        <?= $form->field($eventMain, 'desc')->label('Введите описание') ?>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                            <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg2']) ?>
+                        </div>
+
+                        <?php ActiveForm::end(); ?>
+
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
+
 $this->registerJsFile("@web/js/history.js",[
         'depends' => [
             //\yii\web\JqueryAsset::className()

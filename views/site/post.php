@@ -199,7 +199,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                             ]
                         ]); ?>
 
-                        <div class="form-group field-type-curr required has-success">
+                        <div class="form-group field-type-curr required">
                             <label class="control-label" for="type-curr">Существующие типы событий</label>
                             <?php echo Html::dropDownList('select', '', $types2,['id' => 'types_id', 'class' => 'types_class']); ?>
                             <div class="help-block"></div>
