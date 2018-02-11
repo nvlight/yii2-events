@@ -7,118 +7,23 @@ use app\components\Debug;
 use app\models\authForm;
 use app\models\Category;
 use app\models\Event;
-use app\models\Human;
 use app\models\RegistrationForm;
 use app\models\Type;
 use app\models\User;
-use app\models\UserForm;
 use app\models\UserSignUp;
 use Yii;
-use yii\db\Expression;
-use yii\filters\AccessControl;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
-use yii\filters\VerbFilter;
-use app\models\LoginForm;
 use app\models\ContactForm;
-use app\models\EntryForm;
 use yii\db\Query;
-use yii\base\ExitException;
 use yii\data\Pagination;
 use yii\widgets\LinkPager;
-use yii\swiftmailer;
 use app\models\RestoreForm;
 use DateTime;
 
 class SiteController extends Controller{
-
-    /*
-     *
-     *
-     * */
-    public function actionChangeUserInfo()
-    {
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            return $this->redirect(AuthLib::NOT_AUTHED_PATH);
-        }
-
-        $this->layout = '_main';
-        $uid = $_SESSION['user']['id'];
-        $model = new UserForm();
-        $user = User::findOne($uid);
-        $model->remains = $user->remains;
-        $model->uname = $user->uname;
-        //echo Debug::d($_REQUEST,'request');
-        //echo Debug::d($_SESSION,'$_SESSION');
-        if ($model->load(Yii::$app->request->post()) && $model->validate() ){
-            //echo "in weight 0 <br/>";
-            $user->uname = Yii::$app->request->post('UserForm')['uname'];
-            $upass = Yii::$app->request->post('UserForm')['upass'];
-            $upassHashed = sha1(Yii::$app->params['my_salt'] . $upass);
-            $user->remains = Yii::$app->request->post('UserForm')['remains'];
-
-            if ($upassHashed !== $user->upass){
-                //echo "in weight 1 <br/>";
-                Yii::$app->session->setFlash('saved','Старый пароль не совпадает с введенным!');
-                return $this->render('changeuserinfo', compact('model','user'));
-            }
-            $newpass1 = Yii::$app->request->post('UserForm')['newpass1'];
-            $newpass2 = Yii::$app->request->post('UserForm')['newpass2'];
-            if ($newpass1 !== $newpass2) {
-                //echo "in weight 2 <br/>";
-                Yii::$app->session->setFlash('saved','Новый пароль и его повтор не совпадают!');
-                return $this->render('changeuserinfo', compact('model','user'));
-            }
-            $upassNewHashed = sha1(Yii::$app->params['my_salt'] . $newpass1);
-            $user->upass = $upassNewHashed;
-            if ($user->save()){
-                //echo "in weight 3 <br/>";
-                $_SESSION['user']['uname'] = $user->uname;
-                $_SESSION['user']['remains'] = $user->remains;
-                $user = $model;
-                Yii::$app->session->setFlash('saved','Изменения сохранены!');
-            }
-        }
-        return $this->render('changeuserinfo', compact('model'));
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionRealLogin()
-    {
-        AuthLib::appGoTestLogin();
-        AuthLib::appShowSession();
-
-        //return $this->render('index', []);
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionRealLogout()
-    {
-        AuthLib::appSessionStart();
-        AuthLib::appLogout();
-        AuthLib::appShowSession();
-
-        //return $this->goHome();
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionHello() //$message = 'Noname'
-    {
-        $message = Yii::$app->request->get('message');
-        return $this->render('hello', compact('message'));
-    }
 
     /**
      * Displays contact page.
@@ -136,57 +41,6 @@ class SiteController extends Controller{
         return $this->render('contact', [
             'model' => $model,
         ]);
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionHistory2($sortcol='dtr',$sort='desc'){
-        //echo Debug::d($_SESSION);
-        //die;
-
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            //return $this->goBack(['']);
-            return $this->redirect(['site/index']);
-
-            //return $this->render('index', [ 'message' => $message ]);
-        }
-        $this->layout = '_main';
-        //$sortcol = 'i_cat';
-        switch ($sortcol){
-            case 'id'    : $sortcol = 'id'; break;
-            case 'i_cat' : $sortcol = 'i_cat'; break;
-            case 'desc'  : $sortcol = 'desc'; break;
-            case 'summ'  : $sortcol = 'summ'; break;
-            case 'dtr'   : $sortcol = 'dtr'; break;
-            case 'type'  : $sortcol = 'type'; break;
-            default: { echo 'vi doigralis!'; die;  }
-        }
-        switch ($sort){
-            case 'desc': { $sort = 'asc';  $rsort2 = [$sortcol => SORT_DESC, 'id' => SORT_DESC]; break; }
-            default:     { $sort = 'desc'; $rsort2 = [$sortcol =>  SORT_ASC, 'id' => SORT_DESC]; }
-        }
-        //echo $sort;
-        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-                    ->with('category')
-                    ->with('types')
-            ->orderBy($rsort2)
-            //->asArray()
-            //->all();
-        ;
-        //echo Debug::d($query,'query'); die;
-        $q_counts = 10;
-        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-                                'pageSizeParam' => false, 'forcePageParam' => false]);
-        //echo Debug::d($pages,'pages'.$pages->offset); die;
-        $events = $query->offset($pages->offset)
-            ->limit($pages->limit)
-            ->all();
-        //echo Debug::d($events,'events');
-        $ev2 = Event::find()->where(['i_user' => $_SESSION['user']['id'], ])->with('category');
-        return $this->render('history', compact('events','pages','sort','ev2'));
     }
 
     /*
@@ -240,7 +94,7 @@ class SiteController extends Controller{
      *
      **/
     public function actionLfile(){
-
+        // nice joke )
         return \Yii::$app->response->sendFile('test/test.txt');
     }
 
@@ -248,282 +102,58 @@ class SiteController extends Controller{
      *
      *
      **/
-    public function actionPost(){
-
-
-
+    public function actionTmail(){
+        // nice joke )
+        $p[1] = 'iduso@mail.ru';
+        $p[21] = Yii::$app->params['sw_frommail'];
+        $p[22] = Yii::$app->params['name'];
+        $p[3] = 'Events - регистрация'; // subject
+        $p[4] = "Вы успешно зарегистрировались в приложении Events <br>\n\n";
+        $dtReg = date("m.d.y H:i:s");
+        $p[4] .= "Ваше имя: name<br>";
+        $p[4] .= "Ваша почта: mail<br>";
+        $p[4] .= "Ваш пароль: pass<br>";
+        $p[4] .= "Дата регистрации: dt_reg<br>";
+        $p[4] .= "<br/>Это сообщение отправлено автоматически, пожалуйста, не отвечайте на него<br/>";
+        $res = Yii::$app->mailer->compose()
+            ->setTo($p[1])
+            ->setFrom([$p[21] => $p[22]])
+            ->setSubject($p[3])
+            ->setTextBody($p[4])
+            ->send();
+        echo 'done';
     }
 
     /*
      *
      *
-     * */
-    public function actionIndex(){
-
-        if (AuthLib::appIsAuth()){
-            $this->layout = '_main';
-            return $this->redirect(AuthLib::AUTHED_PATH);
-        }
-        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionLogin(){
-
-        $model = new AuthForm();
-        // для обновления капчи при f5
-
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-
-            // во второй строке добавил важную проверку на капку! без этого можно было было проводить брутфорс!
-            if ($model->load(Yii::$app->request->post())
-                && (Yii::$app->request->post('AuthForm')['captcha'] === $_SESSION['__captcha/site/captcha'] ) )
-            {
-                $this->createAction('captcha')->getVerifyCode(true); // перегенерация капчи
-//                echo Debug::d(Yii::$app->request->post());
-//                echo Debug::d($_SESSION,'session');
-//                die;
-                $parMail = Yii::$app->request->post('AuthForm')['mail'];
-                $parPass = Yii::$app->request->post('AuthForm')['upass'];
-                //
-                $mySalt = Yii::$app->params['my_salt'];
-                $passWithSalt = $mySalt . $parPass;
-                $hashedPass = sha1($passWithSalt);
-                $getUser = User::findOne(['mail' => $parMail, 'upass' => $hashedPass]); //()->where(['mail'=>$parMail])->one();
-//                echo Debug::d($parMail,'mail');
-//                echo Debug::d($parPass,'upass');
-//                echo Debug::d($passWithSalt,'$passWithSalt');
-//                echo Debug::d($hashedPass,'$hashedPass');
-//                echo Debug::d($getUser,'get User');
-//                die;
-                if ($getUser){
-                    AuthLib::appLogin($getUser);
-                    // добавим флеш сообщение и потом считаем его в биллинге
-                    Yii::$app->session->setFlash('logined', 'Вы успешно авторизовались!');
-                    // Yii::$app->session->getFlash('logined')
-                    // Yii::$app->session->hasFlash('logined')
-                    return $this->redirect(AuthLib::AUTHED_PATH);
-                }else{
-                    $err1 = 'Неверный Емеил и/или пароль!';
-                    return $this->render('login', compact('model', 'err1') );
-                }
-            }
-            return $this->render('login', compact('model') );
-        }
-
-        $this->layout = '_main';
-        return $this->redirect(AuthLib::AUTHED_PATH);
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionRegistration(){
-        echo Debug::d($_SESSION);
-        $model = new RegistrationForm();
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            //echo Debug::d($_REQUEST);
-            //echo Debug::d($_SESSION); die;
-            if ($model->load(Yii::$app->request->post())
-                && (Yii::$app->request->post('RegistrationForm')['captcha'] === $_SESSION['__captcha/site/captcha'] ) )
-            {
-                $this->createAction('captcha')->getVerifyCode(true); // перегенерация капчи
-                //echo Debug::d($_REQUEST);
-                $parMail = Yii::$app->request->post('RegistrationForm')['mail'];
-                $parPass = Yii::$app->request->post('RegistrationForm')['upass'];
-                $parName = Yii::$app->request->post('RegistrationForm')['name'];
-                $parMailEnc = Html::encode($parMail);
-                $parPassEnc = Html::encode($parPass);
-                $parNameEnc = Html::encode($parName);
-                // если текущий мейл занят, то сразу выводим это!
-                $getUser = User::findOne(['mail' => $parMail]);
-                if ($getUser){
-                    $err1 = 'Текущий Емеил занят!';
-                    return $this->render('registration', compact('model', 'err1') );
-                }
-                //
-                $mySalt = Yii::$app->params['my_salt'];
-                $passWithSalt = $mySalt . $parPass;
-                $hashedPass = sha1($passWithSalt);
-                $user = new User();
-                $user->mail = $parMail;
-                $user->uname = $parName;
-                $user->i_group = 2;
-                $user->upass = $hashedPass;
-//                echo Debug::d($passWithSalt,'$passWithSalt');
-//                echo Debug::d($hashedPass,'$hashedPass');
-//                die;
-                // создаем нового пользователя и... тут же скармилваем его на вход
-                if ($user->save()){
-                    // еще тут нужно отправить на почту письмо, что юзер зарегестрировался
-                    $p[1] = Yii::$app->params['sw_tomail'];
-                    $p[21] = Yii::$app->params['sw_frommail'];
-                    $p[22] = Yii::$app->params['name'];
-                    $p[3] = 'Events - регистрация'; // subject
-                    $p[4] = "Вы успешно зарегистрировались в приложении Events <br>\n\n";
-                    //$p[4] .= 'my mail: '. $p[1] . ' | from ' . $p[21] . ' => ' .$p[22] . ' | '.date("m.d.y H:i:s");
-                    $dtReg = date("m.d.y H:i:s");
-                    $p[4] .= "Ваше имя: {$parNameEnc}<br>";
-                    $p[4] .= "Ваша почта: {$parMailEnc}<br>";
-                    $p[4] .= "Ваш пароль: {$parPassEnc}<br>";
-                    $p[4] .= "Дата регистрации: {$dtReg}<br>";
-                    $p[4] .= "<br/>Это сообщение отправлено автоматически, пожалуйста, не отвечайте на него<br/>";
-                    $res = Yii::$app->mailer->compose()
-                        ->setTo($p[1])
-                        ->setFrom([$p[21] => $p[22]])
-                        ->setSubject($p[3])
-                        ->setTextBody($p[4])
-                        ->send();
-                    //echo 'status: ' . $res;
-                    //$getUser = User::findOne(['mail' => $parMail, 'upass' => $hashedPass]);
-
-                    AuthLib::appLogin($user);
-                    return $this->redirect('AuthLib::AUTHED_PATH');
-                }else{
-                    $err1 = 'Ошибка при регистрации!';
-                    return $this->render('login', compact('model', 'err1') );
-                }
-            }
-            //die('err 1');
-            return $this->render('registration', compact('model') );
-        }
-        //die('err 2');
-        $this->layout = '_main';
-        return $this->redirect('/registration');
-    }
-
-
-    /*
-    *
-    *
-    * */
-    public function actionRestore()
-    {
-        if (!AuthLib::appIsAuth()) {
-            //echo Debug::d($email);
-            //echo Debug::d($_REQUEST);
-            $model = new RestoreForm(); $isRestore = false;
-            if ($model->load(Yii::$app->request->post()) && $model->validate() ){
-                //echo 'nice job';
-                $s = null;
-                // раз мы получили нормальную почту, нужно отправить туда урл с хешом для восстановления
-                $mail = Yii::$app->request->post('RestoreForm')['email'];
-                $s = User::findOne(['mail' => $mail]);
-                //echo Debug::d($s,'s',2); die;
-                if (!$s){
-                    $this->layout = 'for_auth'; $err = 'Не зарегистрирован пользователь с таким емайлом!';
-                    return $this->render('restore',compact('model','isRestore','mail','err'));
-                }
-                $isRestore = true;
-                $s->restore = 1;
-                //print $when->format('Y-m-d H:i:s'); echo "<br>";
-                $when = new DateTime(); $when->modify('+ 3 hour'); $curr_dt = new DateTime();
-                $curr_dt = $curr_dt->format('Y-m-d H:i:s');
-                $s->res_dt = $when->format('Y-m-d H:i:s'); $res_dt = $s->res_dt;
-                $restore_hash = sha1($mail . Yii::$app->params['restore_salt'] . $curr_dt);
-                $s->res_hash = $restore_hash;
-                $s->update();
-                if ($s) {
-                    $p[1] = $s->mail; $mail = $p[1];
-                    $p[21] = Yii::$app->params['sw_frommail'];
-                    $p[22] = Yii::$app->params['name'];
-                    $p[3] = "Events. Восстановление пароля";
-
-                    //$p[4] = "<p>hash: {$restore_hash}</p>";
-                    $real_link = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT']
-                        .'/do-restore?'.'hash='.$restore_hash;
-                    $real_link = Url::to(['site/do-restore','hash' => $restore_hash ], true);
-                    $p[4] = Html::a('Восстановить доступ!', ['site/do-restore?hash='.$restore_hash], ['class' => 'btn btn-success']);
-                    $text_body = <<<TB
+     **/
+    public function actionTmail2(){
+        $p[1] = 'iduso@mail.ru';
+        $p[21] = Yii::$app->params['sw_frommail'];
+        $p[22] = Yii::$app->params['name'];
+        $p[3] = "Events. Восстановление пароля";
+        $p[4] = Html::a('Восстановить доступ!', ['user/do-restore?hash='.'reshash'], ['class' => 'btn btn-success']);
+        $text_body = <<<TB
     <h4>Приложение Events</h4>
     <h5>Сброс пароля</h5>
     <p>Для того, чтобы сбросить пароль, нужно перейти по данной ссылке и получить временный пароль</p>
     <p>
-       <a href="{$real_link}"
+       <a href="{11}"
         class="btn btn-success" target="_blank" rel="noopener" data-snippet-id="">
-            {$real_link}  
+            {22}  
        </a>
     </p>
 TB;
-                    $res = Yii::$app->mailer->compose('layouts/html',['content' => $text_body])
-                        ->setTo($p[1])
-                        ->setFrom([$p[21] => $p[22]])
-                        ->setSubject($p[3])
-                        ->setTextBody($text_body)
-                        ->send();
-                    //echo 'status: ' . $res;
-                }
-                //echo Debug::d($s,'my email');
-            }
-
-            $this->layout = 'for_auth';
-            return $this->render('restore',compact('model','isRestore','mail','res_dt'));
-        }
-        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
+        $res = Yii::$app->mailer->compose('layouts/html',['content' => $text_body])
+            ->setTo($p[1])
+            ->setFrom([$p[21] => $p[22]])
+            ->setSubject($p[3])
+            ->setTextBody($text_body)
+            ->send();
+        echo 'res: ' . $res;
     }
 
-    /*
-    *
-    *
-    * */
-    public function actionDoRestore($hash=null)
-    {
-        if (!AuthLib::appIsAuth()) {
-            // здесь мы должны получить хеш
-            //$hash = "a33f9ebb21932b71fb26614313e96b3fd22d0807";
-            $err_msg = '';
-            // #1 часть 2 - поле ресторе = 1 ??
-            $rs = User::findOne(['res_hash' => $hash, 'restore' => 1]);
-            if (!$rs){
-                // отказано в сбросе, ресторе <> 1
-                $err_msg = 'Сброс пароля не был запрошен и/или недействительный hash!';
-                $this->layout = 'simple';
-                return $this->render('dorestore',compact('rs','err_msg'));
-            }
-            // #2 часть - истекло ли время?
-            // тут узнаем, истекло ли время - 3 часа с момента подачи заявления о сбросе
-            $qq = (new Query)
-                ->select("HOUR(TIMEDIFF(current_timestamp(), res_dt)) as `diff`")->from('user')->where(['user.restore' => 1])
-                ->andWhere(['user.res_hash' => $hash])
-                ->one();
-            if ( ($qq && $qq['diff'] == 0) || !$qq){
-                $err_msg = 'Сброс был ободрен, однако 3 часа с момента инициация сброса пароля прошли!';
-                $this->layout = 'simple';
-                return $this->render('dorestore',compact('rs','err_msg'));
-            }
-
-            // сброс пароля и ресторе = 0, чтобы исключить дальнейшие сбрасывания на этом же скрипте
-            $np = rand(1000,9999); $np_hash = sha1(Yii::$app->params['my_salt'] . $np);
-            $rs->upass = $np_hash; $uname = $rs->mail;
-            $rs->restore = 0;
-            $rs->update();
-            //
-            $this->layout = 'simple';
-            return $this->render('dorestore',compact('np','uname','err_msg'));
-
-        }
-        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
-    }
-
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
-    public function actionLogout()
-    {
-        //Yii::$app->user->logout();
-        //return $this->goHome();
-        AuthLib::appLogout();
-        $this->layout = 'for_auth';
-        $this->redirect('index');
-    }
 
     /*
      *
@@ -612,68 +242,6 @@ TB;
 
             die(json_encode($json));
         }
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionTest(){
-        $this->layout = 'simple';
-        return $this->render('test');
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionTest2(){
-        $when = new DateTime();
-        print $when->format('Y-m-d H:i:s');
-        echo "<br>";
-        //$when->modify('+ 3 minute');
-        print $when->format('Y-m-d H:i:s');
-        echo "<br>";
-        //echo date('Y-m-d H:i:s');
-        //return $this->render('test2');
-    }
-
-    /*
-     *
-     *
-     * */
-    public function actionAddEvent2(){
-        //
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            return $this->redirect(AuthLib::NOT_AUTHED_PATH);
-        }
-        //
-        $ev = new Event();
-        if ($ev->load(Yii::$app->request->post()) ) {
-            echo Debug::d($_REQUEST,'request');
-            //
-            $ev->i_user = $_SESSION['user']['id'];
-            if (!$ev->validate()) {
-                Yii::$app->session->setFlash('addEvent','Некорректные входные данные!');
-            }
-//            $ev->desc = Yii::$app->request->post('Event')['desc'];
-//            $ev->summ = intval(Yii::$app->request->post('Event')['summ']);
-//            $ev->type = Yii::$app->request->post('Event')['type'];
-//            $ev->i_cat = Yii::$app->request->post('Event')['i_cat'];
-//            $ev->dtr = Yii::$app->request->post('Event')['dtr'];
-            $ev->dtr = Yii::$app->formatter->asTime($ev->dtr, 'yyyy-MM-dd'); # 14:09
-            $rs = $ev->insert();
-            //echo Debug::d($ev);
-            if ($rs) {
-                Yii::$app->session->setFlash('addEvent','Событие успешно добавлено!');
-            }else{
-                Yii::$app->session->setFlash('addEvent','Некорректные входные данные!');
-            }
-        } else{
-            Yii::$app->session->setFlash('addEvent','Данные не переданы!');
-        }
-        return $this->redirect(['post/index']);
     }
 
     /*

@@ -19,8 +19,8 @@ class RegistrationForm extends Model
 {
     public $upass;
     public $mail;
-    public $name;
-    public $captcha;
+    public $uname;
+    public $verifyCode;
 
     /**
      * @return array the validation rules.
@@ -28,10 +28,10 @@ class RegistrationForm extends Model
     public function rules()
     {
         return [
-                [['mail', 'upass','name'], 'required'],
-                [['mail','upass','name'], 'string', 'max' => 55],
+                [['mail', 'upass','uname'], 'required'],
+                [['mail','upass','uname'], 'string', 'max' => 55],
                 [['mail'], 'email'],
-                ['captcha', 'captcha'],
+                ['verifyCode', 'captcha', 'captchaAction'=>'/user/captcha'],
         ];
     }
 

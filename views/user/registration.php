@@ -2,16 +2,15 @@
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\captcha\Captcha;
-use app\components\AuthLib;
 
 /* @var $this yii\web\View */
 /* @var $form app\models\AuthForm */
 /* @var $model app\models\User */
 
-$this->title = 'Events | Вход в систему';
+$this->title = 'Events | Регистрация';
 
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
-$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page login'], 'keywords');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page registratioin'], 'keywords');
 ?>
 
 <section class="main-auth">
@@ -21,7 +20,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 <?php
                 $form = ActiveForm::begin(
                     [
-                        'action' => [AuthLib::NOT_AUTHED_PATH],
+                        'action' => ['user/registration'],
                         'method' => 'post',
                         'options'  => [
                             'class' => 'form-auth',
@@ -32,9 +31,13 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 <h2><i class="fa fa-sun-o" aria-hidden="true"></i> Events</h2>
                 <hr class="hr-toh2">
                 <p class="capt show">Войдите для работы</p>
-                <?php if (Yii::$app->session->hasFlash('logined')): ?>
+                <?php if (Yii::$app->session->hasFlash('registrated')): ?>
                     <p class="capt show" style="font-size: 12px; color: #DF4326;">
-                        <?=Html::encode(Yii::$app->session->getFlash('logined'))?>
+                        <?php //echo Html::encode(Yii::$app->session->getFlash('registrated'); ?>
+                    </p>
+                <?php else: ?>
+                    <p class="capt show" style="font-size: 12px; color: #DF4326;">
+
                     </p>
                 <?php endif; ?>
                 <?= $form->field($model, 'mail',
@@ -51,10 +54,18 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         'placeholder' => 'Введите пароль',
                         'class' => 'form-control'
                     ]
-
                     ]
-                )->passwordInput();
-
+                )->passwordInput()
+                ?>
+                <?= $form->field($model, 'uname',
+                    ['inputOptions' => [
+                        'placeholder' => 'Введите имя',
+                        'class' => 'form-control'
+                    ]
+                    ]
+                )->textInput(['autofocus' => true])
+                ?>
+                <?php
                 echo $form->field($model, 'verifyCode')->widget(
                     Captcha::className(),
                     [
@@ -67,16 +78,12 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     ]
                 )->label('Капча');
 
-                echo Html::submitButton('Войти', ['class' => 'btn btn-success']);
                 ?>
+                <?= Html::submitButton('Зарегистрироваться', ['class' => 'btn btn-success']) ?>
 
                 <p class="reg show">
-                    <span>Нет аккаунта?</span>
-                    <a href="<?=\yii\helpers\Url::to(['user/registration'])?>" class="form-link-reg">Зарегистрироваться!</a>
-                </p>
-                <p class="reg show">
-                    <span>Забыли пароль?</span>
-                    <a href="<?=\yii\helpers\Url::to(['user/restore'])?>" class="form-link-reg">Восстановить!</a>
+                    <span>Уже есть аккаунт?</span>
+                    <a href="<?=\yii\helpers\Url::to(['site/login'])?>" class="form-link-login">Войти!</a>
                 </p>
 
                 <?php ActiveForm::end(); ?>

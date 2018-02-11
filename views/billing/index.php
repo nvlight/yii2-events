@@ -17,6 +17,15 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <?php
         endif;
         ?>
+        <?php
+        if (Yii::$app->session->hasFlash('registrated')):
+            ?>
+            <h4 class="alert-success p10" >
+                <?=Html::encode(Yii::$app->session->getFlash('registrated'))?>
+            </h4>
+        <?php
+        endif;
+        ?>
         <div class="page-caption clearfix">
             <h2 class="pull-left" >Страница счета</h2>
             <span class="reload pull-right">
