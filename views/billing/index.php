@@ -13,7 +13,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <?php
         if (Yii::$app->session->hasFlash('logined')):
             ?>
-            <h3 class="alert-success p10" ><?=Html::encode(Yii::$app->session->getFlash('logined'))?></h3>
+            <h4 class="alert-success p10" ><?=Html::encode(Yii::$app->session->getFlash('logined'))?></h4>
         <?php
         endif;
         ?>

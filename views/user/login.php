@@ -32,8 +32,10 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 <h2><i class="fa fa-sun-o" aria-hidden="true"></i> Events</h2>
                 <hr class="hr-toh2">
                 <p class="capt show">Войдите для работы</p>
-                <?php if (isset($err1)): ?>
-                    <p class="capt show" style="font-size: 12px; color: #DF4326;"><?=Html::encode($err1)?></p>
+                <?php if (Yii::$app->session->hasFlash('logined')): ?>
+                    <p class="capt show" style="font-size: 12px; color: #DF4326;">
+                        <?=Html::encode(Yii::$app->session->getFlash('logined'))?>
+                    </p>
                 <?php endif; ?>
                 <?= $form->field($model, 'mail',
                     ['inputOptions' => [
@@ -49,20 +51,24 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         'placeholder' => 'Введите пароль',
                         'class' => 'form-control'
                     ]
+
                     ]
-                )->passwordInput()
-                ?>
-                <?php
-                echo $form->field($model, 'captcha')->widget(
+                )->passwordInput();
+
+                echo $form->field($model, 'verifyCode')->widget(
                     Captcha::className(),
-                    ['options' => [
-                        'placeholder' => 'Введите капчу',
-                        'class' => 'form-control'
-                    ]]
+                    [
+                        'captchaAction' => 'user/captcha',
+                        //'template' => '<div class="row"><div class="col-lg-3">{image}</div><div class="col-lg-6">{input}</div></div>',
+                        'options' => [
+                            'placeholder' => 'Введите капчу',
+                            'class' => 'form-control',
+                        ]
+                    ]
                 )->label('Капча');
 
+                echo Html::submitButton('Войти', ['class' => 'btn btn-success']);
                 ?>
-                <?= Html::submitButton('Войти', ['class' => 'btn btn-success']) ?>
 
                 <p class="reg show">
                     <span>Нет аккаунта?</span>

@@ -19,7 +19,7 @@ class AuthForm extends Model
 {
     public $upass;
     public $mail;
-    public $captcha;
+    public $verifyCode;
 
     /**
      * @return array the validation rules.
@@ -30,7 +30,8 @@ class AuthForm extends Model
                 [['mail', 'upass',], 'required'],
                 [['mail','upass'], 'string', 'max' => 55],
                 [['mail'], 'email'],
-                ['captcha', 'captcha'],
+                //['captcha', 'captcha'],
+                ['verifyCode', 'captcha', 'captchaAction'=>'/user/captcha'],
         ];
     }
 

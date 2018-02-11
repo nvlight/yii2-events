@@ -5,6 +5,8 @@ use yii\helpers\ArrayHelper;
 use kartik\date\DatePicker;
 use yii\widgets\ActiveField;
 use app\components\AuthLib;
+use app\models\Type;
+use app\components\Debug;
 
 $this->title = 'Events | Категории';
 
@@ -27,6 +29,14 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
             <div class="row">
 
+                <div class="col-md-12">
+                    <?php if (Yii::$app->session->hasFlash('addEvent')) : ?>
+                        <h4 class="alert-success p10" >
+                            <?= Yii::$app->session->getFlash('addEvent') ?>
+                        </h4>
+                    <?php endif; ?>
+                </div>
+
                 <div class="col-md-6">
                     <section class="addEvent">
                         <header>
@@ -36,11 +46,21 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
                             <?php $form = ActiveForm::begin([
                                 'method'=>'post',
-                                'action' => ['/site/add-event'],
+                                'action' => ['/post/add-event'],
                                 'options' => [
                                     'class' => 'addEvent',
                                 ]
                             ]); ?>
+
+
+                            <?php
+                                $types2 = Type::find()->all();
+                                $types30 = ArrayHelper::map($types2,'id','name');
+                                $params21 = [
+                                    //'prompt' => 'Выберите категорию'
+                                    'id' => 'changeEventModal_typeId'
+                                ];
+                            ?>
 
                             <?php
                             // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
@@ -51,29 +71,10 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                 'id' => 'dropDownId_1'
                             ];
                             ?>
-                            <?= $form->field($event, 'i_cat')->dropDownList($cats2,$params)->label('Выберите категорию'); ?>
-
-                            <?= $form->field($event,'type',[
-                                'template' => '<label for="">Выберите тип</label><div>{input}</div>',
-                            ])->radioList(
-                                [1 => 'Доход', 2 => 'Расход'],
-                                [
-                                    'item' => function($index, $label, $name, $checked, $value) {
-                                        $ch = '';
-                                        if ($index === 0) {
-                                            $ch = "checked=''";
-                                        }
-                                        $return = '<label>';
-                                        $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
-                                        $return .= '<i class="fa fa-circle-o fa-2x"></i>' ."\n" .
-                                            '<i class="fa fa-dot-circle-o fa-2x"></i>' ."\n";
-                                        $return .= '<span>' . ucwords($label) . '</span>' ."\n";
-                                        $return .= '</label><br/>';
-
-                                        return $return;
-                                    }
-                                ]
-                            ); ?>
+                            <?= $form->field($event, 'i_cat')->dropDownList($cats2,$params)
+                                ->label('Выберите категорию'); ?>
+                            <?= $form->field($event, 'type')->dropDownList($types30,$params21)
+                                ->label('Выберите тип события'); ?>
 
                             <?php
                             //echo $form->field($event, 'dtr')->widget(\yii\widgets\MaskedInput::className(), [ 'mask' => '99-99-9999', ]);
@@ -220,10 +221,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
             </div>
 
-
-
-
-
         </div>
 
     </div>
@@ -231,29 +228,25 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 <?php
 $js1 = <<<JS
  $('form.addCategory').on('beforeSubmit', function(e){
- //e.preventDefault();
  var data = $(this).serialize();
- //alert('add category...')
- console.log('add category...');
  $.ajax({
-     url: '/web/site/add-category',
+     url: '/site/add-category',
      type: 'POST',
      data: data,
      success: function(res){
-        console.log(res);
+        //console.log(res);
         var np = $.parseJSON(res);
-        // console.log(np['success']);
-        // console.log(np['message']);
-        // console.log(np);
         if (np['success'] === 'yes'){
-            console.log('add meta is done!');
+            //console.log('add meta is done!');
             $('#dropDownId_1,#dropDownId_2,#dropDownId_3').append($('<option>', {
                 value: np['id'],
                 text: np['name']
             }));
             $('form.addCategory').trigger( 'reset' );
             alert(np['message']);
-        }  
+        } else{
+            alert(np['message']);
+        }
      },
      error: function(res){
        console.log(res);
@@ -270,14 +263,12 @@ $js2 = <<<JS
  var p1 = $($('input#changeCat-name')[0]).val();
  var p2 = $($('input#changeCat-limit')[0]).val();
  var p3 = $("#dropDownId_2").find(":selected").val();
- //alert('add category...')
- console.log('change category...');
  $.ajax({
-     url: '/web/site/change-category',
+     url: '/site/change-category',
      type: 'POST',
      data: {p1,p2,p3},
      success: function(res){
-        console.log(res);
+        //console.log(res);
         var np = $.parseJSON(res);
         //console.log(np['success']);
         //console.log(np['message']);
@@ -303,12 +294,12 @@ $js3 = <<<JS
 $('form.addType').on('beforeSubmit', function(e){
     var data = $(this).serialize();
     $.ajax({
-        url: '/web/site/add-type',
+        url: '/site/add-type',
         type: 'POST',
         data: data,
         success: function(res){
             var np = $.parseJSON(res);
-            console.log(np);
+            //console.log(np);
             if (np['success'] === 'yes'){
                 $('#types_id').append($('<option>', {
                     value: np['id'],

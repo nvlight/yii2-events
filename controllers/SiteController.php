@@ -34,22 +34,6 @@ use DateTime;
 
 class SiteController extends Controller{
 
-    /**
-     * @inheritdoc
-     */
-    public function actions()
-    {
-        return [
-            'error' => [
-                'class' => 'yii\web\ErrorAction',
-            ],
-            'captcha' => [
-                'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
-            ],
-        ];
-    }
-
     /*
      *
      *
@@ -58,8 +42,9 @@ class SiteController extends Controller{
     {
         if (!AuthLib::appIsAuth()){
             $this->layout = 'for_auth';
-            return $this->redirect(['site/index']);
+            return $this->redirect(AuthLib::NOT_AUTHED_PATH);
         }
+
         $this->layout = '_main';
         $uid = $_SESSION['user']['id'];
         $model = new UserForm();
@@ -69,23 +54,28 @@ class SiteController extends Controller{
         //echo Debug::d($_REQUEST,'request');
         //echo Debug::d($_SESSION,'$_SESSION');
         if ($model->load(Yii::$app->request->post()) && $model->validate() ){
+            //echo "in weight 0 <br/>";
             $user->uname = Yii::$app->request->post('UserForm')['uname'];
             $upass = Yii::$app->request->post('UserForm')['upass'];
             $upassHashed = sha1(Yii::$app->params['my_salt'] . $upass);
             $user->remains = Yii::$app->request->post('UserForm')['remains'];
 
             if ($upassHashed !== $user->upass){
+                //echo "in weight 1 <br/>";
                 Yii::$app->session->setFlash('saved','Старый пароль не совпадает с введенным!');
                 return $this->render('changeuserinfo', compact('model','user'));
             }
             $newpass1 = Yii::$app->request->post('UserForm')['newpass1'];
             $newpass2 = Yii::$app->request->post('UserForm')['newpass2'];
             if ($newpass1 !== $newpass2) {
+                //echo "in weight 2 <br/>";
                 Yii::$app->session->setFlash('saved','Новый пароль и его повтор не совпадают!');
                 return $this->render('changeuserinfo', compact('model','user'));
             }
-
+            $upassNewHashed = sha1(Yii::$app->params['my_salt'] . $newpass1);
+            $user->upass = $upassNewHashed;
             if ($user->save()){
+                //echo "in weight 3 <br/>";
                 $_SESSION['user']['uname'] = $user->uname;
                 $_SESSION['user']['remains'] = $user->remains;
                 $user = $model;
@@ -152,7 +142,7 @@ class SiteController extends Controller{
      *
      *
      * */
-    public function actionHistory($sortcol='dtr',$sort='desc'){
+    public function actionHistory2($sortcol='dtr',$sort='desc'){
         //echo Debug::d($_SESSION);
         //die;
 
@@ -334,7 +324,7 @@ class SiteController extends Controller{
      *
      * */
     public function actionRegistration(){
-
+        echo Debug::d($_SESSION);
         $model = new RegistrationForm();
         if (!AuthLib::appIsAuth()){
             $this->layout = 'for_auth';
@@ -652,35 +642,38 @@ TB;
      *
      *
      * */
-    public function actionAddEvent(){
-        //echo Debug::d($_SESSION,'session..');
-        //echo Debug::d($_SERVER);
-        if ((Yii::$app->request->method == 'POST') && AuthLib::appIsAuth()){
-            //echo Debug::d($_REQUEST,'request');
+    public function actionAddEvent2(){
+        //
+        if (!AuthLib::appIsAuth()){
+            $this->layout = 'for_auth';
+            return $this->redirect(AuthLib::NOT_AUTHED_PATH);
+        }
+        //
+        $ev = new Event();
+        if ($ev->load(Yii::$app->request->post()) ) {
+            echo Debug::d($_REQUEST,'request');
             //
-            $ev = new Event();
             $ev->i_user = $_SESSION['user']['id'];
-            $ev->desc = Yii::$app->request->post('Event')['desc'];
-            $ev->summ = intval(Yii::$app->request->post('Event')['summ']);
-            $ev->type = Yii::$app->request->post('Event')['type'];
-            $ev->i_cat = Yii::$app->request->post('Event')['i_cat'];
+            if (!$ev->validate()) {
+                Yii::$app->session->setFlash('addEvent','Некорректные входные данные!');
+            }
+//            $ev->desc = Yii::$app->request->post('Event')['desc'];
+//            $ev->summ = intval(Yii::$app->request->post('Event')['summ']);
+//            $ev->type = Yii::$app->request->post('Event')['type'];
+//            $ev->i_cat = Yii::$app->request->post('Event')['i_cat'];
+//            $ev->dtr = Yii::$app->request->post('Event')['dtr'];
+            $ev->dtr = Yii::$app->formatter->asTime($ev->dtr, 'yyyy-MM-dd'); # 14:09
             $rs = $ev->insert();
+            //echo Debug::d($ev);
             if ($rs) {
-                echo 'event is inserted 1!';
-
-                if(!empty($rs)){
-                    //$cats = $cats->asArray();
-                    //echo Debug::d($cats,'cats');
-                    echo 'event is inserted 2!';
-                    return $this->redirect('post');
-                }
+                Yii::$app->session->setFlash('addEvent','Событие успешно добавлено!');
             }else{
-                echo "chto-to poshlo ne tak 1!";
+                Yii::$app->session->setFlash('addEvent','Некорректные входные данные!');
             }
         } else{
-            echo "chto-to poshlo ne tak 2!";
+            Yii::$app->session->setFlash('addEvent','Данные не переданы!');
         }
-
+        return $this->redirect(['post/index']);
     }
 
     /*

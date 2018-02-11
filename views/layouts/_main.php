@@ -130,7 +130,7 @@ if (array_key_exists('1',$rr)) {
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                    <li><a href="<?= \yii\helpers\Url::to(['/site/change-user-info'])?>"><i class="fa fa-pencil-square-o"></i> Редактирование</a></li>
+                                    <li><a href="<?= \yii\helpers\Url::to(['/user/change-user-info'])?>"><i class="fa fa-pencil-square-o"></i> Редактирование</a></li>
                                     <li role="separator" class="divider"></li>
                                     <li><a href="<?= \yii\helpers\Url::to([\app\components\AuthLib::LOG_OUT_PATH])?>"><i class="fa fa-power-off icon"></i> Выйти</a></li>
                                 </ul>
