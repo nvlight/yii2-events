@@ -5,10 +5,11 @@ use yii\widgets\ActiveForm;
 use app\models\Category;
 use app\models\Event;
 use yii\helpers\ArrayHelper;
-use yii\bootstrap\Html;
 use yii\data\ActiveDataProvider;
 use app\components\Debug;
 use app\models\Type;
+use yii\helpers\Html;
+use yii\helpers\Url;
 
 $css1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css";
 $js1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js";
@@ -138,7 +139,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <span class="btn-action" title="Просмотр">
                                         <a class="evActionView"
                                            <?php // echo " href="\yii\helpers\Url::to(['/site/show-event/?id='.$ev->id])" ';  ?>
-                                           data-id="<?=$ev->id?>" href="#"
+                                           data-id="<?=$ev->id?>" href="<?=Url::to(['event/show?id=' . $ev->id])?>"
                                         >
                                             <span class="glyphicon glyphicon-eye-open" ></span>
                                         </a>
@@ -146,7 +147,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <span class="btn-action" title="Редактировать">
                                         <a class="evActionUpdate"
                                             <?php // echo "onclick=editEvent(".$ev->id".)"; return false; ";  ?>
-                                            data-id="<?=$ev->id?>" href="#"
+                                           data-id="<?=$ev->id?>" href="<?=Url::to(['event/edit?id=' . $ev->id])?>"
                                         >
                                             <span class="glyphicon glyphicon-pencil" >
                                             </span>
@@ -154,7 +155,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     </span>
                                     <span class="btn-action" title="Удалить">
                                         <a class="evActionDelete"
-                                           data-id="<?=$ev->id?>" href="#"
+                                           data-id="<?=$ev->id?>" href="<?=Url::to(['event/del?id=' . $ev->id])?>"
                                         >
                                             <span class="glyphicon glyphicon-trash" >
                                             </span>

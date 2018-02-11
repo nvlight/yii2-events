@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\components\AuthLib;
 use app\models\Event;
 use yii\data\Pagination;
+use Yii;
 
 class EventController extends \yii\web\Controller
 {
@@ -59,4 +60,21 @@ class EventController extends \yii\web\Controller
         return $this->render('history', compact('events','pages','sort','ev2'));
     }
 
+    /*
+     *
+     * */
+    public function actionShow($id=0){
+        if (Yii::$app->request->method === 'GET'){
+            $id = Yii::$app->request->get('id'); $rs = null;
+            if ( preg_match("#^[1-9]\d{0,7}$#", $id)){
+                $rs = Event::find()->where(['id' => $id])->with('category')->with('types')
+                    ->asArray()->one();
+                    //->toArray(); ->one();
+            }
+
+            $this->layout = '_main';
+            return $this->render('show', compact('rs'));
+        }
+
+    }
 }
