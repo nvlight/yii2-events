@@ -230,7 +230,7 @@ $js1 = <<<JS
  $('form.addCategory').on('beforeSubmit', function(e){
  var data = $(this).serialize();
  $.ajax({
-     url: '/site/add-category',
+     url: '/post/add-category',
      type: 'POST',
      data: data,
      success: function(res){
@@ -264,7 +264,7 @@ $js2 = <<<JS
  var p2 = $($('input#changeCat-limit')[0]).val();
  var p3 = $("#dropDownId_2").find(":selected").val();
  $.ajax({
-     url: '/site/change-category',
+     url: '/post/change-category',
      type: 'POST',
      data: {p1,p2,p3},
      success: function(res){
@@ -294,7 +294,7 @@ $js3 = <<<JS
 $('form.addType').on('beforeSubmit', function(e){
     var data = $(this).serialize();
     $.ajax({
-        url: '/site/add-type',
+        url: '/post/add-type',
         type: 'POST',
         data: data,
         success: function(res){

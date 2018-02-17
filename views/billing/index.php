@@ -58,6 +58,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         <input type="text" class="form-control user_limit" placeholder="введите лимт средств"
                                aria-describedby="basic-addon2"  value="<?=html::encode($remains)?>">
                         <span class="input-group-addon" id="basic-addon2">изменить</span>
+<!--                        <span class="input-group-addon" id="basic-focusout">потерять фокус</span>-->
                         <span class="form-control spinPreload"><i class="fa fa-spinner fa-spin"></i></span>
                     </div>
                 </div>
@@ -133,21 +134,37 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 <?php
 
 $js1 = <<<JS
+
 /* */
-$('input.user_limit').on('focus', function(e) {
+$('#basic-focusout').on('click', function(e) {
+    $('input.user_limit').focusout();
+});
+
+/* */
+$('input.user_limit222').on('focus', function(ee) {
   $(this).keyup(function(e){
     if (e.which == 13) {
-        //console.log('user limit update - ENTER');
-        updateUserLimit(); 
-        e.preventDefault();
+        ee.preventDefault();
+        updateUserLimit();
     } 
+    return false;
   }); 
+});
+
+/* */
+$('.user_limit').keyup(function (event) {
+    var key = event.keyCode || event.which;
+
+    if (key === 13) {
+        updateUserLimit();
+    }
+    return false;
 });
 
 function updateUserLimit(){
     //console.log('change limit & reload page: starting...');
     $.ajax({
-      url: '/site/change-user-limit',
+      url: '/billing/change-user-limit',
       type: 'GET',
       data: {val:$('.user_limit').val()},
       success: function(res,status) {
