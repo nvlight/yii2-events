@@ -51,7 +51,7 @@ class EventController extends \yii\web\Controller
             //->all();
         ;
         //echo Debug::d($query,'query'); die;
-        $q_counts = 10;
+        $q_counts = 25;
         $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
             'pageSizeParam' => false, 'forcePageParam' => false]);
         //echo Debug::d($pages,'pages'.$pages->offset); die;

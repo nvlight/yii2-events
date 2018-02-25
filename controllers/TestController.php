@@ -105,4 +105,10 @@ class TestController extends \yii\web\Controller
         die(json_encode($json));
 
     }
+
+    public function actionMail(){
+        $this->layout = '@app/mail/layouts/html';
+
+        return $this->render('mail', compact('mailData'));
+    }
 }

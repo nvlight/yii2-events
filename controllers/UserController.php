@@ -221,12 +221,21 @@ class UserController extends \yii\web\Controller
                     $p[4] .= "Ваша почта: {$user->mail}<br>";
                     $p[4] .= "Ваш пароль: {$model->upass}<br>";
                     $p[4] .= "Дата регистрации: {$dtReg}<br>";
+                    $mailData = [
+                        'uname' => $user->uname,
+                        'umail' => $user->mail,
+                        'upass' => $model->upass,
+                        'dt_reg' => date("d.m.Y H:i:s"),
+                    ];
+
                     $p[4] .= "<br/>Это сообщение отправлено автоматически, пожалуйста, не отвечайте на него<br/>";
-                    $res = Yii::$app->mailer->compose()
+                    $res = Yii::$app->mailer->compose('registration',[
+                            'mailData' => $mailData
+                        ])
                         ->setTo($p[1])
                         ->setFrom([$p[21] => $p[22]])
                         ->setSubject($p[3])
-                        ->setTextBody($p[4])
+                        //->setTextBody($p[4])
                         ->send();
                     //echo 'status: ' . $res;
                     //$getUser = User::findOne(['mail' => $parMail, 'upass' => $hashedPass]);

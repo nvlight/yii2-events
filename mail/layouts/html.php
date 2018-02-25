@@ -12,10 +12,13 @@ use yii\helpers\Html;
     <meta http-equiv="Content-Type" content="text/html; charset=<?= Yii::$app->charset ?>" />
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
+
 </head>
 <body>
     <?php $this->beginBody() ?>
+<!--    <h2>H2 !</h2>-->
     <?= $content ?>
+<!--    <h2>H2 !!!</h2>-->
     <?php $this->endBody() ?>
 </body>
 </html>
