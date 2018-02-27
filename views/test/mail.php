@@ -19,7 +19,7 @@ function setSimpleDateForMail(){
         'uname' => 'test',
         'umail' => 'test@mail.com',
         'upass' => 'password',
-        'dtReg' => date("d.m.Y H:i:s"),
+        'udtreg' => date("d.m.Y H:i:s"),
     ];
 }
 $mailData = setSimpleDateForMail();
@@ -39,6 +39,39 @@ $mailData = setSimpleDateForMail();
 //echo 'res: ' . $res;
 
 ?>
+
+<style>
+    h5{
+        color: #4f5f6f;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-block;
+        text-align: left;
+        width: 100%;
+        margin: 0;
+    }
+    .wrapper{
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #333;
+        background-color: #677283;
+        padding: 0;
+        margin: 0;
+    }
+    .mailInner{
+        padding: 15px 30px;
+        color: #B1B0B7;
+        min-height: 330px;
+        max-width: 330px;
+        border: 2px solid #ccc;
+        display: block;
+        background-color: #fff;
+        border-radius: 0px;
+        margin: 0 auto;
+    }
+</style>
+
 
 <div class="wrapper">
     <div class="mailInner">

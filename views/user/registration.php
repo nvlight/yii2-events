@@ -83,7 +83,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
                 <p class="reg show">
                     <span>Уже есть аккаунт?</span>
-                    <a href="<?=\yii\helpers\Url::to(['site/login'])?>" class="form-link-login">Войти!</a>
+                    <a href="<?=\yii\helpers\Url::to(['user/login'])?>" class="form-link-reg">Войти!</a>
                 </p>
 
                 <?php ActiveForm::end(); ?>

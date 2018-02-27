@@ -225,7 +225,7 @@ class UserController extends \yii\web\Controller
                         'uname' => $user->uname,
                         'umail' => $user->mail,
                         'upass' => $model->upass,
-                        'dt_reg' => date("d.m.Y H:i:s"),
+                        'udtreg' => date("d.m.Y H:i:s"),
                     ];
 
                     $p[4] .= "<br/>Это сообщение отправлено автоматически, пожалуйста, не отвечайте на него<br/>";
