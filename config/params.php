@@ -15,4 +15,5 @@ return [
     'test_mail' => 'iduso@mail.ru',
     'name' => 'Martin German',
     'restore_salt' => 'S2per_-%^CoolRestoreSa1t@354%__Ever++', // S2per_-%^CoolRestoreSa1t@354%__Ever++
+    'history_post_count' => 25,
 ];

@@ -9,6 +9,7 @@ use Yii;
 use yii\db\Query;
 use app\models\Type;
 use yii\widgets\LinkPager;
+use app\components\Debug;
 
 class EventController extends \yii\web\Controller
 {
@@ -17,50 +18,16 @@ class EventController extends \yii\web\Controller
      *
      * */
     public function actionHistory($sortcol='dtr',$sort='desc'){
-        //echo Debug::d($_SESSION);
-        //die;
-
         if (!AuthLib::appIsAuth()){
             $this->layout = 'for_auth';
-            //return $this->goBack(['']);
             return $this->redirect(['site/index']);
-
-            //return $this->render('index', [ 'message' => $message ]);
         }
         $this->layout = '_main';
-        //$sortcol = 'i_cat';
-        switch ($sortcol){
-            case 'id'    : $sortcol = 'id'; break;
-            case 'i_cat' : $sortcol = 'i_cat'; break;
-            case 'desc'  : $sortcol = 'desc'; break;
-            case 'summ'  : $sortcol = 'summ'; break;
-            case 'dtr'   : $sortcol = 'dtr'; break;
-            case 'type'  : $sortcol = 'type'; break;
-            default: { echo 'vi doigralis!'; die;  }
-        }
-        switch ($sort){
-            case 'desc': { $sort = 'asc';  $rsort2 = [$sortcol => SORT_DESC, 'id' => SORT_DESC]; break; }
-            default:     { $sort = 'desc'; $rsort2 = [$sortcol =>  SORT_ASC, 'id' => SORT_DESC]; }
-        }
-        //echo $sort;
-        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-            ->with('category')
-            ->with('types')
-            ->orderBy($rsort2)
-            //->asArray()
-            //->all();
-        ;
-        //echo Debug::d($query,'query'); die;
-        $q_counts = 25;
-        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-            'pageSizeParam' => false, 'forcePageParam' => false]);
-        //echo Debug::d($pages,'pages'.$pages->offset); die;
-        $events = $query->offset($pages->offset)
-            ->limit($pages->limit)
-            ->all();
-        //echo Debug::d($events,'events');
-        $ev2 = Event::find()->where(['i_user' => $_SESSION['user']['id'], ])->with('category');
-        return $this->render('history', compact('events','pages','sort','ev2'));
+        $getEvents = Event::getHistory($sortcol,$sort);
+        //echo Debug::d($getEvents,'getEvents',1); die;
+        return $this->render('history',
+            ['events' => $getEvents[0],'pages' => $getEvents[1],'sort' => $getEvents[2],'ev2' => $getEvents[3] ]
+        );
     }
 
     /*
@@ -74,55 +41,10 @@ class EventController extends \yii\web\Controller
                     ->asArray()->one();
                     //->toArray(); ->one();
             }
-
             $this->layout = '_main';
             return $this->render('show', compact('rs'));
         }
 
-    }
-
-    /*
-     *
-     *
-     * */
-    public static function getEventRowsStrByArray($id,$desc,$summ,$dt,$cl1,$cl2,$cat_name){
-        $dt = Yii::$app->formatter->asTime($dt, 'dd.MM.yyyy');
-        $trh = <<<TRH
-<tr class="actionId_{$id}">
-                                <td>{$id}</td>
-<td class='item_cat'>{$cat_name}</td>
-<td class='item_desc'>{$desc}</td>
-<td class='item_summ'>{$summ}</td>
-<td class='item_dtr'>{$dt}</td>
-<td class='item_type'><span style="background-color: #{$cl2}" class="dg_type_style">{$cl1}</span></td>
-<td>
-                                    <span class="btn-action" title="Просмотр">
-                                        <a class="evActionView"                                           
-                                           data-id="{$id}" href="#"
-                                        >
-                                            <span class="glyphicon glyphicon-eye-open" ></span>
-                                        </a>
-                                    </span>
-    <span class="btn-action" title="Редактировать">                                     
-                                        <a class="evActionUpdate"                                          
-                                            data-id="{$id}" href="#"
-                                        >
-                                            <span class="glyphicon glyphicon-pencil" >
-                                            </span>
-                                        </a>
-                                    </span>
-    <span class="btn-action" title="Удалить">
-                                        <a class="evActionDelete"
-                                           data-id="{$id}" href="#"
-                                        >
-                                            <span class="glyphicon glyphicon-trash" >
-                                            </span>
-                                        </a>
-                                    </span>
-</td>
-</tr>
-TRH;
-        return $trh;
     }
 
     /*
@@ -148,15 +70,16 @@ TRH;
     {
         //echo Debug::d($_SESSION,'session..');
         //echo Debug::d($_SERVER);
-
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
-            $ev = new Event();
-            $ev->i_user = $_SESSION['user']['id'];
-            $ev->desc = Yii::$app->request->post('Event')['desc'];
-            $ev->summ = intval(Yii::$app->request->post('Event')['summ']);
-            $ev->type = intval(Yii::$app->request->post('Event')['type']);
-            $ev->i_cat = Yii::$app->request->post('Event')['i_cat'];
-            $ev->dtr = Yii::$app->request->post('Event')['dtr'];
+        $model = new Event();
+        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()
+            && $model->load(Yii::$app->request->post())
+            )
+        {
+            $ev = $model; $ev->i_user = $_SESSION['user']['id'];
+            if ( !$model->validate() ){
+                $json = ['success' => 'no', 'message' => 'validate error!', 'error' => $model->errors];
+                die(json_encode($json));
+            }
             $ev->dtr = \Yii::$app->formatter->asTime($ev->dtr, 'yyyy-MM-dd'); # 14:09
             $rs = $ev->insert();
             if (!$rs) {
@@ -166,11 +89,7 @@ TRH;
             $q1 = (new Query)
                 ->select("last_insert_id() as 'lid'")
                 ->all();
-            //echo Debug::d($q1[0]['lid']);
-            //$r1 = Event::findOne(['id' => $q1[0]['lid']])->toArray();
-            //$r1 = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $q1[0]['lid'] ])->with('category')->all()[0];
             $ev = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $q1[0]['lid']])->with('category')->one();
-            //echo Debug::d($r1);
 
             // table row html
             switch ($ev->type){
@@ -185,7 +104,7 @@ TRH;
 
             $mb_dt = mb_substr($ev->dtr,0,10);
             // new trh
-            $trh = EventController::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,$mb_dt,
+            $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,$mb_dt,
                 //$evtype[$evtypeid][0], $evtype[$evtypeid][1],
                 $r_type, $r_color,
                 $ev['category']->name);
@@ -206,6 +125,9 @@ TRH;
             }
             //$json = ['success' => 'middle', 'message' => 'this is a middle type of status'];
             die(json_encode($json));
+        }else{
+            $json = ['success' => 'no', 'message' => '---',];
+            die(json_encode($json));
         }
     }
 
@@ -216,32 +138,19 @@ TRH;
     public function actionDelete(){
 
         if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
-
             $uid = $_SESSION['user']['id'];
-            $action = 'update';
-            $action = Yii::$app->request->post('action');
-            $id = Yii::$app->request->post('id');
-            $delById = Event::findOne(['id' => $id, 'i_user' => $uid]);
-            //echo Debug::d($delById,'myDeleted rs',2);
-            $res = $delById;
-
-            switch ($action){
-                case 'update': {
-                    $json = ['success' => 'yes', 'message' => 'Запись успешно обновлена!'];
-                    break;
-                }
-                default: {
-                    if ($res){
-                        $delById->delete();
-                        $json = ['success' => 'yes', 'message' => 'Запись успешно удалена!'];
-                    }else {
-                        $json = ['success' => 'no', 'message' => 'Запись НЕ удалена!'];
-                    }
-                }
+            $id = (int)Yii::$app->request->post('id');
+            $res = Event::findOne(['id' => $id, 'i_user' => $uid]);
+            $rs = $res->delete();
+            if ($rs) {
+                $json = ['success' => 'yes', 'message' => 'Запись успешно удалена!'];
+            } else {
+                $json = ['success' => 'no', 'message' => 'Запись НЕ удалена!'];
             }
-            //$json = ['success' => 'middle', 'message' => 'this is a middle type of status'];
             die(json_encode($json));
         }
+        $json = ['success' => 'no', 'message' => '---', ];
+        die(json_encode($json));
     }
 
     /*
@@ -250,9 +159,11 @@ TRH;
      **/
     public function actionUpdate()
     {
+        $model = new Event();
         if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth())
         {
             $uid = $_SESSION['user']['id'];
+            $model->id = $uid;
             $evid = Yii::$app->request->post('evid');
             $ev = Event::find()->where(['id' => $evid, 'i_user' => $uid ])
                 ->with('types')->with('category')->one();
@@ -283,15 +194,13 @@ TRH;
                 $json = ['success' => 'no', 'message' => 'Ошибка при получении обновленной записи!' ];
                 die(json_encode($json));
             }
-            //$rsu = $ev->toArray(); $rsu['typename'] = ''; $rsu['typecolor'] = '';
-            // осталось отформатировать дату для обновленного значения!
             $rsu['dtr'] = Yii::$app->formatter->asTime($rsu['dtr'], 'dd.MM.yyyy');
-            //echo Debug::d($rsu,'rsu');
-            //echo Debug::d($rs,'rs updated');
 
             $json = ['success' => 'yes', 'message' => 'Редактирование события завершено!', 'item' => $rsu];
             die(json_encode($json));
         }
+        $json = ['success' => 'no', 'message' => 'Редактирование события завершено!', 'err' => $model->errors];
+        die(json_encode($json));
     }
 
     /**
@@ -330,7 +239,7 @@ TRH;
                 ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                 ->andWhere(['in', 'i_cat', $ids_cats])
                 ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['>', 'summ',  0])
+                ->andWhere(['<>', 'summ',  0])
                 ->orderBy(['type' => SORT_ASC, 'id' => SORT_ASC])
             ;
             //->asArray()->all();
@@ -357,7 +266,7 @@ TRH;
                 // table row html
                 foreach($rs as $rsk => $ev){
                     $mb_dt = mb_substr($ev->dtr,0,10);
-                    $trh = EventController::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
+                    $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
                         $mb_dt,
                         $ev->types['name'],
                         $ev->types['color'],
@@ -371,7 +280,7 @@ TRH;
                     ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                     ->andWhere(['in', 'i_cat', $ids_cats])
                     ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['>', 'summ',  0])
+                    ->andWhere(['<>', 'summ',  0])
                     //->all()
                     ->sum('summ')
                 ;
@@ -380,7 +289,7 @@ TRH;
                     ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                     ->andWhere(['in', 'i_cat', $ids_cats])
                     ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['>', 'summ',  0])
+                    ->andWhere(['<>', 'summ',  0])
                     //->all()
                     ->sum('summ')
                 ;
@@ -389,7 +298,7 @@ TRH;
                     ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                     ->andWhere(['in', 'i_cat', $ids_cats])
                     ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['>', 'summ',  0])
+                    ->andWhere(['<>', 'summ',  0])
                     //->all()
                     ->sum('summ')
                 ;
@@ -398,7 +307,7 @@ TRH;
                     ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                     ->andWhere(['in', 'i_cat', $ids_cats])
                     ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['>', 'summ',  0])
+                    ->andWhere(['<>', 'summ',  0])
                     //->all()
                     ->sum('summ')
                 ;
@@ -443,6 +352,8 @@ TRS3;
                 $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','rs' => $nrs,
                     'pages' => $pages_str, 'trs' =>  $trs, 'evr' => $evr,
                 ];
+
+
                 die(json_encode($json));
             }
 

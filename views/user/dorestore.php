@@ -40,7 +40,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                             <?php
                         endif;
                     ?>
-                    <?= Html::a('На главную!', ['site/login', ], ['class' => 'btn btn-success']) ?>
+                    <?= Html::a('На главную!', ['user/login', ], ['class' => 'btn btn-success']) ?>
                 </div>
 
             </div>

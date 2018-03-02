@@ -10,6 +10,10 @@ use app\components\Debug;
 use app\models\UserForm;
 use app\models\RegistrationForm;
 use yii\helpers\Html;
+use app\models\RestoreForm;
+use DateTime;
+use yii\helpers\Url;
+use yii\db\Query;
 
 class UserController extends \yii\web\Controller
 {
@@ -215,12 +219,6 @@ class UserController extends \yii\web\Controller
                     $p[22] = Yii::$app->params['name'];
                     $p[3] = 'Events - регистрация'; // subject
                     $p[4] = "Вы успешно зарегистрировались в приложении Events <br>\n\n";
-                    //$p[4] .= 'my mail: '. $p[1] . ' | from ' . $p[21] . ' => ' .$p[22] . ' | '.date("m.d.y H:i:s");
-                    $dtReg = date("m.d.y H:i:s");
-                    $p[4] .= "Ваше имя: {$user->uname}<br>";
-                    $p[4] .= "Ваша почта: {$user->mail}<br>";
-                    $p[4] .= "Ваш пароль: {$model->upass}<br>";
-                    $p[4] .= "Дата регистрации: {$dtReg}<br>";
                     $mailData = [
                         'uname' => $user->uname,
                         'umail' => $user->mail,
@@ -228,7 +226,6 @@ class UserController extends \yii\web\Controller
                         'udtreg' => date("d.m.Y H:i:s"),
                     ];
 
-                    $p[4] .= "<br/>Это сообщение отправлено автоматически, пожалуйста, не отвечайте на него<br/>";
                     $res = Yii::$app->mailer->compose('registration',[
                             'mailData' => $mailData
                         ])
@@ -276,8 +273,9 @@ class UserController extends \yii\web\Controller
                 $s = User::findOne(['mail' => $mail]);
                 //echo Debug::d($s,'s',2); die;
                 if (!$s){
-                    $this->layout = 'for_auth'; $err = 'Не зарегистрирован пользователь с таким емайлом!';
-                    return $this->render('restore',compact('model','isRestore','mail','err'));
+                    $this->layout = 'for_auth';
+                    Yii::$app->session->setFlash('restore', 'Не зарегистрирован пользователь с таким емайлом!');
+                    return $this->render('restore',compact('model','isRestore','mail'));
                 }
                 $isRestore = true;
                 $s->restore = 1;
@@ -294,29 +292,17 @@ class UserController extends \yii\web\Controller
                     $p[22] = Yii::$app->params['name'];
                     $p[3] = "Events. Восстановление пароля";
 
-                    //$p[4] = "<p>hash: {$restore_hash}</p>";
                     $real_link = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT']
                         .'/do-restore?'.'hash='.$restore_hash;
                     $real_link = Url::to(['user/do-restore','hash' => $restore_hash ], true);
-                    $p[4] = Html::a('Восстановить доступ!', ['user/do-restore?hash='.$restore_hash], ['class' => 'btn btn-success']);
-                    $text_body = <<<TB
-    <h4>Приложение Events</h4>
-    <h5>Сброс пароля</h5>
-    <p>Для того, чтобы сбросить пароль, нужно перейти по данной ссылке и получить временный пароль</p>
-    <p>
-       <a href="{$real_link}"
-        class="btn btn-success" target="_blank" rel="noopener" data-snippet-id="">
-            {$real_link}  
-       </a>
-    </p>
-TB;
-                    $res = Yii::$app->mailer->compose('layouts/html',['content' => $text_body])
+
+                    $res = Yii::$app->mailer->compose('restore',[
+                        'real_link' => $real_link
+                    ])
                         ->setTo($p[1])
                         ->setFrom([$p[21] => $p[22]])
                         ->setSubject($p[3])
-                        ->setTextBody($text_body)
                         ->send();
-                    //echo 'status: ' . $res;
                 }
                 //echo Debug::d($s,'my email');
             }
