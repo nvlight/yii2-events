@@ -48,21 +48,84 @@ if (array_key_exists('1',$rr)) {
     //echo Debug::d(Yii::$app->db);
 ?>
 
+<nav class="navbar navbar-default visible-sm visible-xs">
+    <div class="container-fluid">
+        <!-- Brand и toggle сгруппированы для лучшего отображения на мобильных дисплеях -->
+        <div class="navbar-header p015">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="<?=Html::encode(\yii\helpers\Url::to([$_SERVER['PHP_SELF']]))?>">
+                <i class="fa fa-sun-o" aria-hidden="true"></i>
+                <span>Events</span>
+            </a>
+        </div>
+
+        <!-- Соберите навигационные ссылки, формы, и другой контент для переключения -->
+        <!-- hidden-sm hidden-md -->
+        <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
+            <ul class="list-unstyled mainul">
+                <?php
+                $st = [
+                    'fa-file-text-o' => [
+                        'index',
+                        'Счет',
+                        'billing'
+                    ],
+                    'fa-bolt' => [
+                        'history',
+                        'История',
+                        'event',
+                    ],
+                    'fa-calendar' => [
+                        'plan',
+                        'Планирование',
+                        'site',
+                    ],
+                    'fa-archive' => [
+                        'index',
+                        'Запись',
+                        'post',
+                    ],
+                ];
+                ?>
+                <?php foreach ($st as $stk => $stv): ?>
+                    <?php if (1==1) : ?>
+                        <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                            <a href="<?=\yii\helpers\Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
+                                            <span class="ipic">
+                                                <i class="fa <?=$stk?>" aria-hidden="true"></i>
+                                            </span>
+                                <span class="text">
+                                                <?=$stv[1]?>
+                                            </span>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+</nav>
+
 <div class="wrapper">
     <div class="container1">
         <div class="row mp0">
-            <div class="col-md-2 mp0">
+            <div class="col-md-2 mp0 hidden-sm hidden-xs">
                 <div class="leftbar">
                     <div class="caption">
                         <a href="<?=\yii\helpers\Url::to([''])?>">
                             <i class="fa fa-pie-chart" aria-hidden="true"></i>
                             <span>Events</span>
-
                         </a>
 
                     </div>
                     <div class="main-menu">
-                        <ul class="list-unstyled">
+                        <ul class="list-unstyled mainul">
                             <?php
                                 $st = [
                                     'fa-file-text-o' => [
@@ -90,10 +153,13 @@ if (array_key_exists('1',$rr)) {
                             <?php foreach ($st as $stk => $stv): ?>
                                 <?php if (1==1) : ?>
                                     <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
-
                                         <a href="<?=\yii\helpers\Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
-                                            <i class="fa <?=$stk?>" aria-hidden="true"></i>
-                                            <span><?=$stv[1]?></span>
+                                            <span class="ipic">
+                                                <i class="fa <?=$stk?>" aria-hidden="true"></i>
+                                            </span>
+                                            <span class="text">
+                                                <?=$stv[1]?>
+                                            </span>
                                         </a>
                                     </li>
                                 <?php endif; ?>

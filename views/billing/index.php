@@ -28,9 +28,9 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         ?>
         <div class="page-caption clearfix">
             <h2 class="pull-left" >Страница счета</h2>
-            <span class="reload pull-right">
-            <i class="fa fa-refresh" aria-hidden="true"></i>
-        </span>
+<!--            <span class="reload pull-right">-->
+<!--                <i class="fa fa-refresh" aria-hidden="true"></i>-->
+<!--            </span>-->
         </div>
         <div class="page-hr">
             <hr>
@@ -53,13 +53,15 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <div class="row">
                 <div class="col-md-4">
 
-                    <div class="input-group mb4">
+                    <div class="input-group mb4 dt">
                         <span class="input-group-addon" id="basic-addon1">Общий лимит</span>
-                        <input type="text" class="form-control user_limit" placeholder="введите лимт средств"
+                        <input type="text" class="form-control user_limit" id="basic-addon10" placeholder="введите лимт средств"
                                aria-describedby="basic-addon2"  value="<?=html::encode($remains)?>">
-                        <span class="input-group-addon" id="basic-addon2">изменить</span>
+                        <span class="input-group-addon" id="basic-addon2">
+                            <i class="fa fa-refresh" aria-hidden="true"></i>
+                        </span>
 <!--                        <span class="input-group-addon" id="basic-focusout">потерять фокус</span>-->
-                        <span class="form-control spinPreload"><i class="fa fa-spinner fa-spin"></i></span>
+                        <span class="input-group-addon spinPreload"><i class="fa fa-spinner fa-spin"></i></span>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -146,6 +148,7 @@ $('input.user_limit222').on('focus', function(ee) {
     if (e.which == 13) {
         ee.preventDefault();
         updateUserLimit();
+        $(this).focusout();
     } 
     return false;
   }); 
@@ -184,7 +187,8 @@ function updateUserLimit(){
       }
       ,beforeSend: function(e) {
         //console.log('beforeSend');
-        var c = $('.spinPreload').attr('style','display: inline !important');
+            var c = $('.spinPreload').attr('style','display: table-cell !important');
+            var d = $('#basic-addon2').attr('style','display: none !important');
         setTimeout(function () {             
         }, 500);        
       }
@@ -192,6 +196,7 @@ function updateUserLimit(){
         //console.log('complete');
         setTimeout(function () {
             var c = $('.spinPreload').attr('style','display: none !important');
+            var d = $('#basic-addon2').attr('style','display: table-cell !important');
         }, 1000);             
       }
     });

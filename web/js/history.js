@@ -20,7 +20,7 @@
         if (iv === 0) {
             console.log('поле ввода очищено');
             $.ajax({
-                url: '/site/search-by-colval',
+                url: '/event/search-by-colval',
                 method: 'GET',
                 data: {idCol: 5},
                 success: function (res, status) {
@@ -48,7 +48,7 @@
         if (iv >= 3) {
             //console.log('current: '+val);
             $.ajax({
-                url: '/site/search-by-colval',
+                url: '/event/search-by-colval',
                 method: 'GET',
                 data: {text: val, idCol: $('#selectSearchColumn option:selected').val()},
                 success: function (res, status) {

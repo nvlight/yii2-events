@@ -26,43 +26,19 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 <div class="bill-inset">
     <div class="page-caption clearfix">
         <h2 class="pull-left" >Страница истории</h2>
-        <h3>
-            <?php
-                //echo \app\components\Debug::d($_SERVER);
-                //echo \app\components\Debug::d(Yii::$app->params['additional_url_part']);
-            ?>
-        </h3>
-
-        <span id="gg-filter" class="reload pull-right" data-toggle="modal" data-target="#modalSimpleFilter">
-                    <i class="fa fa-filter" aria-hidden="true"></i>
-        </span>
-        <span id="gg-filter" class="reload pull-right" data-toggle="modal" data-target="#modalAddPost">
-                    <i class="fa fa-gear icon"></i>
-        </span>
 
         <div class="pull-right">
-            <?php
-            $dataProvider = new ActiveDataProvider([
-                'query' => $ev2,
-                'pagination' => [
-                    'pageSize' => 4,
-                ],
-            ]);
-
-            $gridColumns = [
-                //['class' => 'yii\grid\SerialColumn'],
-                'id',
-                'category.name',
-                'desc',
-                'summ',
-                'type',
-                //['class' => 'yii\grid\ActionColumn'],
-            ];
-
-            // Renders a export dropdown menu
-            //echo ExportMenu::widget([ 'dataProvider' => $dataProvider,  'columns' => $gridColumns ]);
-            ?>
+            <a href="<?=Url::to(['event/convert-to-xslx'])?>" class="convert2xlsx" title="экспорт всех записей в Xslx">
+                <i class="fa fa-file-excel-o" aria-hidden="true"></i>
+            </a>
+            <span class="reload" data-toggle="modal" data-target="#modalSimpleFilter">
+                <i class="fa fa-filter" aria-hidden="true"></i>
+            </span>
+            <span class="reload" data-toggle="modal" data-target="#modalAddPost">
+                <i class="fa fa-gear icon"></i>
+            </span>
         </div>
+
     </div>
     <div class="page-hr">
         <hr>
@@ -75,10 +51,9 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <h4 class="pull-left">Список событий</h4>
 
                     <div class="pull-right clearfix ">
-                        <div class="form-inline pull-left " style="margin-right: 10px;">
+                        <div class="form-inline pull-right " style="">
                             <input class="form-control" id="searchColumn" placeholder="Сумма" type="text">
                         </div>
-
                         <select id="selectSearchColumn" class="selectpicker pull-right"  title="Параметр">
                             <option value="1">Категория</option>
                             <option value="2" selected>Сумма</option>
@@ -108,7 +83,8 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         $ruri = Html::encode($ruri);
                         $rsort = Html::encode($rsort);
                     ?>
-                    <table class="table table-striped table-hover gg-history">
+                    <div class="table-responsive">
+                    <table class="table table-striped table-hover  gg-history">
                         <thead>
                         <tr>
                             <th><a href="<?=$ruri.'?sortcol=id'.$rsort?>">#</a></th>
@@ -121,55 +97,56 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         </tr>
                         </thead>
                         <tbody>
-                        <?php
-                            //echo Debug::d($events); die;
-                            if (count($events)) :
-                            foreach ($events as $ek => $ev):
-                        ?>
-                            <tr class="actionId_<?=$ev->id?>">
-                                <td class="item_eid"><?=$ev->id?></td>
-                                <td class="item_cat"><?=$ev['category']->name?></td>
-                                <td class="item_desc"><?=$ev->desc?></td>
-                                <td class="item_summ"><?=$ev->summ?></td>
-                                <td class="item_dtr"><?= Yii::$app->formatter->asDate($ev->dtr);?></td>
-                                <td class="item_type"><span class="dg_type_style" style="background-color: #<?=$ev['types']['color']?>;  " >
-                                        <?=$ev->types->name?></span>
-                                </td>
-                                <td>
-                                    <span class="btn-action" title="Просмотр">
-                                        <a class="evActionView"
-                                           <?php // echo " href="\yii\helpers\Url::to(['/site/show-event/?id='.$ev->id])" ';  ?>
-                                           data-id="<?=$ev->id?>" href="<?=Url::to(['event/show?id=' . $ev->id])?>"
-                                        >
-                                            <span class="glyphicon glyphicon-eye-open" ></span>
-                                        </a>
-                                    </span>
-                                    <span class="btn-action" title="Редактировать">
-                                        <a class="evActionUpdate"
-                                            <?php // echo "onclick=editEvent(".$ev->id".)"; return false; ";  ?>
-                                           data-id="<?=$ev->id?>" href="<?=Url::to(['event/edit?id=' . $ev->id])?>"
-                                        >
-                                            <span class="glyphicon glyphicon-pencil" >
-                                            </span>
-                                        </a>
-                                    </span>
-                                    <span class="btn-action" title="Удалить">
-                                        <a class="evActionDelete"
-                                           data-id="<?=$ev->id?>" href="<?=Url::to(['event/del?id=' . $ev->id])?>"
-                                        >
-                                            <span class="glyphicon glyphicon-trash" >
-                                            </span>
-                                        </a>
-                                    </span>
-                                </td>
-                            </tr>
+                            <?php
+                                //echo Debug::d($events); die;
+                                if (count($events)) :
+                                foreach ($events as $ek => $ev):
+                            ?>
+                                <tr class="actionId_<?=$ev->id?>">
+                                    <td class="item_eid"><?=$ev->id?></td>
+                                    <td class="item_cat"><?=$ev['category']->name?></td>
+                                    <td class="item_desc"><?=$ev->desc?></td>
+                                    <td class="item_summ"><?=$ev->summ?></td>
+                                    <td class="item_dtr"><?= Yii::$app->formatter->asDate($ev->dtr);?></td>
+                                    <td class="item_type"><span class="dg_type_style" style="background-color: #<?=$ev['types']['color']?>;  " >
+                                            <?=$ev->types->name?></span>
+                                    </td>
+                                    <td>
+                                        <span class="btn-action" title="Просмотр">
+                                            <a class="evActionView"
+                                               <?php // echo " href="\yii\helpers\Url::to(['/site/show-event/?id='.$ev->id])" ';  ?>
+                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/show?id=' . $ev->id])?>"
+                                            >
+                                                <span class="glyphicon glyphicon-eye-open" ></span>
+                                            </a>
+                                        </span>
+                                        <span class="btn-action" title="Редактировать">
+                                            <a class="evActionUpdate"
+                                                <?php // echo "onclick=editEvent(".$ev->id".)"; return false; ";  ?>
+                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/edit?id=' . $ev->id])?>"
+                                            >
+                                                <span class="glyphicon glyphicon-pencil" >
+                                                </span>
+                                            </a>
+                                        </span>
+                                        <span class="btn-action" title="Удалить">
+                                            <a class="evActionDelete"
+                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/del?id=' . $ev->id])?>"
+                                            >
+                                                <span class="glyphicon glyphicon-trash" >
+                                                </span>
+                                            </a>
+                                        </span>
+                                    </td>
+                                </tr>
 
-                        <?php
-                            endforeach;
-                            endif;
-                        ?>
+                            <?php
+                                endforeach;
+                                endif;
+                            ?>
                         </tbody>
                     </table>
+                    </div>
                     <?php
                         //echo \app\components\Debug::d($pages,'pages');
                         echo LinkPager::widget([
@@ -184,11 +161,12 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <hr>
         </div>
 
-        <div class="row">
-            <div class="col-md-12 col-md-offset-0 ">
-                <div id="donutchart" class="" style="width: 900px; height: 500px;"></div>
-            </div>
-        </div>
+<!--        <div class="row">-->
+<!--            <div class="col-md-12 col-md-offset-0 ">-->
+<!--                <div id="donutchart" class="" style="width: 900px; height: 500px;"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+
     </div>
 </div>
 

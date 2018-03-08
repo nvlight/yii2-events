@@ -10,6 +10,9 @@ use yii\db\Query;
 use app\models\Type;
 use yii\widgets\LinkPager;
 use app\components\Debug;
+use PHPExcel;
+use PHPExcel_IOFactory;
+use DateTime;
 
 class EventController extends \yii\web\Controller
 {
@@ -201,6 +204,197 @@ class EventController extends \yii\web\Controller
         }
         $json = ['success' => 'no', 'message' => 'Редактирование события завершено!', 'err' => $model->errors];
         die(json_encode($json));
+    }
+
+
+    /*
+     *
+     *
+     **/
+    public function actionSearchByColval($idCol=1,$text=''){
+        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
+            // params: idCol - text
+            // cat,summ,dtr,type
+            $pages = '';
+            switch ($idCol){
+                case 2: { $colName = 'summ';
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])->with('category')->with('types')
+                        ->limit(10)
+                        //->asArray()
+                        ->all()
+                    ;
+                    break;
+                }
+                case 3: { $colName = 'dtr';
+                    $text = Yii::$app->formatter->asTime($text, 'yyyy-MM-dd');
+                    //echo $text;
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])->with('category')->with('types')
+                        ->limit(10)
+                        //->asArray()
+                        ->all()
+                    ;
+                    break;
+                }
+                case 4: { $colName = 'type';
+                    $str = (string)($text);
+                    $str = mb_strtolower($str); $str = trim($str);
+                    $text = '';
+                    if ($str === 'доход'){
+                        $text = 1;
+                    }elseif ($str === 'расход'){
+                        $text = 2;
+                    }
+
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])->with('category')->with('types')
+                        ->limit(10)
+                        //->asArray()
+                        ->all()
+                    ;
+                    break;
+                }
+                case 5: {
+
+                    $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])->with('category');
+                    //echo Debug::d($query,'query');
+                    $q_counts = 10;
+                    $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
+                        'pageSizeParam' => false, 'forcePageParam' => false, 'route' => 'site/history']);
+                    $rs = $query->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
+                    break;
+                }
+                default:{
+                    $colName = 'category.name';
+                    $str = (string)($text);
+                    $str = mb_strtolower($str); $str = trim($str);
+                    $rs = Event::find()->where(['event.i_user' => $_SESSION['user']['id'],$colName => $text ])->joinWith('category')
+                        ->limit(10)
+                        //->asArray()
+                        ->all()
+                    ;
+                }
+            }
+            if ($rs) {  }
+            //echo Debug::d($rs,'$rs');
+            $pages_str = ''; if ($pages !== '') { $pages_str = LinkPager::widget([ 'pagination' => $pages ]); }
+            if (!$rs){
+                $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
+                die(json_encode($json));
+            }
+            //
+            $nrs = [];
+            // table row html
+            foreach($rs as $rsk => $ev){
+                $mb_dt = mb_substr($ev->dtr,0,10);
+                $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
+                    $mb_dt,
+                    $ev->types['name'],
+                    $ev->types['color'],
+                    $ev['category']->name);
+                $nrs[] = $trh;
+            }
+            $json = ['success' => 'yes', 'message' => 'Успех','rs0' => $rs, 'rs' => $nrs, 'pages' => $pages_str];
+            die(json_encode($json));
+        }
+    }
+
+    /**
+     *
+     *
+     */
+    public function actionConvertToXslx()
+    {
+        if (AuthLib::appIsAuth()) {
+
+            $eventLabels = (new Event())->attributeLabels();
+            unset($eventLabels['i_user'],$eventLabels['id'],$eventLabels['dt'],$eventLabels['note']);
+            $eventLabels = array_merge(['id' => '№'], $eventLabels);
+
+            // https://github.com/PHPOffice/PHPExcel
+            $objPHPExcel = new PHPExcel();
+
+            // Set document properties
+            $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
+                ->setLastModifiedBy("Maarten Balliauw")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+
+            $events = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+                ->with('types')
+                ->with('category')
+                ->asArray()
+                ->all();
+            ;
+
+            // add new data
+            // prepare columns
+            $str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $arr = [];
+            for($i=0;$i<strlen($str);$i++){
+                $arr[] = substr($str,$i,1);
+            }
+            // add current datetime - row
+            $j = 1; $currDt = (new DateTime())->format('d.m.Y h:i:s');
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue($arr[0] . $j, 'Дата: ')
+                ->setCellValue($arr[1] . $j, $currDt);
+            // add rows count - row
+            $j++; $rowCount = count($events); // $j = 2
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue($arr[0] . $j, 'Количество строк: ')
+                ->setCellValue($arr[1] . $j, $rowCount);
+            // add table labels ...
+            $i = 0; $j++; // j = 3
+            foreach($eventLabels as $ev => $ek){
+                $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue($str[$i] . $j, $ek);
+                $i++;
+            }
+            // add anather rows
+            $j++; $i=1; // j = 4
+            foreach($events as $ek => $ev){
+                $objPHPExcel->setActiveSheetIndex(0)
+                    ->setCellValue($arr[0] . $j, $i)
+                    ->setCellValue($arr[1] . $j, $ev['category']['name'])
+                    ->setCellValue($arr[2] . $j, $ev['desc'])
+                    ->setCellValue($arr[3] . $j, $ev['summ'])
+                    ->setCellValue($arr[4] . $j, $ev['dtr'])
+                    ->setCellValue($arr[5] . $j, $ev['types']['name']);
+                $j++; $i++;
+            }
+
+            // Rename worksheet
+            $objPHPExcel->getActiveSheet()->setTitle('Simple');
+
+
+            // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+            $objPHPExcel->setActiveSheetIndex(0);
+
+            //die(Debug::d( dba_handlers(),' dba_handlers()',1));
+
+            $filename = sha1(md5((new DateTime())->format('r') ) . Yii::$app->params['file_export_salt'] ) . '.xlsx';
+            //echo $filename ; die;
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header("Content-Disposition: attachment;filename={$filename}");
+
+            header('Cache-Control: max-age=0');
+            // If you're serving to IE 9, then the following may be needed
+            header('Cache-Control: max-age=1');
+
+            // If you're serving to IE over SSL, then the following may be needed
+            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+            header ('Pragma: public'); // HTTP/1.0
+
+            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'OpenDocument');
+            $objWriter->save('php://output');
+            exit;
+        }
     }
 
     /**

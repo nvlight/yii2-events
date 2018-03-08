@@ -1,3 +1,11 @@
+#php_admin_value open_basedir "/SRV/"
+#php_admin_value open_basedir "none"
+#php_value upload_tmp_dir "/SRV/vhosts/myevents.loc/html/web/upload_tmp_dir"
+
+#<DirectoryMatch "/SRV/vhosts/myevents.loc/html/web">
+#    php_admin_value open_basedir "/SRV/vhosts/myevents.loc/html/web/upload_tmp_dir"
+#</DirectoryMatch>
+
 RewriteBase /
 
 RewriteCond %{REQUEST_FILENAME} !-f

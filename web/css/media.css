@@ -1,21 +1,130 @@
 
 
 /* Large Devices, Wide Screens */
-@media only screen and (max-width : 1200px) {
+@media only screen and (max-width : 1980px) {
+    .caption-history >.pull-right>div.pull-right{
+        margin-left: 5px;
+    }
+}
 
+/* Large Devices, Wide Screens */
+@media only screen and (max-width : 1200px) {
+    .caption-history >.pull-right>div.pull-right{
+        margin-left: 5px;
+    }
 }
 
 /* Medium Devices, Desktops */
 @media only screen and (max-width : 992px) {
-	
+    .caption-history >.pull-right>div.pull-right{
+        margin-left: 5px;
+    }
+
+    /*body>nav.navbar>div>div.collapse{*/
+        /*display: none !important;*/
+    /*}*/
+    /*body>nav.navbar>div>div.navbar-header>button{*/
+        /*display: block;*/
+    /*}*/
+    /*body>nav.navbar>div>div.collapsing{*/
+        /*display: block !important;*/
+    /*}*/
+
 }
 
 /* Small Devices, Tablets */
 @media only screen and (max-width : 768px) {
-	
+    .caption-history >.pull-right>div.pull-right{
+        margin-left: 5px;
+    }
+}
+
+/* Small Devices, Tablets my - 720 */
+@media only screen and (max-width : 720px) {
+    .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn){
+        width: 100%;
+    }
+    .caption-history >.pull-right{
+        float: none !important;
+        max-width: 220px;
+    }
+    .caption-history > h4.pull-left{
+        float: none !important;
+    }
+    .caption-history >.pull-right>div.pull-right{
+        float: none !important;
+        padding-left: 0;
+        margin-top: 5px;
+        margin-left: 0;
+    }
+    a.convert2xlsx{
+        text-decoration: none;
+        margin-right: 0;
+    }
+    .convert2xlsx > i{
+        color: #7CAEBA;
+        font-size: 34px;
+        position: relative;
+        top: 5px;
+    }
 }
 
 /* Extra Small Devices, Phones */
 @media only screen and (max-width : 480px) {
+    .user-info.pull-right{
+        color: #ff0000;
+        float: none !important;
+    }
+    .curr-date.pull-left{
+        float: none !important;
+    }
+    #dropdownMenu1{
+        padding-left: 0;
+    }
 
+    .page-caption>.pull-left{
+        float: none !important;
+    }
+    .page-caption>.pull-right{
+        margin-top: 5px;
+        float: none !important;
+
+    }
+    .page-caption .reload{
+        margin-right: 5px;
+        margin-left: 0;
+    }
+
+    .wrapper .content-line {
+        background-color: #F0F1F6;
+        padding: 5px 15px;
+    }
+
+    .user-line{
+        padding: 10px 20px;
+    }
+    .table-cover{
+        padding: 0px;
+    }
+    .page-hr {
+        border-top: 1px solid #D8DBE4;
+        margin-top: 20px;
+    }
+    .page-hr > hr{
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    a.convert2xlsx{
+        text-decoration: none;
+        margin-right: 5px;
+    }
+    .convert2xlsx > i{
+        color: #7CAEBA;
+        font-size: 34px;
+        position: relative;
+        top: 6px;
+    }
+    .caption-history{
+        padding: 10px 10px;
+    }
 }
