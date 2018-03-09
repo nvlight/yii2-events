@@ -12,7 +12,6 @@ use app\assets\AppAssetEvents;
 
 AppAssetEvents::register($this);
 
-
 $this->title = $name;
 ?>
 <?php $this->beginPage() ?>
@@ -53,6 +52,3 @@ $this->title = $name;
 </body>
 </html>
 <?php $this->endPage() ?>
-
-
-

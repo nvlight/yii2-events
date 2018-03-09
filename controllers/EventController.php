@@ -16,6 +16,7 @@ use DateTime;
 
 class EventController extends \yii\web\Controller
 {
+
     /*
      *
      *
