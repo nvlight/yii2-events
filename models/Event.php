@@ -122,7 +122,7 @@ class Event extends ActiveRecord
                                     </span>
     <span class="btn-action" title="Редактировать">                                     
                                         <a class="evActionUpdate"                                          
-                                            data-id="{$id}" href="edit?id={$id}"
+                                            data-id="{$id}" href="upd?id={$id}"
                                         >
                                             <span class="glyphicon glyphicon-pencil" >
                                             </span>

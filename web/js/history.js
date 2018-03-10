@@ -4,6 +4,13 @@
 
 //$(document).ready(function () {
 
+    //
+    $('a.noLink-addEvent').on('click', function (e) {
+        e.preventDefault();
+        $('#modalAddPost').modal();
+        return false;
+    });
+
     /* */
     $('#selectSearchColumn').on('change', function () {
         var sval = $(this).val(), stext = $('#selectSearchColumn').find(":selected").text();

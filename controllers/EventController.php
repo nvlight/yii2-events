@@ -17,7 +17,6 @@ use yii\web\HttpException;
 
 class EventController extends \yii\web\Controller
 {
-
     /*
      *
      *
@@ -116,7 +115,7 @@ class EventController extends \yii\web\Controller
      * */
     public function actionCreate(){
         $model = new Event();
-
+        //echo Debug::d($_POST,'$_POST');
         if ($model->load(Yii::$app->request->post()) && AuthLib::appIsAuth() ) {
             $model->i_user = $_SESSION['user']['id'];
             if ($model->save()){

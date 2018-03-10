@@ -34,9 +34,13 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <span class="reload" data-toggle="modal" data-target="#modalSimpleFilter">
                 <i class="fa fa-filter" aria-hidden="true"></i>
             </span>
-            <span class="reload" data-toggle="modal" data-target="#modalAddPost">
+            <a href="<?=Url::to(['event/create'])?>" data-target="#modalAddPost"
+               class="reload noLink-addEvent" title="создание новой записи" data-toggle="modal"  >
                 <i class="fa fa-gear icon"></i>
-            </span>
+            </a>
+<!--            <span class="reload" data-toggle="modal" data-target="#modalAddPost">-->
+<!--                <i class="fa fa-gear icon"></i>-->
+<!--            </span>-->
         </div>
 
     </div>
@@ -131,7 +135,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                         <span class="btn-action" title="Редактировать">
                                             <a class="evActionUpdate"
                                                 <?php // echo "onclick=editEvent(".$ev->id".)"; return false; ";  ?>
-                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/edit?id=' . $ev->id])?>"
+                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/upd?id=' . $ev->id])?>"
                                             >
                                                 <span class="glyphicon glyphicon-pencil" >
                                                 </span>
@@ -440,7 +444,9 @@ CFCF;
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="myModalLabel">
                     Добавление нового события
                 </h4>
