@@ -16,7 +16,7 @@ $this->registerMetaTag(['name' => 'description', 'content' => 'Приложен�
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Show event page'], 'keywords');
 
 
-//echo Debug::d($rs,'rs');
+// echo Debug::d($rs,'rs');
 $rs['catname'] = $rs['category']['name'];
 $rs['typename'] = $rs['types']['name'];
 
@@ -24,28 +24,50 @@ $rs['typename'] = $rs['types']['name'];
 
 <div class="human-view">
 
-    <h1><?= Html::encode($this->title) ?></h1>
+    <h3><?= Html::encode(trim(explode('|',$this->title)[1])) ?></h3>
 
     <p>
-        <?= Html::a('Обновить', ['update', 'id' => $rs['id'] ], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Удалить', ['delete', 'id' => $rs['id']], [
+        <?= Html::a('Обновить', ['event/upd', 'id' => $rs['id'] ], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Удалить', ['event/del', 'id' => $rs['id'],'tt' => 'test'], [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
+                'confirm' => 'Вы действительно хотите удалить запись?',
+                'method' => 'get',
+                'params' => [
+                    'id' => $rs['id']
+                ]
             ],
         ]) ?>
+        <?= Html::a('Создать', ['event/create'], ['class' => 'btn btn-success']) ?>
     </p>
 
     <?= DetailView::widget([
         'model' => $rs,
         'attributes' => [
-            'id',
-            "catname",
-            'desc',
-            'summ',
-            "dtr",
-            "typename",
+            [
+                'label' => '№',
+                'attribute' => 'id',
+            ],
+            [
+                'label' => 'Категория',
+                'attribute' => 'catname',
+            ],
+            [
+                'label' => 'Описание',
+                'attribute' => 'desc',
+            ],
+            [
+                'label' => 'Сумма',
+                'attribute' => 'summ',
+            ],
+            [
+                'label' => 'Дата',
+                'attribute' => 'dtr',
+            ],
+            [
+                'label' => 'Тип',
+                'attribute' => 'typename',
+            ]
         ],
     ]) ?>
 

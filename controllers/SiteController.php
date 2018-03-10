@@ -33,7 +33,6 @@ class SiteController extends Controller{
 
     //
     public function actionError(){
-
         $exception = Yii::$app->errorHandler->exception;
         $statusCode = $exception->statusCode;
         $name = $exception->getName();

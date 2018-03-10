@@ -44,7 +44,7 @@ class RegistrationForm extends Model
             'captcha' => 'Капча',
             'upass' => 'Пароль',
             'mail' => 'Email',
-            'name' => 'Имя',
+            'uname' => 'Имя',
         ];
     }
 

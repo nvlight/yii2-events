@@ -43,11 +43,19 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
     <div class="page-hr">
         <hr>
     </div>
+
+    <?php if (Yii::$app->session->hasFlash('delEvent')) : ?>
+        <h4 class="alert-success for-flash1" >
+            <?= Yii::$app->session->getFlash('delEvent') ?>
+        </h4>
+    <?php endif; ?>
+
     <div class="page-content">
 
         <div class="row">
             <div class="col-md-12">
                 <div class="caption-history clearfix">
+
                     <h4 class="pull-left">Список событий</h4>
 
                     <div class="pull-right clearfix ">

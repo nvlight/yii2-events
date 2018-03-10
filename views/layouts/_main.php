@@ -58,7 +58,7 @@ if (array_key_exists('1',$rr)) {
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="<?=Html::encode(\yii\helpers\Url::to([$_SERVER['PHP_SELF']]))?>">
+            <a class="navbar-brand" href="<?=Html::encode(\yii\helpers\Url::to([\app\components\AuthLib::AUTHED_PATH]))?>">
                 <i class="fa fa-sun-o" aria-hidden="true"></i>
                 <span>Events</span>
             </a>
@@ -118,7 +118,7 @@ if (array_key_exists('1',$rr)) {
             <div class="col-md-2 mp0 hidden-sm hidden-xs">
                 <div class="leftbar">
                     <div class="caption">
-                        <a href="<?=\yii\helpers\Url::to([''])?>">
+                        <a href="<?=\yii\helpers\Url::to([\app\components\AuthLib::AUTHED_PATH])?>">
                             <i class="fa fa-pie-chart" aria-hidden="true"></i>
                             <span>Events</span>
                         </a>

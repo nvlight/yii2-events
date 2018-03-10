@@ -115,14 +115,14 @@ class Event extends ActiveRecord
 <td>
                                     <span class="btn-action" title="Просмотр">
                                         <a class="evActionView"                                           
-                                           data-id="{$id}" href="#"
+                                           data-id="{$id}" href="show?id={$id}"
                                         >
                                             <span class="glyphicon glyphicon-eye-open" ></span>
                                         </a>
                                     </span>
     <span class="btn-action" title="Редактировать">                                     
                                         <a class="evActionUpdate"                                          
-                                            data-id="{$id}" href="#"
+                                            data-id="{$id}" href="edit?id={$id}"
                                         >
                                             <span class="glyphicon glyphicon-pencil" >
                                             </span>
@@ -130,7 +130,7 @@ class Event extends ActiveRecord
                                     </span>
     <span class="btn-action" title="Удалить">
                                         <a class="evActionDelete"
-                                           data-id="{$id}" href="#"
+                                           data-id="{$id}" href="del?id={$id}"
                                         >
                                             <span class="glyphicon glyphicon-trash" >
                                             </span>

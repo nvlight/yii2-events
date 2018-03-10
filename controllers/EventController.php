@@ -13,6 +13,7 @@ use app\components\Debug;
 use PHPExcel;
 use PHPExcel_IOFactory;
 use DateTime;
+use yii\web\HttpException;
 
 class EventController extends \yii\web\Controller
 {
@@ -35,20 +36,126 @@ class EventController extends \yii\web\Controller
     }
 
     /*
+     * Without JS - show
      *
      * */
-    public function actionShow($id=0){
-        if (Yii::$app->request->method === 'GET'){
-            $id = Yii::$app->request->get('id'); $rs = null;
-            if ( preg_match("#^[1-9]\d{0,7}$#", $id)){
-                $rs = Event::find()->where(['id' => $id])->with('category')->with('types')
+    public function actionShow(){
+        if (Yii::$app->request->method === 'GET' && AuthLib::appIsAuth()){
+            $id = Yii::$app->request->get('id');
+            $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])->one();
+            if ( preg_match("#^[1-9]\d{0,7}$#", $id) &&
+                $rs !== null )
+            {
+                $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
+                    ->with('category')->with('types')
                     ->asArray()->one();
                     //->toArray(); ->one();
+                //echo Debug::d($rs,'rs',2);
+                $this->layout = '_main';
+                return $this->render('show', compact('rs'));
+            }else{
+                throw new HttpException(404 ,'События с таким ID не найдено');
             }
-            $this->layout = '_main';
-            return $this->render('show', compact('rs'));
+            echo 'all is bad';
         }
 
+    }
+
+    /*
+     * Without JS - upd
+     *
+     * */
+    public function actionUpd($id){
+        if (Yii::$app->request->method === 'GET' && AuthLib::appIsAuth()){
+            //echo 'chich marin 0';
+            //$id = Yii::$app->request->get('id'); $rs = null;
+            if ( 1 == 1
+                && preg_match("#^[1-9]\d{0,7}$#", $id)
+                && Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
+                )
+            {
+                //echo 'chich marin 01';
+                $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
+                    ->with('category')->with('types')
+                    //->asArray()
+                    ->one();
+                $model = $rs;
+                $this->layout = '_main';
+                return $this->render('update',compact('model'));
+            }else{
+                throw new HttpException(404 ,'События с таким ID не найдено');
+            }
+            //echo 'chich marin 1';
+            //echo Debug::d($_SERVER,'server');
+            //$this->layout = '_main';
+            //return $this->redirect(['event/history']);
+        }
+
+        if (Yii::$app->request->method === 'POST' && AuthLib::appIsAuth()) {
+            //$id = intval(Yii::$app->request->post('Event')['id']);
+            $model =  Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])->one();
+            //$model = new Event();
+            if ($model->load(Yii::$app->request->post())) {
+                $model->i_user = $_SESSION['user']['id'];
+                if ($model->save()){
+                    //die('done!');
+                    return $this->redirect(['show', 'id' => $model->id]);
+                }
+            } else {
+                $this->layout = '_main';
+                return $this->render('update', [
+                    'model' => $model,
+                ]);
+            }
+        }
+    }
+
+    /*
+     * Without JS - create
+     *
+     * */
+    public function actionCreate(){
+        $model = new Event();
+
+        if ($model->load(Yii::$app->request->post()) && AuthLib::appIsAuth() ) {
+            $model->i_user = $_SESSION['user']['id'];
+            if ($model->save()){
+                //die('done!');
+                return $this->redirect(['show', 'id' => $model->id]);
+            }
+        } else {
+            $this->layout = '_main';
+            return $this->render('update', [
+                'model' => $model,
+            ]);
+        }
+    }
+
+    /*
+     * Without JS - del
+     *
+     * */
+    public function actionDel(){
+        //echo Debug::d($_SERVER,'server');
+        //echo Debug::d($_POST,'server');
+        //die;
+        if (Yii::$app->request->method === 'GET' && AuthLib::appIsAuth()){
+            $id = Yii::$app->request->get('id'); $rs = null;
+            //echo $id; die;
+            if ( preg_match("#^[1-9]\d{0,7}$#", $id) &&
+                Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']]))
+            {
+                $res = Event::findOne(['id' => $id, 'i_user' => $_SESSION['user']['id']]);
+                $rs = $res->delete();
+                if ($rs) {
+                    Yii::$app->session->setFlash('delEvent','Запись удалена!');
+                }
+            }else{
+                throw new HttpException(404 ,'События с таким ID не найдено');
+            }
+            //$this->layout = '_main';
+            return $this->redirect(['event/history']);
+        }
     }
 
     /*
@@ -547,7 +654,6 @@ TRS3;
                 $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','rs' => $nrs,
                     'pages' => $pages_str, 'trs' =>  $trs, 'evr' => $evr,
                 ];
-
 
                 die(json_encode($json));
             }

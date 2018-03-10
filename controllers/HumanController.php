@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\components\Debug;
 use Yii;
 use app\models\Human;
 use app\models\HumanSearch;
@@ -86,6 +87,9 @@ class HumanController extends Controller
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            //echo 'model: ' . $id;
+            //echo Debug::d($_POST,'post');
+            //echo 'saved'; die;
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('update', [

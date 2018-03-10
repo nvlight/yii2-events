@@ -53,7 +53,7 @@ body{
 .main-auth .form-auth{
 	padding: 15px 30px;
 	color: #B1B0B7;
-	min-width: 330px; 	
+	min-width: 280px;
 	border: 1px solid #ccc;
 	display: inline-block;
 	background-color: #fff;
@@ -356,6 +356,12 @@ body > nav.navbar {
 	border-top: 1px solid #D8DBE4;
 	margin-top: 20px;
 }
+
+.for-flash1{
+	padding: 10px 13px;
+	margin: 15px -15px;
+}
+
 .gg-billing{
 	background-color: #fff;
 	padding: 15px 25px;
