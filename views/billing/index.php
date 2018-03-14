@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use app\components\Debug;
 use yii\web\NotFoundHttpException;
+use yii\widgets\ActiveForm;
+
 //$remains = "chich maring <br> <h1 style='font-size: 30px;' >cetka</h1>";
 $this->title = 'Events | Биллинг';
 
@@ -25,7 +27,15 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             </h4>
         <?php
         endif;
+        if (Yii::$app->session->hasFlash('updateRemains')):
         ?>
+        <h4 class="alert-success p10" >
+            <?=Html::encode(Yii::$app->session->getFlash('updateRemains'))?>
+        </h4>
+        <?php
+        endif;
+        ?>
+
         <div class="page-caption clearfix">
             <h2 class="pull-left" >Страница счета</h2>
 <!--            <span class="reload pull-right">-->
@@ -53,16 +63,39 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <div class="row">
                 <div class="col-md-4">
 
-                    <div class="input-group mb4 dt">
-                        <span class="input-group-addon" id="basic-addon1">Общий лимит</span>
-                        <input type="text" class="form-control user_limit" id="basic-addon10" placeholder="введите лимт средств"
-                               aria-describedby="basic-addon2"  value="<?=html::encode($remains)?>">
-                        <span class="input-group-addon" id="basic-addon2">
-                            <i class="fa fa-refresh" aria-hidden="true"></i>
-                        </span>
-<!--                        <span class="input-group-addon" id="basic-focusout">потерять фокус</span>-->
-                        <span class="input-group-addon spinPreload"><i class="fa fa-spinner fa-spin"></i></span>
+                    <?php
+                    $afParams = [
+                        'method'=>'get',
+                        'options' => [
+                            'class' => 'frmChngRemains',
+                        ]
+                    ];
+                    //$form = ActiveForm::begin($afParams);
+                    ?>
+                    <div class="input-group mb10">
+                        <form class="form-inline">
+                            <div class="form-group mb10">
+                                <label for="basic-addon10">Общий лимит</label>
+                                <input type="text" name="remains" class="form-control user_limit" id="basic-addon10"
+                                       placeholder="Email" value="<?=html::encode($remains)?>">
+                            </div>
+                            <button type="submit" class="btn btn-default" id="chRemains">
+                                <span class="spinRefresh">
+                                    <i class="fa fa-refresh"></i>
+                                </span>
+                                <span class="spinPreload">
+                                    <i class="fa fa-spinner fa-spin"></i>
+                                </span>
+                                Изменить
+                            </button>
+
+                            <nosript class="hidden">
+                                <?= Html::submitButton( '', ['class' => 'input-group-addon fa fa-refresh']) ?>
+                            </nosript>
+                        </form>
+
                     </div>
+                    <?php //ActiveForm::end(); ?>
                 </div>
                 <div class="col-md-4">
                     <p class="log">
@@ -138,30 +171,31 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 $js1 = <<<JS
 
 /* */
-$('#basic-focusout').on('click', function(e) {
-    $('input.user_limit').focusout();
-});
+// $('#basic-focusout').on('click', function(e) {
+//     $('input.user_limit').focusout();
+// });
 
 /* */
-$('input.user_limit222').on('focus', function(ee) {
-  $(this).keyup(function(e){
-    if (e.which == 13) {
-        ee.preventDefault();
-        updateUserLimit();
-        $(this).focusout();
-    } 
-    return false;
-  }); 
-});
+// $('input.user_limit222').on('focus', function(ee) {
+//   $(this).keyup(function(e){
+//     if (e.which == 13) {
+//         ee.preventDefault();
+//         updateUserLimit();
+//         $(this).focusout();
+//         return false;
+//     } 
+//     return false;
+//   }); 
+// });
 
 /* */
-$('.user_limit').keyup(function (event) {
+$('.user_limit').keydown(function (event) {
     var key = event.keyCode || event.which;
 
     if (key === 13) {
         updateUserLimit();
+        return false;
     }
-    return false;
 });
 
 function updateUserLimit(){
@@ -187,23 +221,24 @@ function updateUserLimit(){
       }
       ,beforeSend: function(e) {
         //console.log('beforeSend');
-            var c = $('.spinPreload').attr('style','display: table-cell !important');
-            var d = $('#basic-addon2').attr('style','display: none !important');
+            var c = $('.spinPreload').toggle();
+            var d = $('.spinRefresh').toggle();
         setTimeout(function () {             
         }, 500);        
       }
       ,complete: function() {
         //console.log('complete');
         setTimeout(function () {
-            var c = $('.spinPreload').attr('style','display: none !important');
-            var d = $('#basic-addon2').attr('style','display: table-cell !important');
+            var c = $('.spinPreload').toggle();
+            var d = $('.spinRefresh').toggle();
         }, 1000);             
       }
     });
 }
 
-$('#basic-addon2,.reload').on('click', function() {
+$('#chRemains').on('click', function() {
     updateUserLimit(); 
+    return false; 
 });
 JS;
 

@@ -18,9 +18,19 @@ class BillingController extends \yii\web\Controller
             //return $this->render('index', [ 'message' => $message ]);
         }
         $uid = $_SESSION['user']['id'];
+        if (Yii::$app->request->isGet && array_key_exists('remains',$_GET) && preg_match("#^[1-9]\d*$#",$_GET['remains']) ){
+            $val = intval($_GET['remains']);
+            $rs = Yii::$app->db
+                ->createCommand("UPDATE `user` SET remains={$val} WHERE `id`={$_SESSION['user']['id']} ")
+                ->execute();
+            $_SESSION['user']['remains'] = $val;
+            Yii::$app->session->setFlash('updateRemains','Общий лимит обновлен');
+        }
         $remains = User::findOne(['id' => $uid])->remains;
         //$remains = number_format($remains, 2, ',', ' ');
         //echo Debug::d($remains,'remains');
+        //echo Debug::d($_GET,'get');
+
         $this->layout = '_main';
         return $this->render('index', compact('remains'));
     }

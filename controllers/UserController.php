@@ -254,6 +254,15 @@ class UserController extends \yii\web\Controller
         return $this->redirect('user/registration');
     }
 
+    /*
+    *
+    *
+    * */
+    public function actionAccount()
+    {
+        $this->layout = '_main';
+        return $this->render('account');
+    }
 
     /*
     *

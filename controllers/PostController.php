@@ -21,7 +21,7 @@ class PostController extends \yii\web\Controller
     {
         if (!AuthLib::appIsAuth()){
             $this->layout = 'for_auth';
-            return $this->redirect(['site/index']);
+            return $this->redirect(AuthLib::NOT_AUTHED_PATH);
         }
         $this->layout = '_main';
         $model = new Category();

@@ -5,6 +5,9 @@
     .caption-history >.pull-right>div.pull-right{
         margin-left: 5px;
     }
+    .modal-period{
+        max-width: 250px;
+    }
 }
 
 /* Large Devices, Wide Screens */
@@ -67,10 +70,21 @@
         position: relative;
         top: 5px;
     }
+
+
 }
 
 /* Extra Small Devices, Phones */
 @media only screen and (max-width : 480px) {
+
+    .modal-period{
+        max-width: inherit;
+    }
+
+    .modal-dialog{
+        margin: 0;
+    }
+
     .user-info.pull-right{
         color: #ff0000;
         float: none !important;

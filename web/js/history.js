@@ -11,6 +11,13 @@
         return false;
     });
 
+    //
+    $('a.noLink-doFilter').on('click', function (e) {
+        e.preventDefault();
+        $('#modalSimpleFilter').modal();
+        return false;
+    });
+
     /* */
     $('#selectSearchColumn').on('change', function () {
         var sval = $(this).val(), stext = $('#selectSearchColumn').find(":selected").text();
@@ -227,6 +234,7 @@
 
     /* */
     $('.doFilter').on('click', function () {
+        console.log('doFilter');
         var params = {};
         // 1
         params['event_type'] = '';
@@ -264,13 +272,13 @@
         params['range1'] = c1;
         params['range2'] = c2;
 
-        //console.log('doFilter: starting...');
+        console.log('doFilter: starting...');
         $.ajax({
             url: '/event/filter',
             type: 'GET',
             data: params,
             success: function (res, status) {
-                //console.log('status: '+status);
+                console.log('status: '+status);
                 var rs = $.parseJSON(res);
                 if (rs['success'] === 'yes') {
                     //console.log('успешно, получили список');
@@ -339,6 +347,7 @@ $('form.addEvent').on('beforeSubmit', function(e){
 });
 
 $('.forSimpleFilter-ckeckAndUncheckAllTypes').find('label').first().find('span').on('click', function () {
+    console.log('check all-1');
     // find('input').prop("checked")
     if (!$(this).parent().find('input').prop("checked")){
         //console.log('check_all');
@@ -351,6 +360,7 @@ $('.forSimpleFilter-ckeckAndUncheckAllTypes').find('label').first().find('span')
 });
 
 $('.forSimpleFilter-ckeckAndUncheckAll').find('label').first().find('span').on('click', function () {
+    console.log('check all-2');
     // find('input').prop("checked")
     if (!$(this).parent().find('input').prop("checked")){
         //console.log('check_all');

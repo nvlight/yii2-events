@@ -24,7 +24,7 @@ class EventController extends \yii\web\Controller
     public function actionHistory($sortcol='dtr',$sort='desc'){
         if (!AuthLib::appIsAuth()){
             $this->layout = 'for_auth';
-            return $this->redirect(['site/index']);
+            return $this->redirect([AuthLib::NOT_AUTHED_PATH]);
         }
         $this->layout = '_main';
         $getEvents = Event::getHistory($sortcol,$sort);
@@ -320,6 +320,7 @@ class EventController extends \yii\web\Controller
      **/
     public function actionSearchByColval($idCol=1,$text=''){
         if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
+
             // params: idCol - text
             // cat,summ,dtr,type
             $pages = '';
@@ -508,6 +509,201 @@ class EventController extends \yii\web\Controller
      *
      *
      */
+    public function actionSimpleFilter($sortColumn='id',$sortType=SORT_DESC){
+
+        if (AuthLib::appIsAuth() && Yii::$app->request->isGet) {
+            $this->layout = '_main';
+
+            //echo Debug::d($_REQUEST,'request');
+            if (
+                !array_key_exists('range1',$_GET) ||
+                !array_key_exists('range2',$_GET) ||
+                !array_key_exists('Event',$_GET) ||
+                !is_array($_GET['Event']) ||
+                !array_key_exists('type',$_GET['Event']) ||
+                !array_key_exists('i_cat',$_GET['Event']) ||
+                !is_array($_GET['Event']['type']) ||
+                !is_array($_GET['Event']['i_cat']) ||
+                !count($_GET['Event']['type']) ||
+                !count($_GET['Event']['i_cat'])
+               ){
+                return $this->render('simplefilter');
+            }
+            //echo Debug::d($_GET,'get'); die;
+
+            // zadacha 1 получаем ключ сортировки или ставим по умолчанию
+            // stage 1
+            $orderBy = [$sortColumn => $sortType];
+            // stage 2
+            $ev_tableSchema = Event::getTableSchema()->columnNames;
+            if (array_key_exists('sortType',$_GET) && array_key_exists('sortColumn',$_GET)){
+                $sortType = intval($_GET['sortType']);
+                //echo $sortType;
+                // если сортТайм придуман от балды, выставляем 3 или же SORT_DESC
+                if (($sortType !== 3) && ($sortType !== 4)){
+                    $sortType = 4;
+                }
+                if ( in_array($_GET['sortColumn'],$ev_tableSchema)){
+                    $sortColumn = $_GET['sortColumn'];
+                    $orderBy[$sortColumn] = ($sortType === SORT_ASC) ? SORT_ASC : SORT_DESC;
+                    // запись текущих параметров в гет. Пока отказываемся, т.к. в представлении будем добавлять
+                    //$_GET['sortColumn'] = $sortColumn;
+                    //$_GET['sortType'] = $orderBy[$sortColumn];
+                }
+            }
+            // end of zadacha 1
+
+            //echo Debug::d($ev_tableSchema,'event_table_schema');
+            //echo Debug::d($orderBy,'orderBy',2);
+
+            // формируем строку запроса из гет-параметров + параметра сортировки
+            // $_GET[]
+            $buildHttpQuery = http_build_query($_GET);
+            //echo Debug::d($buildHttpQuery,'httpBuildQuery',3);
+
+            // event_type	1 2
+            // event_cats	74 78
+            // range1	20-12-2017
+            // range2	30-12-2017
+            //echo Debug::d($_GET,'request'); die;
+            $event_type = Yii::$app->request->get('Event')['type'];
+            $event_cats = Yii::$app->request->get('Event')['i_cat'];
+//            echo Debug::d($event_type,'$event_type');
+//            echo Debug::d($event_cats,'$event_cats');
+//            die;
+
+            // небольшой хак, чтобы получить 4 типа событий )
+            // $event_type = '1 2 3 4';
+            $ids_type = $event_type;
+            $ids_cats = $event_cats;
+
+            $event_range1 = Yii::$app->request->get('range1');
+            $event_range2 = Yii::$app->request->get('range2');
+            $evr1 = \Yii::$app->formatter->asTime($event_range1, 'dd.MM.yyyy');
+            $evr2 = \Yii::$app->formatter->asTime($event_range2, 'dd.MM.yyyy');
+            if (!$event_range1) { $event_range1 = date('d-m-Y'); $evr1 = $event_range1; }
+            if (!$event_range2) { $event_range2 = date('d-m-Y'); $evr2 = $event_range2; }
+            $event_range1 = \Yii::$app->formatter->asTime($event_range1, 'yyyy-MM-dd'); # 14:09
+            $event_range2 = \Yii::$app->formatter->asTime($event_range2, 'yyyy-MM-dd'); # 14:09
+//            echo Debug::d($event_range1,'$event_range1');
+//            echo Debug::d($event_range2,'$event_range1');
+//            die;
+
+            $query = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                ->andWhere(['in', 'i_cat', $ids_cats])
+                ->andWhere(['in', 'type',  $ids_type])
+                ->andWhere(['<>', 'summ',  0])
+                ->orderBy($orderBy) // ['type' => SORT_ASC, 'id' => SORT_ASC]
+                // ->asArray()
+                //->all();
+            ;
+            //echo Debug::d($query,'in weight');
+            $q_counts = 500;
+            $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
+                'pageSizeParam' => false, 'forcePageParam' => false,  ]);
+            $rs = $query->offset($pages->offset)
+                ->limit($pages->limit)
+                ->all();
+            //echo Debug::d($rs,'rs');
+
+            $fl_count = count($rs);
+            if ($fl_count){
+                //$pages_str = '';
+                //if ($pages !== '') { $pages_str = LinkPager::widget([ 'pagination' => $pages ]); }
+                if (!$rs){
+                    $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
+                    return $this->render('simplefilter', compact('json'));
+                }
+                //
+                $nrs = [];
+                // table row html
+                foreach($rs as $rsk => $ev){
+                    $mb_dt = mb_substr($ev->dtr,0,10);
+                    $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
+                        $mb_dt,
+                        $ev->types['name'],
+                        $ev->types['color'],
+                        $ev['category']->name);
+                    $nrs[] = $trh;
+                }
+                // тут же мы должны получить даты начала и конца поиска, а также сумму расходов и доходов за этот период
+                //
+                $event_type = '1'; $ids_type = explode(' ',$event_type);
+                $fl_dohody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                    ->andWhere(['in', 'i_cat', $ids_cats])
+                    ->andWhere(['in', 'type',  $ids_type])
+                    ->andWhere(['<>', 'summ',  0])
+                    //->all()
+                    ->sum('summ')
+                ;
+                $event_type = '2'; $ids_type = explode(' ',$event_type);
+                $fl_rashody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                    ->andWhere(['in', 'i_cat', $ids_cats])
+                    ->andWhere(['in', 'type',  $ids_type])
+                    ->andWhere(['<>', 'summ',  0])
+                    //->all()
+                    ->sum('summ')
+                ;
+                $event_type = '3'; $ids_type = explode(' ',$event_type);
+                $fl_dolgy = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                    ->andWhere(['in', 'i_cat', $ids_cats])
+                    ->andWhere(['in', 'type',  $ids_type])
+                    ->andWhere(['<>', 'summ',  0])
+                    //->all()
+                    ->sum('summ')
+                ;
+                $event_type = '4'; $ids_type = explode(' ',$event_type);
+                $fl_vkladi = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                    ->andWhere(['in', 'i_cat', $ids_cats])
+                    ->andWhere(['in', 'type',  $ids_type])
+                    ->andWhere(['<>', 'summ',  0])
+                    //->all()
+                    ->sum('summ')
+                ;
+                //echo Debug::d($fl_dohody,'$fl_dohody');
+                //echo Debug::d($fl_rashody,'$fl_rashody');
+                $fl_dohody  = intval($fl_dohody);
+                $fl_rashody = intval($fl_rashody);
+                $fl_dolgy = intval($fl_dolgy);
+                $fl_vkladi = intval($fl_vkladi);
+                $fl_diff = abs($fl_dohody - $fl_rashody);
+                if ($fl_rashody > $fl_dohody) {
+                    $fl_diff *= (-1);
+                }
+                $summ_rdv = $fl_rashody + $fl_vkladi + $fl_dolgy;
+                $diff_d_rdv = $fl_dohody - $summ_rdv;
+                $summ_dv = $fl_vkladi + $fl_dolgy;
+                $dt_diff = "{$evr1} - {$evr2}";
+                $trs[] = ['Сумма доходов', $fl_dohody];
+                $trs[] = ['Сумма расходов',$fl_rashody];
+                $trs[] = ['Разница доходы - расходы', $fl_diff];
+                $trs[] = ['Сумма долгов', $fl_dolgy];
+                $trs[] = ['Сумма вкладов', $fl_vkladi];
+                $trs[] = ['Сумма долгов и вкладов', $summ_dv];
+                $trs[] = ['Сумма расходов, долгов и вкладов', $summ_rdv];
+                $trs[] = ['Разница между доходами и тратами', $diff_d_rdv];
+                $evr = [$evr1, $evr2];
+                $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','nrs' => $nrs, 'rs' => $rs,
+                    'pages' => $pages, 'trs' =>  $trs, 'evr' => $evr, 'buildHttpQuery' => $buildHttpQuery,
+                    'orderBy' => $orderBy
+                ];
+                return $this->render('simplefilter', compact('json'));
+            }
+
+            $json = ['success' => 'no', 'message' => 'Фильт успешно отработал, но ничего не нашел!', 'count' => $fl_count ];
+            return $this->render('simplefilter', compact('json'));
+        }
+    }
+
+    /**
+     *
+     *
+     */
     public function actionFilter(){
         if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
 
@@ -542,14 +738,16 @@ class EventController extends \yii\web\Controller
                 ->andWhere(['in', 'type',  $ids_type])
                 ->andWhere(['<>', 'summ',  0])
                 ->orderBy(['type' => SORT_ASC, 'id' => SORT_ASC])
+                //->asArray()
+                //->all()
             ;
-            //->asArray()->all();
+            //echo Debug::d($query,'in weight'); die;
             //echo Debug::d($query,'in weight');
             //$query = Event::find()->where(['i_user' => $_SESSION['user']['id']])->with('category');
             $q_counts = 500; // т.к. у нас идет поиск, мы должны захватить как можно больше в 1 странице,
             // тем более переход на 2-ю и более страницы не работает хД
             $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-                'pageSizeParam' => false, 'forcePageParam' => false, 'route' => 'site/history']);
+                'pageSizeParam' => false, 'forcePageParam' => false]); // 'route' => 'site/history'
             $rs = $query->offset($pages->offset)
                 ->limit($pages->limit)
                 ->all();

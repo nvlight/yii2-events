@@ -12,6 +12,7 @@ use app\models\Event;
 use kartik\date\DatePicker;
 use app\components\Debug;
 use app\models\Type;
+use yii\helpers\Url;
 
 AppAssetEvents::register($this);
 
@@ -48,69 +49,113 @@ if (array_key_exists('1',$rr)) {
     //echo Debug::d(Yii::$app->db);
 ?>
 
-<nav class="navbar navbar-default visible-sm visible-xs">
-    <div class="container-fluid">
-        <!-- Brand и toggle сгруппированы для лучшего отображения на мобильных дисплеях -->
-        <div class="navbar-header p015">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="<?=Html::encode(\yii\helpers\Url::to([\app\components\AuthLib::AUTHED_PATH]))?>">
-                <i class="fa fa-sun-o" aria-hidden="true"></i>
-                <span>Events</span>
-            </a>
-        </div>
+    <nav class="navbar navbar-default visible-sm visible-xs">
+        <div class="container-fluid">
+            <!-- Brand и toggle сгруппированы для лучшего отображения на мобильных дисплеях -->
+            <div class="navbar-header p015">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="<?=Html::encode(Url::to([\app\components\AuthLib::AUTHED_PATH]))?>">
+                    <i class="fa fa-sun-o" aria-hidden="true"></i>
+                    <span>Events</span>
+                </a>
+            </div>
 
-        <!-- Соберите навигационные ссылки, формы, и другой контент для переключения -->
-        <!-- hidden-sm hidden-md -->
-        <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
-            <ul class="list-unstyled mainul">
-                <?php
-                $st = [
-                    'fa-file-text-o' => [
-                        'index',
-                        'Счет',
-                        'billing'
-                    ],
-                    'fa-bolt' => [
-                        'history',
-                        'История',
-                        'event',
-                    ],
-                    'fa-calendar' => [
-                        'plan',
-                        'Планирование',
-                        'site',
-                    ],
-                    'fa-archive' => [
-                        'index',
-                        'Запись',
-                        'post',
-                    ],
-                ];
-                ?>
-                <?php foreach ($st as $stk => $stv): ?>
-                    <?php if (1==1) : ?>
-                        <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
-                            <a href="<?=\yii\helpers\Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
+            <!-- Соберите навигационные ссылки, формы, и другой контент для переключения -->
+            <!-- hidden-sm hidden-md -->
+            <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
+                <ul class="list-unstyled mainul">
+                    <?php
+                    $st = [
+                        'fa-file-text-o' => [
+                            'index',
+                            'Счет',
+                            'billing'
+                        ],
+                        'fa-bolt' => [
+                            'history',
+                            'История',
+                            'event',
+                        ],
+                        'fa-calendar' => [
+                            'plan',
+                            'Планирование',
+                            'site',
+                        ],
+                        'fa-archive' => [
+                            'index',
+                            'Запись',
+                            'post',
+                        ],
+                    ];
+                    ?>
+                    <?php foreach ($st as $stk => $stv): ?>
+                        <?php if (1==1) : ?>
+                            <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                                <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
+                                                <span class="ipic">
+                                                    <i class="fa <?=$stk?>" aria-hidden="true"></i>
+                                                </span>
+                                    <span class="text">
+                                                    <?=$stv[1]?>
+                                                </span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+<noscript>
+    <ul class="list-unstyled mainul hidden-md hidden-lg">
+            <?php
+            $st = [
+                'fa-file-text-o' => [
+                    'index',
+                    'Счет',
+                    'billing'
+                ],
+                'fa-bolt' => [
+                    'history',
+                    'История',
+                    'event',
+                ],
+                'fa-calendar' => [
+                    'plan',
+                    'Планирование',
+                    'site',
+                ],
+                'fa-archive' => [
+                    'index',
+                    'Запись',
+                    'post',
+                ],
+            ];
+            ?>
+            <?php foreach ($st as $stk => $stv): ?>
+                <?php if (1==1) : ?>
+                    <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                        <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
                                             <span class="ipic">
                                                 <i class="fa <?=$stk?>" aria-hidden="true"></i>
                                             </span>
-                                <span class="text">
+                            <span class="text">
                                                 <?=$stv[1]?>
                                             </span>
-                            </a>
-                        </li>
-                    <?php endif; ?>
-                <?php endforeach; ?>
+                        </a>
+                    </li>
+                <?php endif; ?>
+            <?php endforeach; ?>
 
-            </ul>
-        </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-</nav>
+        </ul>
+</noscript>
 
 <div class="wrapper">
     <div class="container1">
@@ -118,7 +163,7 @@ if (array_key_exists('1',$rr)) {
             <div class="col-md-2 mp0 hidden-sm hidden-xs">
                 <div class="leftbar">
                     <div class="caption">
-                        <a href="<?=\yii\helpers\Url::to([\app\components\AuthLib::AUTHED_PATH])?>">
+                        <a href="<?=Url::to([\app\components\AuthLib::AUTHED_PATH])?>">
                             <i class="fa fa-pie-chart" aria-hidden="true"></i>
                             <span>Events</span>
                         </a>
@@ -153,7 +198,7 @@ if (array_key_exists('1',$rr)) {
                             <?php foreach ($st as $stk => $stv): ?>
                                 <?php if (1==1) : ?>
                                     <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
-                                        <a href="<?=\yii\helpers\Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
+                                        <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
                                             <span class="ipic">
                                                 <i class="fa <?=$stk?>" aria-hidden="true"></i>
                                             </span>
@@ -184,8 +229,11 @@ if (array_key_exists('1',$rr)) {
                         </div>
                         <div class="user-info pull-right">
                             <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle gg-dropdown" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                <a href="<?=Url::to(['user/account'], true);?>"
+                                   class="btn btn-default dropdown-toggle gg-dropdown" type="button" id="dropdownMenu1"
+                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                     Здравствуйте,
+                                    <strong>
                                     <?php
                                         $uname = '[UNDEFINED]';
                                         if (isset($_SESSION['user']['uname']) && !empty($_SESSION['user']['uname']) ){
@@ -193,12 +241,13 @@ if (array_key_exists('1',$rr)) {
                                         }
                                         echo Html::encode($uname);
                                     ?>
+                                    </strong>
                                     <span class="caret"></span>
-                                </button>
+                                </a>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                                    <li><a href="<?= \yii\helpers\Url::to(['/user/change-user-info'])?>"><i class="fa fa-pencil-square-o"></i> Редактирование</a></li>
+                                    <li><a href="<?= Url::to(['/user/change-user-info'])?>"><i class="fa fa-pencil-square-o"></i> Редактирование</a></li>
                                     <li role="separator" class="divider"></li>
-                                    <li><a href="<?= \yii\helpers\Url::to([\app\components\AuthLib::LOG_OUT_PATH])?>"><i class="fa fa-power-off icon"></i> Выйти</a></li>
+                                    <li><a href="<?= Url::to([\app\components\AuthLib::LOG_OUT_PATH])?>"><i class="fa fa-power-off icon"></i> Выйти</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -219,6 +268,19 @@ if (array_key_exists('1',$rr)) {
 		</span>
     </div>
 </div>
+
+<?php
+$js1 = <<<JS
+
+    $('#dropdownMenu1').on('click', function (e) {
+        //e.preventDefault();
+        //return false;
+    });
+
+JS;
+
+$this->registerJs($js1);
+?>
 
 <?php $this->endBody() ?>
 

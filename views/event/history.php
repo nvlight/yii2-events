@@ -28,19 +28,20 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <h2 class="pull-left" >Страница истории</h2>
 
         <div class="pull-right">
-            <a href="<?=Url::to(['event/convert-to-xslx'])?>" class="convert2xlsx" title="экспорт всех записей в Xslx">
+            <a href="<?=Url::to(['event/convert-to-xslx'])?>" class="convert2xlsx" title="экспорт всех записей в xlsx">
                 <i class="fa fa-file-excel-o" aria-hidden="true"></i>
             </a>
-            <span class="reload" data-toggle="modal" data-target="#modalSimpleFilter">
-                <i class="fa fa-filter" aria-hidden="true"></i>
-            </span>
+<!--            <span class="reload" data-toggle="modal" data-target="#modalSimpleFilter">-->
+<!--                <i class="fa fa-filter" aria-hidden="true"></i>-->
+<!--            </span>-->
+            <a href="<?=Url::to(['event/simple-filter'])?>" data-target="#modalSimpleFilter"
+               class="reload noLink-doFilter" title="фильтр" data-toggle="modal"  >
+                <i class="fa fa-filter"></i>
+            </a>
             <a href="<?=Url::to(['event/create'])?>" data-target="#modalAddPost"
                class="reload noLink-addEvent" title="создание новой записи" data-toggle="modal"  >
                 <i class="fa fa-gear icon"></i>
             </a>
-<!--            <span class="reload" data-toggle="modal" data-target="#modalAddPost">-->
-<!--                <i class="fa fa-gear icon"></i>-->
-<!--            </span>-->
         </div>
 
     </div>
@@ -99,12 +100,12 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <table class="table table-striped table-hover  gg-history">
                         <thead>
                         <tr>
-                            <th><a href="<?=$ruri.'?sortcol=id'.$rsort?>">#</a></th>
-                            <th><a href="<?=$ruri.'?sortcol=i_cat'.$rsort?>">Категория</a></th>
-                            <th><a href="<?=$ruri.'?sortcol=desc'.$rsort?>">Описание</a></th>
-                            <th><a href="<?=$ruri.'?sortcol=summ'.$rsort?>">Сумма</a></th>
-                            <th><a href="<?=$ruri.'?sortcol=dtr'.$rsort?>">Дата</a></th>
-                            <th><a href="<?=$ruri.'?sortcol=type'.$rsort?>">Тип</a></th>
+                            <th><a href="<?=$ruri.'?sortColumn=id'.$rsort?>">#</a></th>
+                            <th><a href="<?=$ruri.'?sortColumn=i_cat'.$rsort?>">Категория</a></th>
+                            <th><a href="<?=$ruri.'?sortColumn=desc'.$rsort?>">Описание</a></th>
+                            <th><a href="<?=$ruri.'?sortColumn=summ'.$rsort?>">Сумма</a></th>
+                            <th><a href="<?=$ruri.'?sortColumn=dtr'.$rsort?>">Дата</a></th>
+                            <th><a href="<?=$ruri.'?sortColumn=type'.$rsort?>">Тип</a></th>
                             <th>Действия</th>
                         </tr>
                         </thead>
@@ -216,7 +217,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     ];
                     ?>
 
-                    <div class="modal-period" style="width: 250px; margin-bottom: 10px;">
+                    <div class="modal-period mb10">
                         <?php
                             $dtr1 = Event::find()->min('dtr');
                             $dtr2 = Yii::$app->formatter->asTime($dtr1, 'dd-MM-yyyy');

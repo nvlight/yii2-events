@@ -4,28 +4,37 @@ namespace app\components;
 
 class Debug
 {
-    /*
-     * класс для отладки
+    /**
+     * Универсальная функция отладки
      *
+     * @param mixed   $value - входной параметр
+     * @param string  $text  - сообщение отладки
+     * @param integer $type  - тип отладки
+     * @param integer $die   - останавливать ли скрипт после завершения
+     * @param string  $class - класс родительского <div>, содержащая тег <pre>
+     * @param string  $style -
+     *
+     * @return string - возвращает строку, которую можно вывести
      */
     public static function d($value=null,$text='Отладка',$type=1,$die=0,$class='',$style='')
     {
-        $style = <<<STYLE
-    	width: 100%;
-    	margin: 0 auto;
-    	background-color: #d0d0d0;
-    	padding: 10px;
-    	border: 1px solid #444;
-    	border-radius: 5px;
-    	border-color: #ccc;
-    	font-family: sans-serif, arial;
+        if ($style === '')
+            $style = <<<STYLE
+            width: 100%;
+            margin: 0 auto;
+            background-color: #d0d0d0;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            border-color: #ccc;
+            font-family: sans-serif, arial;
 STYLE;
-
         // выходная строка
-        $str = "<div class='rs_debug' style='{$style}'>";
+        $str = "<div class='$class' style='{$style}'>";
         switch ($type){
             case 1: $debug_funct_type = 'print_r'; break;
-            case 2: $debug_funct_type = 'var_export'; break;
+            case 2: $debug_funct_type = 'var_dump'; break;
+            case 3: $debug_funct_type = 'var_export'; break;
             default : $debug_funct_type = 'print_r';
         }
 
@@ -33,12 +42,18 @@ STYLE;
         <?php
         // сохрение выходной строки с нужной отладочной функцией
         $str1 = <<<STR1
-    	<p style='margin: 0;'>Debug text: <span style='color: red; '>$text</span></p>
-    	<p style='margin: 0;' >Debug function: <span  style='color: red; '>{$debug_funct_type}</span></p>
+        <p style='margin: 0;'>Debug text: <span style='color: red; '>$text</span></p>
+        <p style='margin: 0;' >Debug function: <span  style='color: red; '>{$debug_funct_type}</span></p>
 STR1;
 
         if ($type === 1 ){ $pre = $debug_funct_type($value, true);}
-        else if($type === 2 ){
+        elseif($type === 2 ){
+            ob_start();
+            $debug_funct_type($value);
+            $pre = ob_get_contents();
+            ob_end_clean();
+        }
+        elseif($type === 3){
             $pre = $debug_funct_type($value, true);
         }
         $pre = "\n<pre>$pre</pre>\n\n";

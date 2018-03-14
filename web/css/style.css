@@ -510,13 +510,29 @@ span.success{
 .mb4{
 	margin-bottom: 4px;
 }
+.mb10{
+	margin-bottom: 10px;
+}
+
+.account ul li a{
+	padding-left: 5px;
+}
+
+.account ul li i{
+	color: #5FB9D2;
+	font-size: 17px;
+	display: inline-block;
+	min-width: 21px;
+	text-align: center;
+}
+
 
 #basic-addon2{
 	cursor: pointer;
 	color: #828289;
 }
 .spinPreload{
-	display: none !important;
+	display: none;
 }
 .rashodi{
 	padding: 10px;
