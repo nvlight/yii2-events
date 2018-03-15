@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\components\AuthLib;
+use app\models\Category;
 use app\models\Event;
 use yii\data\Pagination;
 use Yii;
@@ -14,6 +15,7 @@ use PHPExcel;
 use PHPExcel_IOFactory;
 use DateTime;
 use yii\web\HttpException;
+use yii\helpers\ArrayHelper;
 
 class EventController extends \yii\web\Controller
 {
@@ -516,17 +518,40 @@ class EventController extends \yii\web\Controller
 
             //echo Debug::d($_REQUEST,'request');
             if (
-                !array_key_exists('range1',$_GET) ||
-                !array_key_exists('range2',$_GET) ||
-                !array_key_exists('Event',$_GET) ||
-                !is_array($_GET['Event']) ||
-                !array_key_exists('type',$_GET['Event']) ||
-                !array_key_exists('i_cat',$_GET['Event']) ||
-                !is_array($_GET['Event']['type']) ||
-                !is_array($_GET['Event']['i_cat']) ||
-                !count($_GET['Event']['type']) ||
-                !count($_GET['Event']['i_cat'])
-               ){
+                !(
+                    (
+                        array_key_exists('range1',$_GET) &&
+                        array_key_exists('range2',$_GET)
+                    )
+                        &&
+                    (
+                        (
+                            array_key_exists('cat',$_GET) ||
+                            (
+                                array_key_exists('Event',$_GET) &&
+                                is_array($_GET['Event']) &&
+                                array_key_exists('i_cat',$_GET['Event']) &&
+                                is_array($_GET['Event']['i_cat']) &&
+                                count($_GET['Event']['i_cat'])
+                            )
+                        )
+                            &&
+                        (
+                            array_key_exists('type',$_GET) ||
+                            (
+                                array_key_exists('Event',$_GET) &&
+                                is_array($_GET['Event']) &&
+                                array_key_exists('type',$_GET['Event']) &&
+                                is_array($_GET['Event']['type']) &&
+                                count($_GET['Event']['type'])
+                            )
+
+                        )
+                    )
+
+                )
+               )
+            {
                 return $this->render('simplefilter');
             }
             //echo Debug::d($_GET,'get'); die;
@@ -553,29 +578,39 @@ class EventController extends \yii\web\Controller
             }
             // end of zadacha 1
 
-            //echo Debug::d($ev_tableSchema,'event_table_schema');
-            //echo Debug::d($orderBy,'orderBy',2);
-
             // формируем строку запроса из гет-параметров + параметра сортировки
             // $_GET[]
             $buildHttpQuery = http_build_query($_GET);
             //echo Debug::d($buildHttpQuery,'httpBuildQuery',3);
 
-            // event_type	1 2
-            // event_cats	74 78
-            // range1	20-12-2017
-            // range2	30-12-2017
-            //echo Debug::d($_GET,'request'); die;
-            $event_type = Yii::$app->request->get('Event')['type'];
-            $event_cats = Yii::$app->request->get('Event')['i_cat'];
-//            echo Debug::d($event_type,'$event_type');
-//            echo Debug::d($event_cats,'$event_cats');
-//            die;
+            // если $_GET['type'] && $_GET['cat'] есть, то нужно выбрать все типы и все категории !
+            //!array_key_exists('cat',$_GET) &&
+            //!array_key_exists('type',$_GET)
+            // #stage 1
+            $type_checked_all = $cats_checked_all = null;
+            if (array_key_exists('type',$_GET)){
+                $types = Type::find()->where(['>','id',0])->asArray()->all();
+                $event_type = []; $type_checked_all = 1;
+                foreach($types as $tk => $tv) $event_type[] = $tv['id'];
+                //echo Debug::d($types,'types');
+                //echo Debug::d($event_type,'$event_type');
+            }else{
+                $event_type = Yii::$app->request->get('Event')['type'];
+            }
+            // #stage 2
+            if (array_key_exists('cat',$_GET)){
+                $cats = Category::find()->where(['>','id',0])->asArray()->all();
+                $event_cats = []; $cats_checked_all = 1;
+                foreach($cats as $tk => $tv) $event_cats[] = $tv['id'];
+                //echo Debug::d($cats,'types');
+                //echo Debug::d($event_cats,'$event_cats');
+            }else{
+                $event_cats = Yii::$app->request->get('Event')['i_cat'];
+            }
 
-            // небольшой хак, чтобы получить 4 типа событий )
-            // $event_type = '1 2 3 4';
-            $ids_type = $event_type;
-            $ids_cats = $event_cats;
+            $ids_type2 = $ids_type = $event_type;
+            $ids_cats2 = $ids_cats = $event_cats;
+            //echo Debug::d($ids_type2,'$ids_type2');
 
             $event_range1 = Yii::$app->request->get('range1');
             $event_range2 = Yii::$app->request->get('range2');
@@ -690,7 +725,9 @@ class EventController extends \yii\web\Controller
                 $evr = [$evr1, $evr2];
                 $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','nrs' => $nrs, 'rs' => $rs,
                     'pages' => $pages, 'trs' =>  $trs, 'evr' => $evr, 'buildHttpQuery' => $buildHttpQuery,
-                    'orderBy' => $orderBy
+                    'orderBy' => $orderBy, 'dt_diff' => $dt_diff, 'ids_cats' => $ids_cats2, 'ids_type' => $ids_type2,
+                     'type_checked_all' => $type_checked_all, 'cats_checked_all' => $cats_checked_all,
+
                 ];
                 return $this->render('simplefilter', compact('json'));
             }

@@ -32,17 +32,6 @@ $action = Yii::$app->controller->action->id;
 ?>
 
 <?php
-    //echo \app\components\Debug::d($_SERVER,'server');
-    $ruri = $_SERVER['REQUEST_URI'];
-    $strp = mb_strpos($ruri,'?');
-    if ($strp){
-        $ruri = mb_substr($ruri,0,$strp);
-        //echo 'ruri: '. $ruri;
-    }
-    $rsort = '&sortType=id';
-    // encode
-    $ruri = Html::encode($ruri);
-    $rsort = Html::encode($rsort);
 
     // for debug
     if ( isset($json) && is_array($json) && array_key_exists('rs',$json) && is_array($json['rs']) && (count($json['rs'])) ){
@@ -199,10 +188,14 @@ $action = Yii::$app->controller->action->id;
                 </div>
 
                 <?php
+                $type_checked_all_css = '';
+                if (isset($json) && is_array($json)) {
+                    if ($json['type_checked_all']) $type_checked_all_css = "checked";
+                }
                 $chechBoxexForTypeFilter = <<<CFCF
                     <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
                         <label>
-                            <input type="checkbox" name="" value="">
+                            <input type="checkbox" name="type" $type_checked_all_css value="0">
                             <i class="fa fa-square-o fa-2x"></i>
                             <i class="fa fa-check-square-o fa-2x"></i>
                             <span>Выбрать все типы событий</span>
@@ -212,29 +205,44 @@ CFCF;
                 ?>
 
                 <?php
+
+                //
+                function is_inType($id,$type){
+                    $checked = '';
+                    $type = $GLOBALS[$type];
+                    if (in_array($id,$type)){
+                        $checked = 'checked';
+                    }
+                    return $checked;
+                }
+
                 // получение массива для 2-го параметра чекбоксЛиста
                 $types = Type::find()->asArray()->all();
+                // получение ключей типов, для постановки установленных чекбоксов
+                $GLOBALS['ids_type'] = [];
+                if (isset($json) && is_array($json) && array_key_exists('ids_type', $json)
+                    && is_array($json['ids_type']) && count($json['ids_type']) ){
+                    $ids_type = $json['ids_type'];
+                    $GLOBALS['ids_type'] = $ids_type;
+                    //echo Debug::d($ids_type,'$ids_type');
+                }
+
                 $naa = [];
                 foreach($types as $ck => $cv){
                     $naa[$cv['id']] = $cv['name'];
                 }
-
                 echo $form->field($eventMain,'type',[
                     'template' => "<label for=''>Выберите тип</label>                                             
                                          $chechBoxexForTypeFilter
                                        <div>{input}</div>",
                     'options' => ['class' => 'class-radioCheckBox']
                 ])->checkboxList(
-                //[1 => 'Доход', 2 => 'Расход'],
                     $naa,
                     [
-                        'item' => function($index, $label, $name, $checked, $value) {
-                            $ch = '';
-                            if ($index === 0) {
-                                $ch = "checked=''";
-                            }
+                        'item' => function($index, $label, $name, $checkbox, $value) {
+                            $ch = is_inType($value,'ids_type');
                             $return = '<label>';
-                            $return .= '<input type="checkbox" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
+                            $return .= '<input type="checkbox" name="' . $name . '" ' . $ch . ' value="' . $value . '"' . ' >'."\n";
                             $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .
                                 '<i class="fa fa-check-square-o fa-2x"></i>' ."\n";
                             $return .= '<span>' . ucwords($label) . '</span>' ."\n";
@@ -247,10 +255,14 @@ CFCF;
                 );
                 ?>
                 <?php
+                $cats_checked_all_css = '';
+                if (isset($json) && is_array($json)) {
+                    if ($json['cats_checked_all']) $cats_checked_all_css = "checked";
+                }
                 $chechBoxexForCatFilter = <<<CFCF
                     <div class="forSimpleFilter-ckeckAndUncheckAll">
-                        <label>
-                            <input type="checkbox" name="" value="">
+                        <label>                            
+                            <input type="checkbox" name="cat" $cats_checked_all_css value="0">
                             <i class="fa fa-square-o fa-2x"></i>
                             <i class="fa fa-check-square-o fa-2x"></i>
                             <span>Выбрать все категории</span>
@@ -261,12 +273,18 @@ CFCF;
                 <?php
                 // получение массива для первого параметра чекбоксЛиста
                 $cats = Category::find()->where(['i_user' => 1])->asArray()->all();
+                // получение ключей типов, для постановки установленных чекбоксов
+                $GLOBALS['ids_cats'] = [];
+                if (isset($json) && is_array($json) && array_key_exists('ids_cats', $json)
+                    && is_array($json['ids_cats']) && count($json['ids_cats']) ){
+                    $ids_cats = $json['ids_cats'];
+                    $GLOBALS['ids_cats'] = $ids_cats;
+                }
+
                 $na = [];
                 foreach($cats as $ck => $cv){
                     $na[$cv['id']] = $cv['name'];
                 }
-                //echo \app\components\Debug::d($cats);
-                //echo \app\components\Debug::d($na);
 
                 echo $form->field($eventMain,'i_cat',[
                     'template' => "<label for=''>Выберите категории</label>
@@ -278,12 +296,9 @@ CFCF;
                     $na,
                     [
                         'item' => function($index, $label, $name, $checked, $value) {
-                            $ch = '';
-                            if ($index === 0) {
-                                $ch = "checked=''";
-                            }
+                            $ch = is_inType($value,'ids_cats');
                             $return = '<label>';
-                            $return .= '<input type="checkbox" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
+                            $return .= '<input type="checkbox" name="' . $name . '" ' . $ch . ' value="' . $value . '"' . ' >'."\n";
                             $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .
                                 '<i class="fa fa-check-square-o fa-2x"></i>' ."\n";
                             $return .= '<span>' . ucwords($label) . '</span>' ."\n";
@@ -298,6 +313,7 @@ CFCF;
 
             </div>
             <div class="modal-footer">
+                <?= Html::a('Сбросить', ['/event/simple-filter'], ['class'=>'btn btn-primary']) ?>
                 <?= Html::submitButton( 'Применить', ['class' => 'btn btn-primary']) ?>
             </div>
             <?php ActiveForm::end(); ?>
