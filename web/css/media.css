@@ -77,8 +77,16 @@
 /* Extra Small Devices, Phones */
 @media only screen and (max-width : 480px) {
 
+    .event-view .adaptmt10{
+        margin-top: 10px;
+    }
+
     .modal-period{
         max-width: inherit;
+    }
+
+    .modal-footer a,.modal-footer button{
+        font-size: 13px;
     }
 
     .modal-dialog{

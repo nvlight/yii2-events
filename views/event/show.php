@@ -22,10 +22,13 @@ $rs['typename'] = $rs['types']['name'];
 
 ?>
 
-<div class="human-view">
+<div class="event-view">
 
     <h3><?= Html::encode(trim(explode('|',$this->title)[1])) ?></h3>
 
+    <p>
+        <?= Html::a('Создать', ['event/create'], ['class' => 'btn btn-success']) ?>
+    </p>
     <p>
         <?= Html::a('Обновить', ['event/upd', 'id' => $rs['id'] ], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Удалить', ['event/del', 'id' => $rs['id'],'tt' => 'test'], [
@@ -38,7 +41,7 @@ $rs['typename'] = $rs['types']['name'];
                 ]
             ],
         ]) ?>
-        <?= Html::a('Создать', ['event/create'], ['class' => 'btn btn-success']) ?>
+
     </p>
 
     <?= DetailView::widget([
