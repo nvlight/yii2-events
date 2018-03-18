@@ -84,7 +84,7 @@ if (array_key_exists('1',$rr)) {
                         'fa-calendar' => [
                             'plan',
                             'Планирование',
-                            'site',
+                            'event',
                         ],
                         'fa-archive' => [
                             'index',
@@ -130,7 +130,7 @@ if (array_key_exists('1',$rr)) {
                 'fa-calendar' => [
                     'plan',
                     'Планирование',
-                    'site',
+                    'event',
                 ],
                 'fa-archive' => [
                     'index',
@@ -186,7 +186,7 @@ if (array_key_exists('1',$rr)) {
                                     'fa-calendar' => [
                                                 'plan',
                                                 'Планирование',
-                                                'site',
+                                                'event',
                                             ],
                                     'fa-archive' => [
                                                 'index',

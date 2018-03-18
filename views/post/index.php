@@ -17,8 +17,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
     <div class="bill-inset">
         <div class="page-caption clearfix">
             <h2 class="pull-left" >Страница записей</h2>
-            <span class="reload pull-right">
-                <i class="fa fa-refresh" aria-hidden="true"></i>
         </span>
 
         </div>

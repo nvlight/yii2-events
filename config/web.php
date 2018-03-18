@@ -35,7 +35,7 @@ $config = [
             'loginUrl' => '/log/in',
         ],
         'errorHandler' => [
-            'errorAction' => 'site/error',
+            'errorAction' => 'event/error',
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
