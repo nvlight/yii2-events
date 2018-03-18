@@ -629,16 +629,25 @@ class EventController extends \yii\web\Controller
 
             $event_range1 = Yii::$app->request->get('range1');
             $event_range2 = Yii::$app->request->get('range2');
+            // validate date and set default values
+            try {
+                Yii::$app->formatter->asDatetime($event_range1, "d.m.Y");
+            }catch (\Exception $e){
+                $event_range1 = date('d-m-Y');
+            }
+            try {
+                Yii::$app->formatter->asDatetime($event_range2, "d.m.Y");
+            }catch (\Exception $e){
+                $event_range2 = date('d-m-Y');
+            }
+
             $evr1 = \Yii::$app->formatter->asTime($event_range1, 'dd.MM.yyyy');
             $evr2 = \Yii::$app->formatter->asTime($event_range2, 'dd.MM.yyyy');
-            if (!$event_range1) { $event_range1 = date('d-m-Y'); $evr1 = $event_range1; }
-            if (!$event_range2) { $event_range2 = date('d-m-Y'); $evr2 = $event_range2; }
+
             $event_range1 = \Yii::$app->formatter->asTime($event_range1, 'yyyy-MM-dd'); # 14:09
             $event_range2 = \Yii::$app->formatter->asTime($event_range2, 'yyyy-MM-dd'); # 14:09
-//            echo Debug::d($event_range1,'$event_range1');
-//            echo Debug::d($event_range2,'$event_range1');
-//            die;
 
+            //
             $query = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
                 ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                 ->andWhere(['in', 'i_cat', $ids_cats])
@@ -729,19 +738,20 @@ class EventController extends \yii\web\Controller
                 $diff_d_rdv = $fl_dohody - $summ_rdv;
                 $summ_dv = $fl_vkladi + $fl_dolgy;
                 $dt_diff = "{$evr1} - {$evr2}";
-                $trs[] = ['Сумма доходов', $fl_dohody];
-                $trs[] = ['Сумма расходов',$fl_rashody];
-                $trs[] = ['Разница доходы - расходы', $fl_diff];
-                $trs[] = ['Сумма долгов', $fl_dolgy];
-                $trs[] = ['Сумма вкладов', $fl_vkladi];
-                $trs[] = ['Сумма долгов и вкладов', $summ_dv];
-                $trs[] = ['Сумма расходов, долгов и вкладов', $summ_rdv];
-                $trs[] = ['Разница между доходами и тратами', $diff_d_rdv];
+                $trs[] = ['Сумма доходов', $fl_dohody,$evr1,$evr2];
+                $trs[] = ['Сумма расходов',$fl_rashody,$evr1,$evr2];
+                $trs[] = ['Разница доходы - расходы', $fl_diff,$evr1,$evr2];
+                $trs[] = ['Сумма долгов', $fl_dolgy,$evr1,$evr2];
+                $trs[] = ['Сумма вкладов', $fl_vkladi,$evr1,$evr2];
+                $trs[] = ['Сумма долгов и вкладов', $summ_dv,$evr1,$evr2];
+                $trs[] = ['Сумма расходов, долгов и вкладов', $summ_rdv,$evr1,$evr2];
+                $trs[] = ['Разница между доходами и тратами', $diff_d_rdv,$evr1,$evr2];
                 $evr = [$evr1, $evr2];
                 $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','nrs' => $nrs, 'rs' => $rs,
                     'pages' => $pages, 'trs' =>  $trs, 'evr' => $evr, 'buildHttpQuery' => $buildHttpQuery,
                     'orderBy' => $orderBy, 'dt_diff' => $dt_diff, 'ids_cats' => $ids_cats2, 'ids_type' => $ids_type2,
                      'type_checked_all' => $type_checked_all, 'cats_checked_all' => $cats_checked_all,
+                    'evr1' => $evr1, 'evr2' => $evr2,
 
                 ];
                 return $this->render('simplefilter', compact('json'));

@@ -107,8 +107,29 @@ $action = Yii::$app->controller->action->id;
                                 </td>
                             </tr>
                         <?php endforeach;?>
+                        <?php if (array_key_exists('trs',$json)): ?>
+                            <?php if (count($json['trs'])): ?>
+                            <?php foreach($json['trs'] as $tk => $tv): ?>
+                                <tr>
+                                    <td colspan='3' style='text-align: right;'>
+                                        <?=$tv[0]?>
+                                    </td>
+                                    <td><?=$tv[1]?></td>
+                                    <td colspan='3'>
+                                        <?=$tv[2]?> - <?=$tv[3]?>
+                                    </td>
+
+                                </tr>
+                            <?php endforeach; ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
+                <?php
+//                    echo Debug::d($json['evr'],'evr');
+//                    echo Debug::d($json['dt_diff'],'dt_diff');
+//                    echo Debug::d($json['trs'],'json_trs');
+                ?>
             </div>
     <?php endif; ?>
 
@@ -156,16 +177,18 @@ $action = Yii::$app->controller->action->id;
 
                 <div class="modal-period mb10" >
                     <?php
-                    $dtr1 = Event::find()->min('dtr');
-                    $dtr2 = Yii::$app->formatter->asTime($dtr1, 'dd-MM-yyyy');
+                    // Event::find()->min('dtr');
+                    $dtr1 = (isset($json) && is_array($json) && array_key_exists('evr1',$json)) ? $json['evr1'] :
+                        \Yii::$app->formatter->asTime(Event::find()->min('dtr'), 'dd-MM-yyyy');
+                    $dtr2 = (isset($json) && is_array($json) && array_key_exists('evr2',$json)) ? $json['evr2'] : date('d-m-Y');
                     echo '<label class="control-label">Выберите период</label>';
                     echo DatePicker::widget([
                         'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
                         'name' => 'range1',
-                        'value' => $dtr2,
+                        'value' => $dtr1,
                         'type' => DatePicker::TYPE_RANGE,
                         'name2' => 'range2',
-                        'value2' => date('d-m-Y'),
+                        'value2' => $dtr2,
                         'language' => 'ru',
 
                         'pluginOptions' => [
@@ -189,8 +212,11 @@ $action = Yii::$app->controller->action->id;
 
                 <?php
                 $type_checked_all_css = '';
+                //echo Debug::d($json,'json'); die;
                 if (isset($json) && is_array($json)) {
-                    if ($json['type_checked_all']) $type_checked_all_css = "checked";
+                    if ( array_key_exists('type_checked_all',$json) && $json['type_checked_all']) {
+                        $type_checked_all_css = "checked";
+                    }
                 }
                 $chechBoxexForTypeFilter = <<<CFCF
                     <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
@@ -257,7 +283,9 @@ CFCF;
                 <?php
                 $cats_checked_all_css = '';
                 if (isset($json) && is_array($json)) {
-                    if ($json['cats_checked_all']) $cats_checked_all_css = "checked";
+                    if (array_key_exists('cats_checked_all',$json) &&  $json['cats_checked_all']) {
+                        $cats_checked_all_css = "checked";
+                    }
                 }
                 $chechBoxexForCatFilter = <<<CFCF
                     <div class="forSimpleFilter-ckeckAndUncheckAll">
