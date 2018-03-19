@@ -81,10 +81,7 @@ class Event extends ActiveRecord
         $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
             ->with('category')
             ->with('types')
-            ->orderBy($rsort2)
-            //->asArray()
-            //->all();
-        ;
+            ->orderBy($rsort2);
         //echo Debug::d($query,'query'); die;
         $q_counts = Yii::$app->params['history_post_count'];
         $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,

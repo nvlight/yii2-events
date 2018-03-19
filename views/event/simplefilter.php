@@ -72,7 +72,7 @@ $action = Yii::$app->controller->action->id;
                                 <td class="item_cat"><?=$ev['category']->name?></td>
                                 <td class="item_desc"><?=$ev->desc?></td>
                                 <td class="item_summ"><?=$ev->summ?></td>
-                                <td class="item_dtr"><?= Yii::$app->formatter->asDate($ev->dtr);?></td>
+                                <td class="item_dtr"><?=Yii::$app->formatter->asDate($ev->dtr);?></td>
                                 <td class="item_type">
                                     <span class="dg_type_style"
                                           style="background-color: #<?=$ev['types']['color']?>;"
@@ -111,14 +111,13 @@ $action = Yii::$app->controller->action->id;
                             <?php if (count($json['trs'])): ?>
                             <?php foreach($json['trs'] as $tk => $tv): ?>
                                 <tr>
-                                    <td colspan='3' style='text-align: right;'>
+                                    <td colspan='3' class="tar">
                                         <?=$tv[0]?>
                                     </td>
                                     <td><?=$tv[1]?></td>
                                     <td colspan='3'>
                                         <?=$tv[2]?> - <?=$tv[3]?>
                                     </td>
-
                                 </tr>
                             <?php endforeach; ?>
                             <?php endif; ?>
@@ -134,6 +133,8 @@ $action = Yii::$app->controller->action->id;
     <?php endif; ?>
 
             <?php
+                //echo 'link pager tut: ';
+                //echo Debug::d($json['pages']);
                 if (isset($json) && is_array($json) && array_key_exists('pages',$json)){
                     echo LinkPager::widget([
                         'pagination' => $json['pages'],

@@ -22,7 +22,11 @@
     $('#selectSearchColumn').on('change', function () {
         var sval = $(this).val(), stext = $('#selectSearchColumn').find(":selected").text();
         $('#searchColumn').attr('placeholder', stext);
-        console.log('selectSearchColumn changed... to: ' + stext + ' option: ' + sval);
+        if (sval == '3') {
+            $('#searchColumn').attr('placeholder', 'Дата: yyyy-mm-dd');
+            //console.log('yes - goal, goal!');
+        }
+        //console.log('selectSearchColumn changed... to: ' + stext + ' option: ' + sval);
         //console.log(sval);
         //console.log(stext);
     });
@@ -36,13 +40,15 @@
             $.ajax({
                 url: '/event/search-by-colval',
                 method: 'GET',
-                data: {idCol: 5},
+                data: {idCol: 6},
                 success: function (res, status) {
                     var rs = $.parseJSON(res);
                     if (rs['success'] === 'yes') {
                         console.log('успешно, получили список');
                         if (rs['rs'].length) {
                             //console.log(rs['rs'].length);
+                            //console.log('udalili pagintaion');
+                            $('ul.pagination').remove();
                             $('table.gg-history > tbody tr').remove();
                             $("table.gg-history").after(rs['pages']);
                             for (var i = 0; i < rs['rs'].length; i++) {
@@ -100,10 +106,6 @@
         params['event-catid'] = $('#changeEventModal_catId option:selected').val();
         params['event-date'] = $('#changeEventModal_datePicker').val();
         params['event-typeid'] = $('#changeEventModal_typeId option:selected').val();
-        // params['event-type'] = 1;
-        // if ($('#changeEventModal_radioId').find('label').last().find('input').prop("checked")) {
-        //     params['event-type'] = 2;
-        // }
         $.ajax({
             url: '/event/update',
             type: 'POST',
@@ -119,14 +121,6 @@
                     c.find('td[class=item_desc]').text(np['item']['desc']);
                     c.find('td[class=item_type] span').text(np['item']['types']['name'])
                         .css('background-color', '#'+np['item']['types']['color']);
-                    // var itype = c.find('td[class=item_type] span').removeClass('danger').removeClass('success');
-                    // if (np['item']['type'] == 1) {
-                    //     itype.addClass('success');
-                    //     itype.text('доход');
-                    // } else {
-                    //     itype.addClass('danger');
-                    //     itype.text('расход');
-                    // }
                     $('#modalEventEdit').modal('hide');
                 }
 
@@ -208,13 +202,6 @@
                 if (np['success'] === 'yes') {
                     $('#event-summ').val(np['event']['summ']);
                     $('#event-desc').val(np['event']['desc']);
-                    // if (np['event']['type'] === 1) {
-                    //     $('#changeEventModal_radioId').find('label').last().find('input').removeAttr('checked');
-                    //     $('#changeEventModal_radioId').find('label').first().find('input').prop("checked", true);
-                    // } else {
-                    //     $('#changeEventModal_radioId').find('label').first().find('input').removeAttr('checked');
-                    //     $('#changeEventModal_radioId').find('label').last().find('input').prop("checked", true);
-                    // }
                     $('#changeEventModal_typeId option[value="' + np['event']['types']['id'] + '"]').prop('selected', true);
                     $('#changeEventModal_catId option[value="' + np['event']['i_cat'] + '"]').prop('selected', true);
                     $('#changeEventModal_datePicker').val(np['event']['dtr']);
@@ -238,15 +225,6 @@
         var params = {};
         // 1
         params['event_type'] = '';
-        // if ($('#simpleFilterModal_radioCheckBox').find('label input').first().is(':checked')) {
-        //     params['event_type'] = '1'
-        // }
-        // if ($('#simpleFilterModal_radioCheckBox').find('label input').last().is(':checked')) {
-        //     params['event_type'] = params['event_type'] + ' 2'
-        // }
-        //2
-        // .class-catsCheckBox
-        // $('.class-catsCheckBox').find('label input').first().is(':checked')
         var cd = $('.class-radioCheckBox').find('label input');
         var tc = '';
         $.each(cd, function (index, value) {
@@ -299,7 +277,7 @@
                         }
                     }
                 } else {
-                    alert('Ничего не найдено!');
+                    //alert('Ничего не найдено!');
                     console.log('успешно, не нашли');
                 }
             }

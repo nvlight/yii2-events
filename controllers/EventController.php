@@ -16,6 +16,7 @@ use PHPExcel_IOFactory;
 use DateTime;
 use yii\web\HttpException;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Url;
 
 class EventController extends \yii\web\Controller
 {
@@ -34,15 +35,14 @@ class EventController extends \yii\web\Controller
         ]);
     }
 
-    /*
+    /**
      *
      *
-     * */
+     **/
     public function actionHistory($sortcol='dtr',$sort='desc'){
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            return $this->redirect([AuthLib::NOT_AUTHED_PATH]);
-        }
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
         $this->layout = '_main';
         $getEvents = Event::getHistory($sortcol,$sort);
         //echo Debug::d($getEvents,'getEvents',1); die;
@@ -55,93 +55,73 @@ class EventController extends \yii\web\Controller
      * Without JS - show
      *
      * */
-    public function actionShow(){
-        if (Yii::$app->request->method === 'GET' && AuthLib::appIsAuth()){
-            $id = Yii::$app->request->get('id');
-            $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])->one();
-            if ( preg_match("#^[1-9]\d{0,7}$#", $id) &&
-                $rs !== null )
-            {
-                $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
-                    ->with('category')->with('types')
-                    ->asArray()->one();
-                    //->toArray(); ->one();
-                //echo Debug::d($rs,'rs',2);
-                $this->layout = '_main';
-                return $this->render('show', compact('rs'));
-            }else{
-                throw new HttpException(404 ,'События с таким ID не найдено');
-            }
-            echo 'all is bad';
-        }
+    public function actionShow($id){
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
+        if (Yii::$app->request->method === 'GET')
+        {
+            $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
+                ->with('category')->with('types')->asArray()->one();
+            if (!$rs) throw new HttpException(404 ,'События с таким ID не найдено');
+
+            $this->layout = '_main';
+            return $this->render('show', compact('rs'));
+        }
     }
 
-    /*
+    /**
      * Without JS - upd
      *
      * */
     public function actionUpd($id){
-        if (Yii::$app->request->method === 'GET' && AuthLib::appIsAuth()){
-            //echo 'chich marin 0';
-            //$id = Yii::$app->request->get('id'); $rs = null;
-            if ( 1 == 1
-                && preg_match("#^[1-9]\d{0,7}$#", $id)
-                && Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
-                )
-            {
-                //echo 'chich marin 01';
-                $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
-                    ->with('category')->with('types')
-                    //->asArray()
-                    ->one();
-                $model = $rs;
-                $this->layout = '_main';
-                return $this->render('update',compact('model'));
-            }else{
-                throw new HttpException(404 ,'События с таким ID не найдено');
-            }
-            //echo 'chich marin 1';
-            //echo Debug::d($_SERVER,'server');
-            //$this->layout = '_main';
-            //return $this->redirect(['event/history']);
-        }
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-        if (Yii::$app->request->method === 'POST' && AuthLib::appIsAuth()) {
-            //$id = intval(Yii::$app->request->post('Event')['id']);
+        if (Yii::$app->request->method === 'GET'){
+            $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
+                ->with('category')->with('types')//->asArray()
+                ->one();
+            if (!$rs) throw new HttpException(404 ,'События с таким ID не найдено');
+            $model = $rs;
+            $this->layout = '_main';
+            return $this->render('update',compact('model'));
+        } elseif
+            (Yii::$app->request->method === 'POST') {
+
             $model =  Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])->one();
-            //$model = new Event();
-            if ($model->load(Yii::$app->request->post())) {
+            if ( $model && $model->load(Yii::$app->request->post())) {
                 $model->i_user = $_SESSION['user']['id'];
-                if ($model->save()){
-                    //die('done!');
+                //
+                if ( $model->validate() && $model->save() ){
                     return $this->redirect(['show', 'id' => $model->id]);
                 }
-            } else {
-                $this->layout = '_main';
-                return $this->render('update', [
-                    'model' => $model,
-                ]);
             }
+            //
+            $this->layout = '_main';
+            return $this->render('update', [
+                'model' => $model,
+            ]);
         }
     }
 
-    /*
+    /**
      * Without JS - create
      *
      * */
     public function actionCreate(){
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //
         $model = new Event();
-        //echo Debug::d($_POST,'$_POST');
-        if ($model->load(Yii::$app->request->post()) && AuthLib::appIsAuth() ) {
+        if ($model->load(Yii::$app->request->post())) {
             $model->i_user = $_SESSION['user']['id'];
-            if ($model->save()){
-                //die('done!');
+            if ( $model->validate() &&  $model->save()){
                 return $this->redirect(['show', 'id' => $model->id]);
             }
         } else {
             $this->layout = '_main';
-            return $this->render('update', [
+            return $this->render('update',  [
                 'model' => $model,
             ]);
         }
@@ -150,7 +130,7 @@ class EventController extends \yii\web\Controller
     /*
      * Without JS - del
      *
-     * */
+     **/
     public function actionDel(){
         //echo Debug::d($_SERVER,'server');
         //echo Debug::d($_POST,'server');
@@ -175,16 +155,23 @@ class EventController extends \yii\web\Controller
     }
 
     /*
-     *
-     * */
+     * AJAX
+     **/
     public function actionGet($id){
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if ((Yii::$app->request->isAjax)) {
             $query = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $id ])
                 ->with('category')->with('types')->asArray()->one();
             //echo Debug::d($query,'query');
-            $query['dtr'] = \Yii::$app->formatter->asTime($query['dtr'], 'dd.MM.yyyy');
-            unset($query['i_user']);
-            $json = ['success' => 'yes', 'message' => 'Событие получено!', 'event' => $query ];
+            if ($query){
+                $query['dtr'] = \Yii::$app->formatter->asTime($query['dtr'], 'dd.MM.yyyy');
+                unset($query['i_user']);
+                $json = ['success' => 'yes', 'message' => 'Событие получено!', 'event' => $query ];
+            }else{
+                $json = ['success' => 'no', 'message' => 'Событие не получено!' ];
+            }
             die(json_encode($json));
         }
     }
@@ -192,13 +179,13 @@ class EventController extends \yii\web\Controller
     /*
      *
      *
-     * */
+     **/
     public function actionAdd()
     {
-        //echo Debug::d($_SESSION,'session..');
-        //echo Debug::d($_SERVER);
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //
         $model = new Event();
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()
+        if ((Yii::$app->request->isAjax)
             && $model->load(Yii::$app->request->post())
             )
         {
@@ -213,47 +200,11 @@ class EventController extends \yii\web\Controller
                 $json = ['success' => 'no', 'message' => 'При добавлении события произошла ошибка!', 'err' => $rs];
                 die(json_encode($json));
             }
-            $q1 = (new Query)
-                ->select("last_insert_id() as 'lid'")
-                ->all();
-            $ev = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $q1[0]['lid']])->with('category')->one();
+            //$q1 = (new Query)->select("last_insert_id() as 'lid'")->all();
+            //$ev = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $q1[0]['lid']])
+            //    ->with('category')->with('types')->one();
 
-            // table row html
-            switch ($ev->type){
-                case 1: $evtype[1] = ['success', 'доход']; $evtypeid = 1;  break;
-                case 2: $evtype[2] = ['danger',  'расход'];  $evtypeid = 2; break;
-                default:$evtype[3] = ['type_undefined', 'просто событие']; $evtypeid = 3;
-            }
-            // ^ это старый код, в новом коде есть таблица с типами событий, из него и будем брать
-            $real_type = Type::findOne($ev->type);
-            if (!$real_type) { $r_type = 0; $r_color = 'fff'; }
-            $r_type = $real_type->name; $r_color = $real_type->color;
-
-            $mb_dt = mb_substr($ev->dtr,0,10);
-            // new trh
-            $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,$mb_dt,
-                //$evtype[$evtypeid][0], $evtype[$evtypeid][1],
-                $r_type, $r_color,
-                $ev['category']->name);
-            $r1 = $ev;
-            if ($r1) {
-                $json = ['success' => 'yes', 'message' => 'Запись успешно добавлена!',
-                    'post' => $r1,
-                    'id' => $r1->id,
-                    'desc' => $r1->desc,
-                    'summ' => $r1->summ,
-                    'type' => $r1->type,
-                    'category' => $r1['category']['name'],
-                    'trh' => $trh
-                ];
-                //echo Debug::d(json_encode($json));
-            } else {
-                $json = ['success' => 'no', 'message' => 'При добавлении записи произошла ошибка!'];
-            }
-            //$json = ['success' => 'middle', 'message' => 'this is a middle type of status'];
-            die(json_encode($json));
-        }else{
-            $json = ['success' => 'no', 'message' => '---',];
+            $json = ['success' => 'yes', 'message' => 'Запись успешно добавлена!',];
             die(json_encode($json));
         }
     }
@@ -261,13 +212,13 @@ class EventController extends \yii\web\Controller
     /*
      *
      *
-     * */
+     **/
     public function actionDelete(){
-
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
-            $uid = $_SESSION['user']['id'];
-            $id = (int)Yii::$app->request->post('id');
-            $res = Event::findOne(['id' => $id, 'i_user' => $uid]);
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //
+        if ((Yii::$app->request->isAjax)) {
+            $res = Event::findOne(['id' => Yii::$app->request->post('id'), 'i_user' => $_SESSION['user']['id']]);
             $rs = $res->delete();
             if ($rs) {
                 $json = ['success' => 'yes', 'message' => 'Запись успешно удалена!'];
@@ -276,8 +227,6 @@ class EventController extends \yii\web\Controller
             }
             die(json_encode($json));
         }
-        $json = ['success' => 'no', 'message' => '---', ];
-        die(json_encode($json));
     }
 
     /*
@@ -286,8 +235,11 @@ class EventController extends \yii\web\Controller
      **/
     public function actionUpdate()
     {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
         $model = new Event();
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth())
+        if ((Yii::$app->request->isAjax))
         {
             $uid = $_SESSION['user']['id'];
             $model->id = $uid;
@@ -309,14 +261,20 @@ class EventController extends \yii\web\Controller
             $ev->type = intval($tmp['typeid']);
             $ev->i_cat = intval($tmp['i_cat']);
             $ev->dtr = $tmp['dtr'];
-            $ev->dtr = Yii::$app->formatter->asTime($ev->dtr, 'yyyy-MM-dd');
+            try {
+                $ev->dtr = Yii::$app->formatter->asDatetime($ev->dtr, 'yyyy-MM-dd');
+            }catch (\Exception $e){
+                $ev->dtr = date('d-m-Y');
+            }
             //
-            if (!$ev->save()) {
+            if ( !$ev->validate() || !$ev->save()) {
                 $json = ['success' => 'no', 'message' => 'Ошибка при обновлении записи!',
-                    'tmp' => $tmp ];
+                    'tmp' => $tmp, 'errors' => $ev->errors ];
                 die(json_encode($json));
             }
-            $rsu = Event::find()->where(['id' => $evid])->with('types')->with('category')->asArray()->one();
+            // нужно найти только что вставленный элемент, чтобы аяксом обновить строку в таблице...
+            $rsu = Event::find()->where(['id' => $evid, 'i_user' => $uid])
+                ->with('types')->with('category')->asArray()->one();
             if (!$rsu) {
                 $json = ['success' => 'no', 'message' => 'Ошибка при получении обновленной записи!' ];
                 die(json_encode($json));
@@ -326,41 +284,55 @@ class EventController extends \yii\web\Controller
             $json = ['success' => 'yes', 'message' => 'Редактирование события завершено!', 'item' => $rsu];
             die(json_encode($json));
         }
-        $json = ['success' => 'no', 'message' => 'Редактирование события завершено!', 'err' => $model->errors];
-        die(json_encode($json));
     }
 
+    public function actionTestq(){
+        $pgs = 'default'; $colName = 'desc';
+        $q_counts = Yii::$app->params['history_post_search'];
+        $q_counts = Yii::$app->params['history_post_count'];
+        echo Debug::d($q_counts);
+        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+            ->with('category')->with('types');
 
-    /*
+        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
+            'pageSizeParam' => false, 'forcePageParam' => false, 'route' => 'event/history' ]);
+        $rs = $query->offset($pages->offset)->limit($pages->limit)
+            ->orderBy(['id' => SORT_ASC])->all();
+        echo Debug::d(count($rs),'count rs');
+    }
+
+    /**
      *
      *
      **/
     public function actionSearchByColval($idCol=1,$text=''){
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if ((Yii::$app->request->isAjax)) {
 
             // params: idCol - text
             // cat,summ,dtr,type
-            $pages = '';
             switch ($idCol){
-                case 2: { $colName = 'summ';
-                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])->with('category')->with('types')
-                        ->limit(10)
-                        //->asArray()
-                        ->all()
-                    ;
+                case 2: {
+                    $colName = 'summ';
+                    $text = (string)intval(($text));
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'] ]) //,$colName => $text
+                        ->andWhere(['like',$colName,$text])
+                        ->with('category')->with('types')->limit(50)->all();
                     break;
                 }
-                case 3: { $colName = 'dtr';
-                    $text = Yii::$app->formatter->asTime($text, 'yyyy-MM-dd');
-                    //echo $text;
-                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])->with('category')->with('types')
-                        ->limit(10)
-                        //->asArray()
-                        ->all()
-                    ;
+                case 3: {
+                    $colName = 'dtr';
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+                        ->with('category')->with('types')
+                        ->andWhere(['like',$colName,$text])
+                        ->limit(50)->all();
                     break;
                 }
-                case 4: { $colName = 'type';
+                case 4: {
+                    // .........
+                    $colName = 'type';
                     $str = (string)($text);
                     $str = mb_strtolower($str); $str = trim($str);
                     $text = '';
@@ -369,47 +341,59 @@ class EventController extends \yii\web\Controller
                     }elseif ($str === 'расход'){
                         $text = 2;
                     }
-
-                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])->with('category')->with('types')
-                        ->limit(10)
-                        //->asArray()
-                        ->all()
-                    ;
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])
+                        ->with('category')->with('types')
+                        ->limit(10)->all();
                     break;
                 }
                 case 5: {
-
-                    $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])->with('category');
-                    //echo Debug::d($query,'query');
-                    $q_counts = 10;
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+                        ->with('category')->with('types')->orderBy(['id' => SORT_DESC])
+                        ->limit(50)->all();
+                    break;
+                }
+                case 7: {
+                    $colName = 'desc';
+                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+                        ->with('category')->with('types')
+                        ->andWhere(['like',$colName,$text])
+                        ->limit(50)->all();
+                    break;
+                }
+                case 6:{
+                    $pgs = 'default'; $colName = 'desc';
+                    $q_counts = Yii::$app->params['history_post_count'];
+                    $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+                        ->with('category')->with('types');
+                    // пагинация работает, но немножко не так, нужно чтобы было как на хистори после обновления.
+                    // а сейчас, все есть на странице, правда в обратном порядке )
                     $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-                        'pageSizeParam' => false, 'forcePageParam' => false, 'route' => 'site/history']);
+                        'pageSizeParam' => false, 'forcePageParam' => false, 'route' => 'event/history' ]);
                     $rs = $query->offset($pages->offset)
-                        ->limit($pages->limit)
-                        ->all();
+                        ->orderBy(['id' => SORT_DESC])->limit($pages->limit)->all();
                     break;
                 }
                 default:{
                     $colName = 'category.name';
-                    $str = (string)($text);
-                    $str = mb_strtolower($str); $str = trim($str);
-                    $rs = Event::find()->where(['event.i_user' => $_SESSION['user']['id'],$colName => $text ])->joinWith('category')
-                        ->limit(10)
-                        //->asArray()
-                        ->all()
-                    ;
+                    $rs = Event::find()->where(['event.i_user' => $_SESSION['user']['id']])
+                        ->andWhere(['like',$colName,$text])
+                        ->joinWith('category')->limit(50)->all();
                 }
+
             }
-            if ($rs) {  }
-            //echo Debug::d($rs,'$rs');
-            $pages_str = ''; if ($pages !== '') { $pages_str = LinkPager::widget([ 'pagination' => $pages ]); }
+
             if (!$rs){
                 $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
                 die(json_encode($json));
             }
-            //
-            $nrs = [];
+
+            $pages_str = '';
+            if (isset($pgs) && $pgs === 'default') {
+                $pages_str = LinkPager::widget([ 'pagination' => $pages ]);
+            }
+
             // table row html
+            $nrs = [];
             foreach($rs as $rsk => $ev){
                 $mb_dt = mb_substr($ev->dtr,0,10);
                 $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
@@ -430,105 +414,150 @@ class EventController extends \yii\web\Controller
      */
     public function actionConvertToXslx()
     {
-        if (AuthLib::appIsAuth()) {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-            $eventLabels = (new Event())->attributeLabels();
-            unset($eventLabels['i_user'],$eventLabels['id'],$eventLabels['dt'],$eventLabels['note']);
-            $eventLabels = array_merge(['id' => '№'], $eventLabels);
+        // подготовка данных и его конвертация
+        $eventLabels = (new Event())->attributeLabels();
+        unset($eventLabels['i_user'],$eventLabels['id'],$eventLabels['dt'],$eventLabels['note']);
+        $eventLabels = array_merge(['id' => '№'], $eventLabels);
 
-            // https://github.com/PHPOffice/PHPExcel
-            $objPHPExcel = new PHPExcel();
+        // https://github.com/PHPOffice/PHPExcel
+        $objPHPExcel = new PHPExcel();
 
-            // Set document properties
-            $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
-                ->setLastModifiedBy("Maarten Balliauw")
-                ->setTitle("Office 2007 XLSX Test Document")
-                ->setSubject("Office 2007 XLSX Test Document")
-                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-                ->setKeywords("office 2007 openxml php")
-                ->setCategory("Test result file");
+        // Set document properties
+        $objPHPExcel->getProperties()->setCreator("Maarten Balliauw - yeah")
+            ->setLastModifiedBy("Maarten Balliauw - yeah")
+            ->setTitle("Office 2007 XLSX Test Document")
+            ->setSubject("Office 2007 XLSX Test Document")
+            ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("Test result file");
 
-            $events = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-                ->with('types')
-                ->with('category')
-                ->asArray()
-                ->all();
-            ;
+        $events = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+            ->with('types')
+            ->with('category')
+            ->asArray()
+            ->all();
+        ;
 
-            // add new data
-            // prepare columns
-            $str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            $arr = [];
-            for($i=0;$i<strlen($str);$i++){
-                $arr[] = substr($str,$i,1);
-            }
-            // add current datetime - row
-            $j = 1; $currDt = (new DateTime())->format('d.m.Y h:i:s');
-            $objPHPExcel->setActiveSheetIndex(0)
-                ->setCellValue($arr[0] . $j, 'Дата: ')
-                ->setCellValue($arr[1] . $j, $currDt);
-            // add rows count - row
-            $j++; $rowCount = count($events); // $j = 2
-            $objPHPExcel->setActiveSheetIndex(0)
-                ->setCellValue($arr[0] . $j, 'Количество строк: ')
-                ->setCellValue($arr[1] . $j, $rowCount);
-            // add table labels ...
-            $i = 0; $j++; // j = 3
-            foreach($eventLabels as $ev => $ek){
-                $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue($str[$i] . $j, $ek);
-                $i++;
-            }
-            // add anather rows
-            $j++; $i=1; // j = 4
-            foreach($events as $ek => $ev){
-                $objPHPExcel->setActiveSheetIndex(0)
-                    ->setCellValue($arr[0] . $j, $i)
-                    ->setCellValue($arr[1] . $j, $ev['category']['name'])
-                    ->setCellValue($arr[2] . $j, $ev['desc'])
-                    ->setCellValue($arr[3] . $j, $ev['summ'])
-                    ->setCellValue($arr[4] . $j, $ev['dtr'])
-                    ->setCellValue($arr[5] . $j, $ev['types']['name']);
-                $j++; $i++;
-            }
-
-            // Rename worksheet
-            $objPHPExcel->getActiveSheet()->setTitle('Simple');
-
-
-            // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-            $objPHPExcel->setActiveSheetIndex(0);
-
-            //die(Debug::d( dba_handlers(),' dba_handlers()',1));
-
-            $filename = sha1(md5((new DateTime())->format('r') ) . Yii::$app->params['file_export_salt'] ) . '.xlsx';
-            //echo $filename ; die;
-            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            header("Content-Disposition: attachment;filename={$filename}");
-
-            header('Cache-Control: max-age=0');
-            // If you're serving to IE 9, then the following may be needed
-            header('Cache-Control: max-age=1');
-
-            // If you're serving to IE over SSL, then the following may be needed
-            header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-            header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-            header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-            header ('Pragma: public'); // HTTP/1.0
-
-            $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'OpenDocument');
-            $objWriter->save('php://output');
-            exit;
+        // add new data
+        // prepare columns
+        $str = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $arr = [];
+        for($i=0;$i<strlen($str);$i++){
+            $arr[] = substr($str,$i,1);
         }
+        // add current datetime - row
+        $j = 1; $currDt = (new DateTime())->format('d.m.Y h:i:s');
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue($arr[0] . $j, 'Дата: ')
+            ->setCellValue($arr[1] . $j, $currDt);
+        // add rows count - row
+        $j++; $rowCount = count($events); // $j = 2
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue($arr[0] . $j, 'Количество строк: ')
+            ->setCellValue($arr[1] . $j, $rowCount);
+
+        // add table labels ...
+        $i = 0; $j++; // j = 3
+        foreach($eventLabels as $ev => $ek){
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue($str[$i] . $j, $ek);
+            $i++;
+        }
+        // add anather rows
+        $j++; $i=1; // j = 4
+        foreach($events as $ek => $ev){
+            $objPHPExcel->setActiveSheetIndex(0)
+                ->setCellValue($arr[0] . $j, $i)
+                ->setCellValue($arr[1] . $j, $ev['category']['name'])
+                ->setCellValue($arr[2] . $j, $ev['desc'])
+                ->setCellValue($arr[3] . $j, $ev['summ'])
+                ->setCellValue($arr[4] . $j, $ev['dtr'])
+                ->setCellValue($arr[5] . $j, $ev['types']['name']);
+            $j++; $i++;
+        }
+
+        // Rename worksheet
+        $objPHPExcel->getActiveSheet()->setTitle('Simple');
+
+        // Set active sheet index to the first sheet, so Excel opens this as the first sheet
+        $objPHPExcel->setActiveSheetIndex(0);
+
+        //die(Debug::d( dba_handlers(),' dba_handlers()',1));
+
+        $filename = sha1(md5((new DateTime())->format('r') ) . Yii::$app->params['file_export_salt'] ) . '.xlsx';
+        //echo $filename ; die;
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename={$filename}");
+
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+
+        // If you're serving to IE over SSL, then the following may be needed
+        header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+        header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header ('Pragma: public'); // HTTP/1.0
+
+        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'OpenDocument');
+        $objWriter->save('php://output');
+        exit;
+    }
+
+    /*
+     *
+     *
+     **/
+    public function actionPlan(){
+
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $subquery1 = (new \yii\db\Query)->select('summ')->from('event')->where(['=','type','1'])->andWhere(['=','category.id','event.i_cat'])->limit(1);
+        //$subquery1 = (new \yii\db\Query)->select('summ')->from('event')->where(['=','type','1'])->limit(1);
+        $subquery2 = (new \yii\db\Query)->select('summ')->from('event')->where(['=','type','2'])->limit(1);
+        $query = (new \yii\db\Query)->select(['name', 'c1' => $subquery1,'c2' => $subquery2])->from('category');
+        $res =  $query->all();
+        //echo Debug::d($res);
+
+        //$q1 = Category::find()->select(['name'])->where(['>','id',1])->with('event')->all();
+        $q1 = (new Query)
+            ->select(['category.name'
+                //,'event.type',
+                ," @p11 := (select abs(SUM(event.summ)) from event WHERE event.i_cat = category.id and event.type = 1) as 'p11'"
+                ," @p12 := (select abs(SUM(event.summ)) from event WHERE event.i_cat = category.id and event.type = 2) as 'p12'"
+                ," @p1 := (abs(@p11 - @p12) + 0) as 'p1' "
+                , "category.`limit` as 'p2'"
+            ])
+            ->from('category')->where(['i_user' => $_SESSION['user']['id']])
+            ->all();
+        //echo Debug::d($q1);
+
+        // большая часть, написанная выше, сделано напросно, т.к. мы будем считать только расходы, а не их разность
+        // получим здесь $remains - $all_rashod...
+        $remains = $_SESSION['user']['remains'];
+        $all_rashod = 0; foreach ($q1 as $qk => $qv) { $all_rashod += $qv['p12']; } //echo $qv['p12'] . "</br>"; }
+        $diff_main = $remains - $all_rashod;
+
+        // получили тут разность расходов с доходами и остаток - массив
+        $catPlans = $q1;
+        $this->layout = '_main';
+        return $this->render('plan', compact('catPlans','remains','diff_main'));
     }
 
     /**
      *
      *
-     */
+     **/
     public function actionSimpleFilter($sortColumn='id',$sortType=SORT_DESC){
 
-        if (AuthLib::appIsAuth() && Yii::$app->request->isGet) {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if (Yii::$app->request->isGet){
             $this->layout = '_main';
 
             //echo Debug::d($_REQUEST,'request');
@@ -586,15 +615,11 @@ class EventController extends \yii\web\Controller
                 if ( in_array($_GET['sortColumn'],$ev_tableSchema)){
                     $sortColumn = $_GET['sortColumn'];
                     $orderBy[$sortColumn] = ($sortType === SORT_ASC) ? SORT_ASC : SORT_DESC;
-                    // запись текущих параметров в гет. Пока отказываемся, т.к. в представлении будем добавлять
-                    //$_GET['sortColumn'] = $sortColumn;
-                    //$_GET['sortType'] = $orderBy[$sortColumn];
                 }
             }
             // end of zadacha 1
 
             // формируем строку запроса из гет-параметров + параметра сортировки
-            // $_GET[]
             $buildHttpQuery = http_build_query($_GET);
             //echo Debug::d($buildHttpQuery,'httpBuildQuery',3);
 
@@ -658,7 +683,7 @@ class EventController extends \yii\web\Controller
                 //->all();
             ;
             //echo Debug::d($query,'in weight');
-            $q_counts = 500;
+            $q_counts = 50; $q_counts = Yii::$app->params['history_post_search'];
             $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
                 'pageSizeParam' => false, 'forcePageParam' => false,  ]);
             $rs = $query->offset($pages->offset)
@@ -666,146 +691,77 @@ class EventController extends \yii\web\Controller
                 ->all();
             //echo Debug::d($rs,'rs');
 
-            $fl_count = count($rs);
-            if ($fl_count){
-                //$pages_str = '';
-                //if ($pages !== '') { $pages_str = LinkPager::widget([ 'pagination' => $pages ]); }
-                if (!$rs){
-                    $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
-                    return $this->render('simplefilter', compact('json'));
-                }
-                //
-                $nrs = [];
-                // table row html
-                foreach($rs as $rsk => $ev){
-                    $mb_dt = mb_substr($ev->dtr,0,10);
-                    $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
-                        $mb_dt,
-                        $ev->types['name'],
-                        $ev->types['color'],
-                        $ev['category']->name);
-                    $nrs[] = $trh;
-                }
-                // тут же мы должны получить даты начала и конца поиска, а также сумму расходов и доходов за этот период
-                //
-                $event_type = '1'; $ids_type = explode(' ',$event_type);
-                $fl_dohody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                $event_type = '2'; $ids_type = explode(' ',$event_type);
-                $fl_rashody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                $event_type = '3'; $ids_type = explode(' ',$event_type);
-                $fl_dolgy = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                $event_type = '4'; $ids_type = explode(' ',$event_type);
-                $fl_vkladi = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                //echo Debug::d($fl_dohody,'$fl_dohody');
-                //echo Debug::d($fl_rashody,'$fl_rashody');
-                $fl_dohody  = intval($fl_dohody);
-                $fl_rashody = intval($fl_rashody);
-                $fl_dolgy = intval($fl_dolgy);
-                $fl_vkladi = intval($fl_vkladi);
-                $fl_diff = abs($fl_dohody - $fl_rashody);
-                if ($fl_rashody > $fl_dohody) {
-                    $fl_diff *= (-1);
-                }
-                $summ_rdv = $fl_rashody + $fl_vkladi + $fl_dolgy;
-                $diff_d_rdv = $fl_dohody - $summ_rdv;
-                $summ_dv = $fl_vkladi + $fl_dolgy;
-                $dt_diff = "{$evr1} - {$evr2}";
-                $trs[] = ['Сумма доходов', $fl_dohody,$evr1,$evr2];
-                $trs[] = ['Сумма расходов',$fl_rashody,$evr1,$evr2];
-                $trs[] = ['Разница доходы - расходы', $fl_diff,$evr1,$evr2];
-                $trs[] = ['Сумма долгов', $fl_dolgy,$evr1,$evr2];
-                $trs[] = ['Сумма вкладов', $fl_vkladi,$evr1,$evr2];
-                $trs[] = ['Сумма долгов и вкладов', $summ_dv,$evr1,$evr2];
-                $trs[] = ['Сумма расходов, долгов и вкладов', $summ_rdv,$evr1,$evr2];
-                $trs[] = ['Разница между доходами и тратами', $diff_d_rdv,$evr1,$evr2];
-                $evr = [$evr1, $evr2];
-                $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','nrs' => $nrs, 'rs' => $rs,
-                    'pages' => $pages, 'trs' =>  $trs, 'evr' => $evr, 'buildHttpQuery' => $buildHttpQuery,
-                    'orderBy' => $orderBy, 'dt_diff' => $dt_diff, 'ids_cats' => $ids_cats2, 'ids_type' => $ids_type2,
-                     'type_checked_all' => $type_checked_all, 'cats_checked_all' => $cats_checked_all,
-                    'evr1' => $evr1, 'evr2' => $evr2,
-
-                ];
+            if (!$rs){
+                $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
                 return $this->render('simplefilter', compact('json'));
             }
 
-            $json = ['success' => 'no', 'message' => 'Фильт успешно отработал, но ничего не нашел!', 'count' => $fl_count ];
+            // тут же мы должны получить даты начала и конца поиска, а также сумму расходов и доходов за этот период
+            //
+            $event_type = '1'; $ids_type = explode(' ',$event_type);
+            $fl_dohody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                ->andWhere(['in', 'i_cat', $ids_cats])
+                ->andWhere(['in', 'type',  $ids_type])
+                ->andWhere(['<>', 'summ',  0])
+                ->sum('summ')
+            ;
+            $event_type = '2'; $ids_type = explode(' ',$event_type);
+            $fl_rashody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                ->andWhere(['in', 'i_cat', $ids_cats])
+                ->andWhere(['in', 'type',  $ids_type])
+                ->andWhere(['<>', 'summ',  0])
+                ->sum('summ')
+            ;
+            $event_type = '3'; $ids_type = explode(' ',$event_type);
+            $fl_dolgy = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                ->andWhere(['in', 'i_cat', $ids_cats])
+                ->andWhere(['in', 'type',  $ids_type])
+                ->andWhere(['<>', 'summ',  0])
+                ->sum('summ')
+            ;
+            $event_type = '4'; $ids_type = explode(' ',$event_type);
+            $fl_vkladi = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                ->andWhere(['in', 'i_cat', $ids_cats])
+                ->andWhere(['in', 'type',  $ids_type])
+                ->andWhere(['<>', 'summ',  0])
+                ->sum('summ')
+            ;
+            //echo Debug::d($fl_dohody,'$fl_dohody');
+            //echo Debug::d($fl_rashody,'$fl_rashody');
+            $fl_dohody  = intval($fl_dohody);
+            $fl_rashody = intval($fl_rashody);
+            $fl_dolgy = intval($fl_dolgy);
+            $fl_vkladi = intval($fl_vkladi);
+            $fl_diff = abs($fl_dohody - $fl_rashody);
+            if ($fl_rashody > $fl_dohody) {
+                $fl_diff *= (-1);
+            }
+            $summ_rdv = $fl_rashody + $fl_vkladi + $fl_dolgy;
+            $diff_d_rdv = $fl_dohody - $summ_rdv;
+            $summ_dv = $fl_vkladi + $fl_dolgy;
+            $dt_diff = "{$evr1} - {$evr2}";
+            $trs[] = ['Сумма доходов', $fl_dohody,$evr1,$evr2];
+            $trs[] = ['Сумма расходов',$fl_rashody,$evr1,$evr2];
+            $trs[] = ['Разница доходы - расходы', $fl_diff,$evr1,$evr2];
+            $trs[] = ['Сумма долгов', $fl_dolgy,$evr1,$evr2];
+            $trs[] = ['Сумма вкладов', $fl_vkladi,$evr1,$evr2];
+            $trs[] = ['Сумма долгов и вкладов', $summ_dv,$evr1,$evr2];
+            $trs[] = ['Сумма расходов, долгов и вкладов', $summ_rdv,$evr1,$evr2];
+            $trs[] = ['Разница между доходами и тратами', $diff_d_rdv,$evr1,$evr2];
+            $evr = [$evr1, $evr2];
+            $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!', 'rs' => $rs,
+                'pages' => $pages, 'trs' =>  $trs, 'evr' => $evr, 'buildHttpQuery' => $buildHttpQuery,
+                'orderBy' => $orderBy, 'dt_diff' => $dt_diff, 'ids_cats' => $ids_cats2, 'ids_type' => $ids_type2,
+                 'type_checked_all' => $type_checked_all, 'cats_checked_all' => $cats_checked_all,
+                'evr1' => $evr1, 'evr2' => $evr2,
+
+            ];
             return $this->render('simplefilter', compact('json'));
         }
-    }
-
-    /*
- *
- *
- * */
-    public function actionPlan($message=''){
-
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            //return $this->goBack(['']);
-            return $this->redirect(['site/index']);
-
-            //return $this->render('index', [ 'message' => $message ]);
-        }
-
-        $subquery1 = (new \yii\db\Query)->select('summ')->from('event')->where(['=','type','1'])->andWhere(['=','category.id','event.i_cat'])->limit(1);
-        //$subquery1 = (new \yii\db\Query)->select('summ')->from('event')->where(['=','type','1'])->limit(1);
-        $subquery2 = (new \yii\db\Query)->select('summ')->from('event')->where(['=','type','2'])->limit(1);
-        $query = (new \yii\db\Query)->select(['name', 'c1' => $subquery1,'c2' => $subquery2])->from('category');
-        $res =  $query->all();
-        //echo Debug::d($res);
-
-        //$q1 = Category::find()->select(['name'])->where(['>','id',1])->with('event')->all();
-        $q1 = (new Query)
-            ->select(['category.name'
-                //,'event.type',
-                ," @p11 := (select abs(SUM(event.summ)) from event WHERE event.i_cat = category.id and event.type = 1) as 'p11'"
-                ," @p12 := (select abs(SUM(event.summ)) from event WHERE event.i_cat = category.id and event.type = 2) as 'p12'"
-                ," @p1 := (abs(@p11 - @p12) + 0) as 'p1' "
-                , "category.`limit` as 'p2'"
-            ])
-            ->from('category')->where(['i_user' => $_SESSION['user']['id']])
-            ->all();
-        //echo Debug::d($q1);
-
-        // большая часть, написанная выше, сделано напросно, т.к. мы будем считать только расходы, а не их разность
-        // получим здесь $remains - $all_rashod...
-        $remains = $_SESSION['user']['remains'];
-        $all_rashod = 0; foreach ($q1 as $qk => $qv) { $all_rashod += $qv['p12']; } //echo $qv['p12'] . "</br>"; }
-        $diff_main = $remains - $all_rashod;
-
-        // получили тут разность расходов с доходами и остаток - массив
-        $catPlans = $q1;
-        $this->layout = '_main';
-        return $this->render('plan', compact('catPlans','remains','diff_main'));
     }
 
     /**
@@ -813,12 +769,11 @@ class EventController extends \yii\web\Controller
      *
      */
     public function actionFilter(){
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
 
-            // event_type	1 2
-            // event_cats	74 78
-            // range1	20-12-2017
-            // range2	30-12-2017
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if ((Yii::$app->request->isAjax)) {
 
             $event_type = Yii::$app->request->get('event_type');
             // небольшой хак, чтобы получить 4 типа событий )
@@ -835,17 +790,12 @@ class EventController extends \yii\web\Controller
             $event_range1 = \Yii::$app->formatter->asTime($event_range1, 'yyyy-MM-dd'); # 14:09
             $event_range2 = \Yii::$app->formatter->asTime($event_range2, 'yyyy-MM-dd'); # 14:09
 
-            //echo Debug::d($event_type,'$event_type');
-            //echo Debug::d($event_cats,'$event_cats');
-            //echo Debug::d($event_range1,'$event_range1');
-            //echo Debug::d($event_range2,'$event_range1');
-
             $query = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
                 ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                 ->andWhere(['in', 'i_cat', $ids_cats])
                 ->andWhere(['in', 'type',  $ids_type])
                 ->andWhere(['<>', 'summ',  0])
-                ->orderBy(['type' => SORT_ASC, 'id' => SORT_ASC])
+                ->orderBy(['id' => SORT_DESC])
                 //->asArray()
                 //->all()
             ;

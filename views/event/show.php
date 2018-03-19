@@ -31,7 +31,7 @@ $rs['typename'] = $rs['types']['name'];
     </p>
     <p>
         <?= Html::a('Обновить', ['event/upd', 'id' => $rs['id'] ], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Удалить', ['event/del', 'id' => $rs['id'],'tt' => 'test'], [
+        <?= Html::a('Удалить', ['event/del', 'id' => $rs['id'],], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Вы действительно хотите удалить запись?',
@@ -64,13 +64,13 @@ $rs['typename'] = $rs['types']['name'];
                 'attribute' => 'summ',
             ],
             [
+                'label' => 'Тип',
+                'attribute' => 'typename',
+            ],
+            [
                 'label' => 'Дата',
                 'attribute' => 'dtr',
             ],
-            [
-                'label' => 'Тип',
-                'attribute' => 'typename',
-            ]
         ],
     ]) ?>
 

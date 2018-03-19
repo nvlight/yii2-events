@@ -13,8 +13,6 @@ use yii\helpers\Url;
 
 $css1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css";
 $js1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js";
-//$this->registerCss($css1);
-//$this->registerJs($js1);
 $this->registerCssFile('@web/css/bootstrap-select.min.css');
 
 $this->title = 'Events | История';
@@ -31,9 +29,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <a href="<?=Url::to(['event/convert-to-xslx'])?>" class="convert2xlsx" title="экспорт всех записей в xlsx">
                 <i class="fa fa-file-excel-o" aria-hidden="true"></i>
             </a>
-<!--            <span class="reload" data-toggle="modal" data-target="#modalSimpleFilter">-->
-<!--                <i class="fa fa-filter" aria-hidden="true"></i>-->
-<!--            </span>-->
             <a href="<?=Url::to(['event/simple-filter'])?>" data-target="#modalSimpleFilter"
                class="reload noLink-doFilter" title="фильтр" data-toggle="modal"  >
                 <i class="fa fa-filter"></i>
@@ -72,40 +67,26 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                             <option value="2" selected>Сумма</option>
                             <option value="3">Дата</option>
                             <option value="4">Тип</option>
+                            <option value="7">Описание</option>
                         </select>
-
                     </div>
                 </div>
-                <?php
-                if ($events){
-                    //echo \app\components\Debug::d($events,'events');
-                }
-                ?>
+
                 <div class="table-cover">
                     <?php
-                        //echo \app\components\Debug::d($_SERVER,'server');
-
-                        $ruri = $_SERVER['REQUEST_URI'];
-                        $strp = mb_strpos($ruri,'?');
-                        if ($strp){
-                            $ruri = mb_substr($ruri,0,$strp);
-                            //echo 'ruri: '. $ruri;
-                        }
+                        $abs_url = Url::toRoute('event/history', true);
                         $rsort = '&sort='.$sort;
-                        // encode
-                        $ruri = Html::encode($ruri);
-                        $rsort = Html::encode($rsort);
                     ?>
                     <div class="table-responsive">
                     <table class="table table-striped table-hover  gg-history">
                         <thead>
                         <tr>
-                            <th><a href="<?=$ruri.'?sortColumn=id'.$rsort?>">#</a></th>
-                            <th><a href="<?=$ruri.'?sortColumn=i_cat'.$rsort?>">Категория</a></th>
-                            <th><a href="<?=$ruri.'?sortColumn=desc'.$rsort?>">Описание</a></th>
-                            <th><a href="<?=$ruri.'?sortColumn=summ'.$rsort?>">Сумма</a></th>
-                            <th><a href="<?=$ruri.'?sortColumn=dtr'.$rsort?>">Дата</a></th>
-                            <th><a href="<?=$ruri.'?sortColumn=type'.$rsort?>">Тип</a></th>
+                            <th><a href="<?=$abs_url.'?sortColumn=id'.$rsort?>">#</a></th>
+                            <th><a href="<?=$abs_url.'?sortColumn=i_cat'.$rsort?>">Категория</a></th>
+                            <th><a href="<?=$abs_url.'?sortColumn=desc'.$rsort?>">Описание</a></th>
+                            <th><a href="<?=$abs_url.'?sortColumn=summ'.$rsort?>">Сумма</a></th>
+                            <th><a href="<?=$abs_url.'?sortColumn=dtr'.$rsort?>">Дата</a></th>
+                            <th><a href="<?=$abs_url.'?sortColumn=type'.$rsort?>">Тип</a></th>
                             <th>Действия</th>
                         </tr>
                         </thead>
@@ -127,7 +108,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <td>
                                         <span class="btn-action" title="Просмотр">
                                             <a class="evActionView"
-                                               <?php // echo " href="\yii\helpers\Url::to(['/site/show-event/?id='.$ev->id])" ';  ?>
                                                data-id="<?=$ev->id?>" href="<?=Url::to(['event/show?id=' . $ev->id])?>"
                                             >
                                                 <span class="glyphicon glyphicon-eye-open" ></span>
@@ -135,7 +115,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                         </span>
                                         <span class="btn-action" title="Редактировать">
                                             <a class="evActionUpdate"
-                                                <?php // echo "onclick=editEvent(".$ev->id".)"; return false; ";  ?>
                                                data-id="<?=$ev->id?>" href="<?=Url::to(['event/upd?id=' . $ev->id])?>"
                                             >
                                                 <span class="glyphicon glyphicon-pencil" >
@@ -163,7 +142,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <?php
                         //echo \app\components\Debug::d($pages,'pages');
                         echo LinkPager::widget([
-                        'pagination' => $pages,
+                            'pagination' => $pages,
                     ]); ?>
                 </div>
 
@@ -173,12 +152,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <div class="page-hr">
             <hr>
         </div>
-
-<!--        <div class="row">-->
-<!--            <div class="col-md-12 col-md-offset-0 ">-->
-<!--                <div id="donutchart" class="" style="width: 900px; height: 500px;"></div>-->
-<!--            </div>-->
-<!--        </div>-->
 
     </div>
 </div>
@@ -359,7 +332,7 @@ CFCF;
     </div>
 </div>
 
-<!-- модальное окно для правки и показа события -->
+<!-- модальное окно для правки и показа (2 ин 1) события -->
 <div class="modal fade" id="modalEventEdit" tabindex="-1" role="dialog" aria-labelledby="modalEventEditLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -441,6 +414,7 @@ CFCF;
     </div>
 </div>
 
+<!-- модальное окно для добавления события -->
 <div class="modal fade" id="modalAddPost" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

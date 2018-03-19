@@ -530,6 +530,9 @@ span.success{
 	text-align: center;
 }
 
+.tar{
+	text-align: right;
+}
 
 #basic-addon2{
 	cursor: pointer;

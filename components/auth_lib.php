@@ -9,12 +9,14 @@
 namespace app\components;
 
 use Yii;
+use yii\web\Controller;
 
-class AuthLib
+class AuthLib extends Controller
 {
     const NOT_AUTHED_PATH = "user/login";
     const AUTHED_PATH = "billing/index";
     const LOG_OUT_PATH = "user/logout";
+
     //
     public static function appSessionStart(){
         //$session = new Yii::$app->session;
@@ -26,10 +28,11 @@ class AuthLib
     //
     public static function appShowSession(){
         self::appSessionStart();
-        echo Debug::d($_SESSION,'user...',1);
+        //echo Debug::d($_SESSION,'user...',1);
 
         return true;
     }
+
     //
     public static function appIsAuth()
     {
@@ -40,6 +43,13 @@ class AuthLib
         }
 
         return false;
+    }
+
+    //
+    public static function appGoAuth()
+    {
+        $a = new Controller('tmp_test','module_test');
+        return $a->redirect([AuthLib::NOT_AUTHED_PATH]);
     }
 
     //

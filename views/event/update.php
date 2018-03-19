@@ -13,7 +13,7 @@ $this->title = 'Events | ';
 if (\Yii::$app->controller->action->id == 'create') {
     $this->title .= 'Создание';
 }else{
-    $this->title .= 'Просмотр';;
+    $this->title .= 'Обновление';;
 }
 $this->title .= ' события';
 
@@ -21,7 +21,7 @@ $this->title .= ' события';
 //echo \app\components\Debug::d(Yii::$app,'yii-app');
 
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
-$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Show event page'], 'keywords');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Update event page'], 'keywords');
 
 
 ?>

@@ -16,5 +16,6 @@ return [
     'name' => 'Martin German',
     'restore_salt' => 'S2per_-%^CoolRestoreSa1t@354%__Ever++', // S2per_-%^CoolRestoreSa1t@354%__Ever++
     'history_post_count' => 25,
+    'history_post_search' => 50,
     'file_export_salt' => '7dfklj*3478LKjdf8459KLJDKLF',
 ];
