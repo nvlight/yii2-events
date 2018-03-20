@@ -287,18 +287,17 @@ class EventController extends \yii\web\Controller
     }
 
     public function actionTestq(){
-        $pgs = 'default'; $colName = 'desc';
-        $q_counts = Yii::$app->params['history_post_search'];
-        $q_counts = Yii::$app->params['history_post_count'];
-        echo Debug::d($q_counts);
-        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-            ->with('category')->with('types');
 
-        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-            'pageSizeParam' => false, 'forcePageParam' => false, 'route' => 'event/history' ]);
-        $rs = $query->offset($pages->offset)->limit($pages->limit)
-            ->orderBy(['id' => SORT_ASC])->all();
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $colName = 'type.name'; $text = 'вкл';
+        $rs = Event::find()->where(['event.i_user' => $_SESSION['user']['id']])
+            ->andWhere(['like',$colName,$text])
+            ->joinWith('types') //->asArray()
+            ->limit(50)->all();
         echo Debug::d(count($rs),'count rs');
+        echo Debug::d($rs,'rs');
     }
 
     /**
@@ -331,24 +330,10 @@ class EventController extends \yii\web\Controller
                     break;
                 }
                 case 4: {
-                    // .........
-                    $colName = 'type';
-                    $str = (string)($text);
-                    $str = mb_strtolower($str); $str = trim($str);
-                    $text = '';
-                    if ($str === 'доход'){
-                        $text = 1;
-                    }elseif ($str === 'расход'){
-                        $text = 2;
-                    }
-                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id'],$colName => $text ])
-                        ->with('category')->with('types')
-                        ->limit(10)->all();
-                    break;
-                }
-                case 5: {
-                    $rs = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-                        ->with('category')->with('types')->orderBy(['id' => SORT_DESC])
+                    $colName = 'type.name'; // $text = 'расх';
+                    $rs = Event::find()->where(['event.i_user' => $_SESSION['user']['id']])
+                        ->andWhere(['like',$colName,$text])
+                        ->joinWith('types') //->asArray()
                         ->limit(50)->all();
                     break;
                 }
