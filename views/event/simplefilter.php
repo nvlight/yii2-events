@@ -30,7 +30,6 @@ $action = Yii::$app->controller->action->id;
 //echo Debug::d($json,'json',2);
 
 ?>
-
 <?php
 
     // for debug
