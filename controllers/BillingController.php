@@ -9,15 +9,17 @@ use Yii;
 
 class BillingController extends \yii\web\Controller
 {
+    /**
+     *
+     *
+     **/
     public function actionIndex()
     {
-        if (!AuthLib::appIsAuth()){
-            $this->layout = 'for_auth';
-            //return $this->goBack(['']);
-            return $this->redirect([AuthLib::NOT_AUTHED_PATH]);
-            //return $this->render('index', [ 'message' => $message ]);
-        }
-        $uid = $_SESSION['user']['id'];
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //echo Debug::d(Yii::$app->session);
+        //echo Debug::d($_REQUEST,'request'); die;
+
+        $uid = intval($_SESSION['user']['id']);
         if (Yii::$app->request->isGet && array_key_exists('remains',$_GET) && preg_match("#^[1-9]\d*$#",$_GET['remains']) ){
             $val = intval($_GET['remains']);
             $rs = Yii::$app->db
@@ -39,7 +41,10 @@ class BillingController extends \yii\web\Controller
      *
      * */
     public function actionChangeUserLimit($val=0){
-        if ((Yii::$app->request->isAjax) && AuthLib::appIsAuth()) {
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if ((Yii::$app->request->isAjax)){
             $ulimit = User::findOne([$_SESSION['user']['id']]);
             //echo Debug::d($ulimit,'$ulimit');
             if (!$ulimit){
@@ -47,11 +52,17 @@ class BillingController extends \yii\web\Controller
                 die(json_encode($json));
             }
             $ulimit->remains = $val;
-            $rs = $ulimit->update();
+            // чтобы это заработало, нужно чтобы новое значение было отлично от предыдущего, на это и update!
+            // инчае пишеm $ulimit->save() вместо $ulimit->update() ;
+            $rs = $ulimit->save();
+
             // обновление не работает ! придется сделать как приведено ниже!
             // а еще может не работать потому, что это update а не save();
             // а не работает он потому, что в модель введена капча!
-            $rs = Yii::$app->db->createCommand("UPDATE `user` SET remains={$val} WHERE `id`={$_SESSION['user']['id']} ")->execute();
+            //$rs = Yii::$app->db
+            //    ->createCommand("UPDATE `user` SET remains={$val} WHERE `id`={$_SESSION['user']['id']} ")
+            //    ->execute();
+
             // также нужно обновить и сессионную переменную remains
             $_SESSION['user']['remains'] = $val;
             $recalc = []; // cshet and course

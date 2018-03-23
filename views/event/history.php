@@ -255,9 +255,6 @@ CFCF;
                             [
                                 'item' => function($index, $label, $name, $checked, $value) {
                                     $ch = '';
-                                    if ($index === 0) {
-                                        $ch = "checked=''";
-                                    }
                                     $return = '<label>';
                                     $return .= '<input type="checkbox" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
                                     $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .
@@ -304,9 +301,6 @@ CFCF;
                         [
                             'item' => function($index, $label, $name, $checked, $value) {
                                 $ch = '';
-                                if ($index === 0) {
-                                    $ch = "checked=''";
-                                }
                                 $return = '<label>';
                                 $return .= '<input type="checkbox" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
                                 $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .

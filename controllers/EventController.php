@@ -132,10 +132,10 @@ class EventController extends \yii\web\Controller
      *
      **/
     public function actionDel(){
-        //echo Debug::d($_SERVER,'server');
-        //echo Debug::d($_POST,'server');
-        //die;
-        if (Yii::$app->request->method === 'GET' && AuthLib::appIsAuth()){
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if (Yii::$app->request->method === 'GET'){
             $id = Yii::$app->request->get('id'); $rs = null;
             //echo $id; die;
             if ( preg_match("#^[1-9]\d{0,7}$#", $id) &&
@@ -286,6 +286,10 @@ class EventController extends \yii\web\Controller
         }
     }
 
+    /*
+     *
+     *
+     **/
     public function actionTestq(){
 
         //

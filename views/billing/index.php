@@ -170,23 +170,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
 $js1 = <<<JS
 
-/* */
-// $('#basic-focusout').on('click', function(e) {
-//     $('input.user_limit').focusout();
-// });
-
-/* */
-// $('input.user_limit222').on('focus', function(ee) {
-//   $(this).keyup(function(e){
-//     if (e.which == 13) {
-//         ee.preventDefault();
-//         updateUserLimit();
-//         $(this).focusout();
-//         return false;
-//     } 
-//     return false;
-//   }); 
-// });
 
 /* */
 $('.user_limit').keydown(function (event) {
@@ -198,6 +181,7 @@ $('.user_limit').keydown(function (event) {
     }
 });
 
+/* */
 function updateUserLimit(){
     //console.log('change limit & reload page: starting...');
     $.ajax({

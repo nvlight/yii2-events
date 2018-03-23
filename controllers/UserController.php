@@ -39,11 +39,8 @@ class UserController extends \yii\web\Controller
      * */
     public function actionIndex()
     {
-        if (AuthLib::appIsAuth()){
-            $this->layout = '_main';
-            return $this->redirect(AuthLib::AUTHED_PATH);
-        }
-        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        AuthLib::appGoIndex();
     }
 
     /*
@@ -51,9 +48,8 @@ class UserController extends \yii\web\Controller
      * */
     public function actionLogout()
     {
-        AuthLib::appLogout();
-        $this->layout = 'for_auth';
-        $this->redirect([AuthLib::NOT_AUTHED_PATH]);
+        if (Authlib::appIsAuth()){ AuthLib::appLogout();}
+        AuthLib::appGoAuth();
     }
 
     /*
@@ -66,22 +62,11 @@ class UserController extends \yii\web\Controller
 
         if (!AuthLib::appIsAuth()){
             $this->layout = 'for_auth';
-//            echo Debug::d($_SESSION,'session');
-//            echo Debug::d($_REQUEST,'request');
 
-//            echo Debug::d($_SESSION['__captcha/user/captcha'],'session_user_captcha',2);
-//            if (array_key_exists('AuthForm',$_REQUEST)){
-//                echo Debug::d($_REQUEST['AuthForm']['verifyCode'],'request_user_captcha',2);
-//            }
-
-            //$this->createAction('captcha')->getVerifyCode(true); // перегенерация капчи
             if ($model->load(Yii::$app->request->post())
                 && $model->validate()
-                // его надобность отпадает т.к. валидейт вбирает его в себя
-                //&& (Yii::$app->request->post('AuthForm')['verifyCode'] === $_SESSION['__captcha/user/captcha'] )
                 )
             {
-                //echo Debug::d($model); die;
                 $parMail = $model->mail;  //$parMail = Yii::$app->request->post('AuthForm')['mail'];
                 $parPass = $model->upass; //$parPass = Yii::$app->request->post('AuthForm')['upass'];
                 //
@@ -89,12 +74,6 @@ class UserController extends \yii\web\Controller
                 $passWithSalt = $mySalt . $parPass;
                 $hashedPass = sha1($passWithSalt);
                 $getUser = User::findOne(['mail' => $parMail, 'upass' => $hashedPass]); //()->where(['mail'=>$parMail])->one();
-//                echo Debug::d($parMail,'mail');
-//                echo Debug::d($parPass,'upass');
-//                echo Debug::d($passWithSalt,'$passWithSalt');
-//                echo Debug::d($hashedPass,'$hashedPass');
-//                echo Debug::d($getUser,'get User');
-//                die;
                 if ($getUser){
                     $this->createAction('captcha')->getVerifyCode(true); // перегенерация капчи
                     AuthLib::appLogin($getUser);
@@ -111,6 +90,7 @@ class UserController extends \yii\web\Controller
                     return $this->render('login', compact('model', 'err1') );
                 }
             }
+            $this->createAction('captcha')->getVerifyCode(true); // перегенерация капчи
             //Yii::$app->session->setFlash('logined', 'заполните поля');
             return $this->render('login', compact('model') );
         }
@@ -186,9 +166,6 @@ class UserController extends \yii\web\Controller
                 //&& (Yii::$app->request->post('RegistrationForm')['captcha'] === $_SESSION['__captcha/site/captcha']
                 )
             {
-//                echo Debug::d($_SESSION,'session');
-//                echo Debug::d($_REQUEST,'request');
-//                echo Debug::d($model);
                 Yii::$app->session->setFlash('registrated', 'Валидация пройдена!');
                 // если текущий мейл занят, то сразу выводим это!
                 $getUser = User::findOne(['mail' => $model->mail]);
@@ -271,8 +248,6 @@ class UserController extends \yii\web\Controller
     public function actionRestore()
     {
         if (!AuthLib::appIsAuth()) {
-            //echo Debug::d($email);
-            //echo Debug::d($_REQUEST);
             $model = new RestoreForm(); $isRestore = false;
             if ($model->load(Yii::$app->request->post()) && $model->validate() ){
                 //echo 'nice job';

@@ -111,6 +111,71 @@ class TestController extends \yii\web\Controller
 
     }
 
+    /*
+ *
+ *
+ **/
+    public function actionLfile(){
+        // nice joke )
+        return \Yii::$app->response->sendFile('test/test.txt');
+    }
+
+    /*
+     *
+     *
+     **/
+    public function actionTmail(){
+        // nice joke )
+        $p[1] = 'iduso@mail.ru';
+        $p[21] = Yii::$app->params['sw_frommail'];
+        $p[22] = Yii::$app->params['name'];
+        $p[3] = 'Events - регистрация'; // subject
+        $p[4] = "Вы успешно зарегистрировались в приложении Events <br>\n\n";
+        $dtReg = date("m.d.y H:i:s");
+        $p[4] .= "Ваше имя: name<br>";
+        $p[4] .= "Ваша почта: mail<br>";
+        $p[4] .= "Ваш пароль: pass<br>";
+        $p[4] .= "Дата регистрации: dt_reg<br>";
+        $p[4] .= "<br/>Это сообщение отправлено автоматически, пожалуйста, не отвечайте на него<br/>";
+        $res = Yii::$app->mailer->compose()
+            ->setTo($p[1])
+            ->setFrom([$p[21] => $p[22]])
+            ->setSubject($p[3])
+            ->setTextBody($p[4])
+            ->send();
+        echo 'done';
+    }
+
+    /*
+     *
+     *
+     **/
+    public function actionTmail2(){
+        $p[1] = 'iduso@mail.ru';
+        $p[21] = Yii::$app->params['sw_frommail'];
+        $p[22] = Yii::$app->params['name'];
+        $p[3] = "Events. Восстановление пароля";
+        $p[4] = Html::a('Восстановить доступ!', ['user/do-restore?hash='.'reshash'], ['class' => 'btn btn-success']);
+        $text_body = <<<TB
+    <h4>Приложение Events</h4>
+    <h5>Сброс пароля</h5>
+    <p>Для того, чтобы сбросить пароль, нужно перейти по данной ссылке и получить временный пароль</p>
+    <p>
+       <a href="{11}"
+        class="btn btn-success" target="_blank" rel="noopener" data-snippet-id="">
+            {22}  
+       </a>
+    </p>
+TB;
+        $res = Yii::$app->mailer->compose('layouts/html',['content' => $text_body])
+            ->setTo($p[1])
+            ->setFrom([$p[21] => $p[22]])
+            ->setSubject($p[3])
+            ->setTextBody($text_body)
+            ->send();
+        echo 'res: ' . $res;
+    }
+
     public function actionMail(){
         $this->layout = '@app/mail/layouts/html';
 
@@ -127,35 +192,6 @@ class TestController extends \yii\web\Controller
             ->all();
         ;
         echo Debug::d($events,'events',1);
-
-//        echo \moonland\phpexcel\Excel::export([
-//            'models' => $events,
-//            'columns' => ['id','desc','summ'], //without header working, because the header will be get label from attribute label.
-//            'headers' => ['column1' => 'Header Column 1','column2' => 'Header Column 2', 'column3' => 'Header Column 3'],
-//        ]);
-
-//        \moonland\phpexcel\Excel::widget([
-//            'models' => $events,
-//            'mode' => 'export', //default value as 'export'
-//            'columns' => ['id','desc','summ'], //without header working, because the header will be get label from attribute label.
-//            'headers' => ['column1' => 'Header Column 1','column2' => 'Header Column 2', 'column3' => 'Header Column 3'],
-//        ]);
-
-//        \moonland\phpexcel\Excel::export([
-//            'models' => $events,
-//            'columns' => [
-//                'desc:text:Event desc',
-//                'created_at:datetime',
-//                [
-//                    'attribute' => 'updated_at',
-//                    'format' => 'date',
-//                ],
-//            ],
-//            'headers' => [
-//                'created_at' => 'Date Created Content',
-//            ],
-//        ]);
-
 
 
         // https://github.com/PHPOffice/PHPExcel

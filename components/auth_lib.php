@@ -39,17 +39,29 @@ class AuthLib extends Controller
         self::appSessionStart();
         //
         if (array_key_exists('user',$_SESSION)){
+            //echo 'da';
             return true;
         }
-
+        //echo 'net';
         return false;
     }
 
     //
     public static function appGoAuth()
     {
+        //echo 'yes';
         $a = new Controller('tmp_test','module_test');
-        return $a->redirect([AuthLib::NOT_AUTHED_PATH]);
+        //echo Debug::d($a);
+        die($a->redirect([AuthLib::NOT_AUTHED_PATH])->send());
+    }
+
+    //
+    public static function appGoIndex()
+    {
+        //echo 'yes';
+        $a = new Controller('tmp_test','module_test');
+        //echo Debug::d($a);
+        die($a->redirect([AuthLib::AUTHED_PATH])->send());
     }
 
     //
@@ -62,7 +74,7 @@ class AuthLib extends Controller
         Yii::$app->session->close(); // закрываем сессию
         Yii::$app->session->destroy(); // уничтожаяем все связанные с ним данные
 
-        return true;
+        self::appGoIndex();
     }
 
     //
