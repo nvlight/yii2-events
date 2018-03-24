@@ -300,6 +300,6 @@ class UserController extends \yii\web\Controller
             return $this->render('dorestore',compact('np','uname','err_msg'));
 
         }
-        return $this->redirect(AuthLib::NOT_AUTHED_PATH);
+        return AuthLib::appGoIndex();
     }
 }
