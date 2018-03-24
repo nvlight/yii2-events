@@ -30,16 +30,14 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 ?>
                 <h2><i class="fa fa-sun-o" aria-hidden="true"></i> Events</h2>
                 <hr class="hr-toh2">
-                <p class="capt show">Войдите для работы</p>
-                <?php if (Yii::$app->session->hasFlash('registrated')): ?>
-                    <p class="capt show" style="font-size: 12px; color: #DF4326;">
-                        <?php //echo Html::encode(Yii::$app->session->getFlash('registrated'); ?>
-                    </p>
-                <?php else: ?>
-                    <p class="capt show" style="font-size: 12px; color: #DF4326;">
+                <p class="capt show">Регистрация пользователя</p>
 
+                <?php if (Yii::$app->session->hasFlash('registrated')): ?>
+                    <p class="alert-success p5">
+                        <?php echo Html::encode(Yii::$app->session->getFlash('registrated')); ?>
                     </p>
                 <?php endif; ?>
+
                 <?= $form->field($model, 'mail',
                     ['inputOptions' => [
                         'placeholder' => 'Введите email',

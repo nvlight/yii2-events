@@ -32,11 +32,13 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 <h2><i class="fa fa-sun-o" aria-hidden="true"></i> Events</h2>
                 <hr class="hr-toh2">
                 <p class="capt show">Войдите для работы</p>
+
                 <?php if (Yii::$app->session->hasFlash('logined')): ?>
-                    <p class="capt show" style="font-size: 12px; color: #DF4326;">
+                    <h4 class="alert-danger p10 fz14" >
                         <?=Html::encode(Yii::$app->session->getFlash('logined'))?>
-                    </p>
+                    </h4>
                 <?php endif; ?>
+
                 <?= $form->field($model, 'mail',
                     ['inputOptions' => [
                         'placeholder' => 'Введите email',

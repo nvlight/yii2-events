@@ -28,7 +28,7 @@ class RegistrationForm extends Model
     public function rules()
     {
         return [
-                [['mail', 'upass','uname'], 'required'],
+                [['mail', 'upass','uname','verifyCode'], 'required'],
                 [['mail','upass','uname'], 'string', 'max' => 55],
                 [['mail'], 'email'],
                 ['verifyCode', 'captcha', 'captchaAction'=>'/user/captcha'],

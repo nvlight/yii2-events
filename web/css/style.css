@@ -514,12 +514,19 @@ span.success{
 	margin-bottom: 10px;
 }
 
+.fz14{
+	font-size: 14px;
+}
+
 .convert2xlsx > i:hover {
 	color: #63817a;
 }
 
 .m015{
 	margin: 0 15px;
+}
+.p5{
+	padding: 5px;
 }
 
 .account ul li a{

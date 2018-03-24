@@ -27,7 +27,7 @@ class AuthForm extends Model
     public function rules()
     {
         return [
-                [['mail', 'upass',], 'required'],
+                [['mail', 'upass','verifyCode'], 'required'],
                 [['mail','upass'], 'string', 'max' => 55],
                 [['mail'], 'email'],
                 //['captcha', 'captcha'],
