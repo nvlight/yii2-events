@@ -517,6 +517,9 @@ span.success{
 .fz14{
 	font-size: 14px;
 }
+.fz16{
+	font-size: 16px;
+}
 
 .convert2xlsx > i:hover {
 	color: #63817a;

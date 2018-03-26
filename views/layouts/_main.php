@@ -91,6 +91,11 @@ if (array_key_exists('1',$rr)) {
                             'Запись',
                             'post',
                         ],
+                        'fa-file' => [
+                            'load',
+                            'Документы',
+                            'doc',
+                        ],
                     ];
                     ?>
                     <?php foreach ($st as $stk => $stv): ?>
@@ -136,6 +141,11 @@ if (array_key_exists('1',$rr)) {
                     'index',
                     'Запись',
                     'post',
+                ],
+                'fa-file' => [
+                    'load',
+                    'Документы',
+                    'doc',
                 ],
             ];
             ?>
@@ -193,6 +203,11 @@ if (array_key_exists('1',$rr)) {
                                                 'Запись',
                                                 'post',
                                             ],
+                                    'fa-file' => [
+                                                'load',
+                                                'Документы',
+                                                'doc',
+                                    ],
                                 ];
                             ?>
                             <?php foreach ($st as $stk => $stv): ?>
@@ -211,6 +226,7 @@ if (array_key_exists('1',$rr)) {
                             <?php endforeach; ?>
 
                         </ul>
+                        <?php //echo Debug::d($st,'st'); ?>
                     </div>
                 </div>
             </div>

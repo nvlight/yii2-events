@@ -18,4 +18,8 @@ return [
     'history_post_count' => 25,
     'history_post_search' => 50,
     'file_export_salt' => '7dfklj*3478LKjdf8459KLJDKLF',
+    //'pathUploads' => '@web',
+    'pathUploads' => realpath(dirname(__FILE__)).'\..\web\upload\\',
+    'fileMaxAmount' => 10,
+    'fileMaxSize' => 10*1024*1024,
 ];

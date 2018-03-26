@@ -17,9 +17,8 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
     <div class="bill-inset">
         <div class="page-caption clearfix">
             <h2 class="pull-left" >Страница записей</h2>
-        </span>
-
         </div>
+
         <div class="page-hr">
             <hr>
         </div>
