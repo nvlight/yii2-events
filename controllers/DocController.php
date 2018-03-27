@@ -8,12 +8,15 @@
 
 namespace app\controllers;
 
+use app\models\ChangeFileForm;
 use app\models\File;
 use Yii;
 use app\models\LoadDocForm;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\UploadedFile;
 use app\components\AuthLib;
+use yii\helpers\FileHelper;
 
 class DocController extends Controller
 {
@@ -99,4 +102,59 @@ class DocController extends Controller
         }
         return $this->redirect(['doc/load']);
     }
+
+    //
+    public function actionDownload(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $down_item = File::findOne(['i_user' => $_SESSION['user']['id'], 'id' => Yii::$app->request->get('id')]);
+        if ($down_item && is_file(Yii::$app->params['pathUploads'] . $down_item->hash)){
+            return Yii::$app->response
+                ->sendFile(Yii::$app->params['pathUploads'] . $down_item->hash, $down_item->name);
+        }
+    }
+
+    //
+    public function actionShow(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $down_item = File::findOne(['i_user' => $_SESSION['user']['id'], 'id' => Yii::$app->request->get('id')]);
+        $filename = Yii::$app->params['pathUploads'] . $down_item->hash;
+        if ($down_item && is_file($filename)){
+            $mimeType = FileHelper::getMimeType($filename);
+            // echo 'mime: ' . $mimeType;
+            $white_list = ['image/png', 'image/gif', 'image/jpeg'];
+            if (in_array($mimeType, $white_list)){
+                return $this->redirect(Url::to('@web/upload/' . $down_item->hash,true));
+            }else{
+                return $this->redirect(Url::to(['doc/download', 'id' => $down_item->id],true));
+            }
+        }
+    }
+
+    //
+    public function actionUpd(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $model = new ChangeFileForm();
+        $upd_item = File::findOne(['i_user' => $_SESSION['user']['id'], 'id' => Yii::$app->request->get('id')]);
+        if (!$upd_item) die('Vi doigralis!');
+        $model->filename = $upd_item->name;
+        $model->notice = $upd_item->notice;
+
+        if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post()) && $model->validate()){
+            $upd_item->name = $model->filename;
+            $upd_item->notice = $model->notice;
+            if ($upd_item->save()) {
+                Yii::$app->session->setFlash('changeFile', 'Мета-данные файла сохранены!');
+            }
+        }
+
+        $this->layout = '_main';
+        return $this->render('upd', ['upd_item' => $upd_item, 'model' => $model]);
+    }
+
 }

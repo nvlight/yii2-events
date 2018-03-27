@@ -18,7 +18,7 @@ class LoadDocForm extends Model
     public function rules(){
         return [
           [['file'], 'file',
-              'extensions' => 'png, jpg, jpeg, docx, xlsx, pdf, djvu, rar, zip, 7zip',
+              'extensions' => 'png, jpg, jpeg, gif, docx, xlsx, pdf, djvu, rar, zip, 7zip, ',
               'maxSize' => Yii::$app->params['fileMaxSize'],
               //'tooLarge'=>'File has to be smaller than 50MB'
               ],
