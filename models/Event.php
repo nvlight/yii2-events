@@ -145,7 +145,7 @@ TRH;
     public function rules()
     {
         return [
-            [['i_user', 'i_cat', 'desc', 'dtr','type','summ'], 'required'],
+            [['i_user', 'i_cat', 'desc', 'dtr','type'], 'required'],
             [['i_user', 'i_cat', 'summ', 'type'], 'integer'],
             [['dt'], 'safe'],
             [['dtr'], 'string', 'length' => [8]],

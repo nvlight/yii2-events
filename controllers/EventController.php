@@ -114,11 +114,17 @@ class EventController extends \yii\web\Controller
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         //
         $model = new Event();
+        $model->summ = 0;
+        $model->dtr = date('Y-m-d');
         if ($model->load(Yii::$app->request->post())) {
             $model->i_user = $_SESSION['user']['id'];
             if ( $model->validate() &&  $model->save()){
                 return $this->redirect(['show', 'id' => $model->id]);
             }
+            $this->layout = '_main';
+            return $this->render('update',  [
+                'model' => $model,
+            ]);
         } else {
             $this->layout = '_main';
             return $this->render('update',  [
@@ -203,8 +209,11 @@ class EventController extends \yii\web\Controller
             //$q1 = (new Query)->select("last_insert_id() as 'lid'")->all();
             //$ev = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $q1[0]['lid']])
             //    ->with('category')->with('types')->one();
+            $mb_dt = mb_substr($ev->dtr,0,10);
+            $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
+                $mb_dt, $ev->types['name'], $ev->types['color'], $ev['category']->name);
 
-            $json = ['success' => 'yes', 'message' => 'Запись успешно добавлена!',];
+            $json = ['success' => 'yes', 'message' => 'Запись успешно добавлена!','trh' => $trh];
             die(json_encode($json));
         }
     }

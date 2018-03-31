@@ -300,7 +300,7 @@ $('form.addEvent').on('beforeSubmit', function(e){
     //e.preventDefault();
     var data = $(this).serialize();
     //alert('add category...')
-    //console.log('add event by modal form...');
+    console.log('add event by modal form...');
     $.ajax({
         url: '/event/add',
         type: 'POST',

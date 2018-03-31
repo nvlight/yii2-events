@@ -66,60 +66,6 @@ if (array_key_exists('1',$rr)) {
             </div>
 
             <!-- Соберите навигационные ссылки, формы, и другой контент для переключения -->
-            <!-- hidden-sm hidden-md -->
-            <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
-                <ul class="list-unstyled mainul">
-                    <?php
-                    $st = [
-                        'fa-file-text-o' => [
-                            'index',
-                            'Счет',
-                            'billing'
-                        ],
-                        'fa-bolt' => [
-                            'history',
-                            'История',
-                            'event',
-                        ],
-                        'fa-calendar' => [
-                            'plan',
-                            'Планирование',
-                            'event',
-                        ],
-                        'fa-archive' => [
-                            'index',
-                            'Запись',
-                            'post',
-                        ],
-                        'fa-file' => [
-                            'load',
-                            'Документы',
-                            'doc',
-                        ],
-                    ];
-                    ?>
-                    <?php foreach ($st as $stk => $stv): ?>
-                        <?php if (1==1) : ?>
-                            <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
-                                <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
-                                                <span class="ipic">
-                                                    <i class="fa <?=$stk?>" aria-hidden="true"></i>
-                                                </span>
-                                    <span class="text">
-                                                    <?=$stv[1]?>
-                                                </span>
-                                </a>
-                            </li>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
-                </ul>
-            </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
-    </nav>
-
-<noscript>
-    <ul class="list-unstyled mainul hidden-md hidden-lg">
             <?php
             $st = [
                 'fa-file-text-o' => [
@@ -142,6 +88,11 @@ if (array_key_exists('1',$rr)) {
                     'Запись',
                     'post',
                 ],
+                'fa-video-camera' => [
+                    'index',
+                    'Кино',
+                    'video',
+                ],
                 'fa-file' => [
                     'load',
                     'Документы',
@@ -149,22 +100,46 @@ if (array_key_exists('1',$rr)) {
                 ],
             ];
             ?>
-            <?php foreach ($st as $stk => $stv): ?>
-                <?php if (1==1) : ?>
-                    <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
-                        <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
-                                            <span class="ipic">
-                                                <i class="fa <?=$stk?>" aria-hidden="true"></i>
-                                            </span>
-                            <span class="text">
-                                                <?=$stv[1]?>
-                                            </span>
-                        </a>
-                    </li>
-                <?php endif; ?>
-            <?php endforeach; ?>
 
-        </ul>
+            <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
+                <ul class="list-unstyled mainul">
+                    <?php foreach ($st as $stk => $stv): ?>
+                        <?php if (1==1) : ?>
+                            <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                                <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
+                                    <span class="ipic">
+                                        <i class="fa <?=$stk?>" aria-hidden="true"></i>
+                                    </span>
+                                    <span class="text">
+                                        <?=$stv[1]?>
+                                    </span>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+
+<noscript>
+    <ul class="list-unstyled mainul hidden-md hidden-lg">
+        <?php foreach ($st as $stk => $stv): ?>
+            <?php if (1==1) : ?>
+                <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                    <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
+                                        <span class="ipic">
+                                            <i class="fa <?=$stk?>" aria-hidden="true"></i>
+                                        </span>
+                        <span class="text">
+                                            <?=$stv[1]?>
+                                        </span>
+                    </a>
+                </li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </ul>
 </noscript>
 
 <div class="wrapper">
@@ -177,39 +152,9 @@ if (array_key_exists('1',$rr)) {
                             <i class="fa fa-pie-chart" aria-hidden="true"></i>
                             <span>Events</span>
                         </a>
-
                     </div>
                     <div class="main-menu">
                         <ul class="list-unstyled mainul">
-                            <?php
-                                $st = [
-                                    'fa-file-text-o' => [
-                                                'index',
-                                                'Счет',
-                                                'billing'
-                                            ],
-                                    'fa-bolt' => [
-                                                'history',
-                                                'История',
-                                                'event',
-                                            ],
-                                    'fa-calendar' => [
-                                                'plan',
-                                                'Планирование',
-                                                'event',
-                                            ],
-                                    'fa-archive' => [
-                                                'index',
-                                                'Запись',
-                                                'post',
-                                            ],
-                                    'fa-file' => [
-                                                'load',
-                                                'Документы',
-                                                'doc',
-                                    ],
-                                ];
-                            ?>
                             <?php foreach ($st as $stk => $stv): ?>
                                 <?php if (1==1) : ?>
                                     <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
@@ -224,7 +169,6 @@ if (array_key_exists('1',$rr)) {
                                     </li>
                                 <?php endif; ?>
                             <?php endforeach; ?>
-
                         </ul>
                         <?php //echo Debug::d($st,'st'); ?>
                     </div>
