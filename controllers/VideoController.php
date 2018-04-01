@@ -42,7 +42,7 @@ class VideoController extends Controller
 
     public function actionTestapi(){
 
-        // используется вариант с самим объектом youyube -> search -> listSearch 
+        // используется вариант с самим объектом youyube -> search -> listSearch
 
         $ids[] = 'N584L3HdLfg';
         $api_key = Yii::$app->params['youtube_api_key_1'];
@@ -61,9 +61,8 @@ class VideoController extends Controller
 
         //echo Debug::d($rs2,'youtube result');
         $this->layout = '_main';
-        return $this->render('main',['data' => $rs ]);
+        return $this->render('search',['rs' => $rs ]);
     }
-
 
     public function actionTestapi2(){
 
@@ -143,4 +142,10 @@ class VideoController extends Controller
         return $this->render('main',['data' => $response ]);
     }
 
+
+    public function actionMaxheight(){
+
+        $this->layout = '_main';
+        return $this->render('testmaxheight',['data' => '' ]);
+    }
 }

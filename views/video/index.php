@@ -38,8 +38,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <div class="col-md-4">
                         <iframe
                             width="350" height="250"
-                            src="https://www.googleapis.com/youtube/v3/videos?id=<?=$v->link?>&key=<?=Yii::$app->params['youtube_api_key_1']?>
-                                &part=snippet,contentDetails,statistics,status"
+                            src="https://www.youtube.com/embed/<?=$v->link?>"
                             frameborder="0" allow="autoplay; encrypted-media"
                             allowfullscreen>
                         </iframe>

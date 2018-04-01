@@ -5,7 +5,6 @@ use yii\widgets\ActiveForm;
 use app\models\Category;
 use app\models\Event;
 use yii\helpers\ArrayHelper;
-use yii\data\ActiveDataProvider;
 use app\components\Debug;
 use app\models\Type;
 use yii\helpers\Html;

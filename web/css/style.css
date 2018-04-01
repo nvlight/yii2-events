@@ -5,6 +5,10 @@ body{
 	font-family: tahoma,verdana,sans-serif;	
 }
 
+.invid {
+	border: 1px solid #000;
+}
+
 /*=======index.html========*/
 .main-auth h2{
 	font-family: 'Kurale';

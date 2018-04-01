@@ -22,7 +22,8 @@
         "kartik-v/yii2-field-range": "*",
         "moonlandsoft/yii2-phpexcel": "*",
         "guzzlehttp/psr7": "1.2.3",
-        "google/apiclient": "2.0"
+        "google/apiclient": "2.0",
+        "nerburish/yii2-match-height-view": "dev-master"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

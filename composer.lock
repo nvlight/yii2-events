@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "44d75088f1bd3643fa0137f1c7c1b602",
+    "content-hash": "d1755628f6ec5991b66af83194f82135",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -143,6 +143,44 @@
                 "javascript",
                 "jquery",
                 "library"
+            ]
+        },
+        {
+            "name": "bower-asset/matchheight",
+            "version": "0.7.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/liabru/jquery-match-height.git",
+                "reference": "2446ac654f694bc05a1297cbab0b2d875e278bbd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/liabru/jquery-match-height/zipball/2446ac654f694bc05a1297cbab0b2d875e278bbd",
+                "reference": "2446ac654f694bc05a1297cbab0b2d875e278bbd",
+                "shasum": ""
+            },
+            "type": "bower-asset-library",
+            "extra": {
+                "bower-asset-main": "dist/jquery.matchHeight.js",
+                "bower-asset-ignore": [
+                    "**/.*",
+                    "node_modules",
+                    "bower_components",
+                    "test",
+                    "tests"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "a more robust, responsive equal heights plugin for jQuery",
+            "keywords": [
+                "columns",
+                "equal",
+                "equalize",
+                "height",
+                "match",
+                "matchHeight"
             ]
         },
         {
@@ -1060,6 +1098,53 @@
                 "yii2"
             ],
             "time": "2015-09-06T07:50:33+00:00"
+        },
+        {
+            "name": "nerburish/yii2-match-height-view",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nerburish/yii2-match-height-view.git",
+                "reference": "6a0fbd6ee299e643a40157b24c6c335b138bb8aa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nerburish/yii2-match-height-view/zipball/6a0fbd6ee299e643a40157b24c6c335b138bb8aa",
+                "reference": "6a0fbd6ee299e643a40157b24c6c335b138bb8aa",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/matchheight": "~0.7.0",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "nerburish\\matchheight\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "nerburish",
+                    "email": "nerburish@hotmail.com"
+                }
+            ],
+            "description": "ListView widget improved to use Jquery Match Height (https://github.com/liabru/jquery-match-height)",
+            "keywords": [
+                "ListView",
+                "dataprovider",
+                "extension",
+                "macth-height",
+                "masonry",
+                "view",
+                "widget",
+                "yii2"
+            ],
+            "time": "2016-08-24T07:47:33+00:00"
         },
         {
             "name": "phpoffice/phpexcel",
@@ -4157,7 +4242,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "kartik-v/yii2-widget-datepicker": 20
+        "kartik-v/yii2-widget-datepicker": 20,
+        "nerburish/yii2-match-height-view": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
