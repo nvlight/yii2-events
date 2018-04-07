@@ -10,10 +10,13 @@ use Yii;
  * @property int $id
  * @property int $i_user
  * @property int $i_cat
+ * @property string $title
  * @property string $description
- * @property string $link
+ * @property string $video_id
  * @property string $note
  * @property string $duration
+ * @property int $viewcount
+ * @property string $channeltitle
  * @property string $dt_publish
  * @property string $dt_created
  * @property string $dt_updated
@@ -38,11 +41,11 @@ class Video extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['i_user', 'i_cat', 'description', 'link'], 'required'],
-            [['i_user', 'i_cat'], 'integer'],
-            [['dt_publish', 'dt_created', 'dt_updated'], 'safe'],
-            [['description', 'link', 'note'], 'string', 'max' => 111],
-            [['duration'], 'string', 'max' => 25],
+            [['i_user', 'i_cat', 'title', 'description', 'video_id','url' ,'duration', 'viewcount', 'channeltitle'], 'required'],
+            [['i_user', 'i_cat', 'viewcount'], 'integer'],
+            [['duration', 'dt_publish', 'dt_created', 'dt_updated'], 'safe'],
+            [['title', 'video_id', 'note', 'channeltitle'], 'string', 'max' => 111],
+            [['description'], 'string', 'max' => 65535],
         ];
     }
 
@@ -53,12 +56,14 @@ class Video extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'i_user' => 'I User',
-            'i_cat' => 'I Cat',
-            'description' => 'Description',
-            'link' => 'Link',
-            'note' => 'Note',
-            'duration' => 'Duration',
+            'i_user' => 'Пользователь',
+            'i_cat' => 'Категория',
+            'title' => 'Название',
+            'description' => 'Описание',
+            'video_id' => 'ИД видео',
+            'url' => 'УРЛ',
+            'note' => 'Примечание',
+            'duration' => 'Длительность',
             'dt_publish' => 'Dt Publish',
             'dt_created' => 'Dt Created',
             'dt_updated' => 'Dt Updated',

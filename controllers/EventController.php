@@ -196,6 +196,7 @@ class EventController extends \yii\web\Controller
             )
         {
             $ev = $model; $ev->i_user = $_SESSION['user']['id'];
+            if ( !$ev->summ) $ev->summ = 0;
             if ( !$model->validate() ){
                 $json = ['success' => 'no', 'message' => 'validate error!', 'error' => $model->errors];
                 die(json_encode($json));

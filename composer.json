@@ -23,7 +23,8 @@
         "moonlandsoft/yii2-phpexcel": "*",
         "guzzlehttp/psr7": "1.2.3",
         "google/apiclient": "2.0",
-        "nerburish/yii2-match-height-view": "dev-master"
+        "nerburish/yii2-match-height-view": "dev-master",
+        "loveorigami/yii2-magnific-popup": "@dev"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

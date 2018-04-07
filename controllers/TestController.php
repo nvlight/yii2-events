@@ -10,7 +10,6 @@ use app\models\Event;
 use app\models\User;
 use Yii;
 use yii\db\Query;
-//use moonland\phpexcel;
 use PHPExcel;
 use PHPExcel_IOFactory;
 use DateTime;
@@ -282,5 +281,27 @@ TB;
         //echo DateTime::createFromFormat('d.m.yyyy h:i:s');
         $curr = (new DateTime())->format('d.m.Y h:i:s');
         echo $curr;
+    }
+
+    /*
+     *
+     *
+     * */
+    public function actionAr(){
+        echo 'start active record';
+        echo "<br>";
+        // возвращает всех покупателей массивом, индексированным их идентификаторами
+        // SELECT * FROM `customer`
+        $Event = Event::find()
+            ->where(['>','id',0])
+            ->one();
+        //echo Debug::d($Event,'Event');
+        echo "<pre>";
+        print_r($Event);
+        echo "</pre>";
+        $Event = Event::find()
+            ->indexBy('id')
+            ->one();
+        //echo Debug::d($Event,'Event');
     }
 }
