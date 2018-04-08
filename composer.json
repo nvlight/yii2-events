@@ -24,7 +24,8 @@
         "guzzlehttp/psr7": "1.2.3",
         "google/apiclient": "2.0",
         "nerburish/yii2-match-height-view": "dev-master",
-        "loveorigami/yii2-magnific-popup": "@dev"
+        "loveorigami/yii2-magnific-popup": "@dev",
+        "fortawesome/font-awesome": "^4.7"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

@@ -43,10 +43,14 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                         //*/
                                     ?>
 
-                                    <a href="#">
+<!--                                    data-toggle="modal" data-target="#watchVideModal"-->
+                                    <a class="cp loadVideoToModal"  data-id="<?=$v->id?>" >
                                         <div class="yt_img"  alt="<?=$v->title?>"
                                              style="background-image: url(<?=\yii\helpers\Url::to('@web/youytube_imgs/' . $img1,true)?>) " >
                                             <span class="yt_duration"><?=$v->duration?></span>
+                                            <span class="tocenter">
+											    <i class="fa fa-youtube-play" aria-hidden="true"></i>
+										    </span>
                                         </div>
                                     </a>
 
@@ -85,3 +89,68 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <?php endif; ?>
     <?php endif; ?>
 </div>
+
+<!-- Модаль -->
+<div class="modal fade" id="watchVideModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Просмотр видео</h4>
+            </div>
+            <div class="modal-body">
+                <iframe width="560" height="315"
+                        src="https://www.youtube.com/embed/"
+                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                </iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+// loadVideoToModal
+
+$js1 = <<<JS
+
+/* */
+function getYtVideoById(id){
+    $.ajax({
+      url: '/video/get-yt-video',
+      type: 'GET',
+      data: {id: id},
+      success: function(res,status) {
+        //console.log('status: '+status);
+        var rs = $.parseJSON(res);
+        if (rs['success'] === 'yes'){
+            //console.log('limit change is success & reload is completed');  
+            $('.modal-body').html(rs['iframe']);
+            $('#watchVideModal').modal('show');
+        }        
+      }
+      ,error: function(res) {
+        alert('we got error --- ' + res);
+      }
+      ,beforeSend: function(e) {
+        //console.log('beforeSend');  
+      }
+      ,complete: function() {
+        //console.log('complete');      
+      }
+    });
+}
+
+/* */
+$('.loadVideoToModal').on('click', function() {
+    var id = $(this).data('id');
+    console.log('id: ' + id);
+    getYtVideoById(id);
+    return false; 
+});
+JS;
+
+$this->registerJs($js1);
+?>

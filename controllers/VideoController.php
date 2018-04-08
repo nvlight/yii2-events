@@ -174,6 +174,7 @@ class VideoController extends Controller
     //
     public function actionSearch1(){
 
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         // используется вариант с самим объектом youyube -> search -> listSearch
 
         $ids[] = 'N584L3HdLfg';
@@ -198,6 +199,8 @@ class VideoController extends Controller
 
     //
     public function actionTestapi2($id=''){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
         // используется вариант с CURL
         $video_id = 'wHObvCfiUyI';
@@ -259,6 +262,8 @@ class VideoController extends Controller
     //
     public function actionTestapi3($id=''){
 
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
         // используется вариант с fOpen
         $video_id = 'wHObvCfiUyI';
         if ($id !== ''){
@@ -316,6 +321,8 @@ class VideoController extends Controller
     //
     public function actionTestapi($id='')
     {
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
         // используется вариант с fileGetContents
         $video_id = '83OavSpuXXY';
         if ($id !== ''){
@@ -363,6 +370,38 @@ class VideoController extends Controller
         }
         //echo Debug::d( $thumbs_array,'$thumbs_array',1,1);
         // convert to array
+    }
+
+    //
+    public function actionWatch($id=''){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $video = Video::findOne($id);
+        //echo Debug::d($video,'video');
+        $this->layout = '_main';
+        return $this->render('watch',['video' => $video]);
+    }
+
+    //
+    public function actionGetYtVideo($id=''){
+
+        if (!Authlib::appIsAuth()) {
+            echo json_decode(['success' => 'no', 'message' => 'auth is required']); die;
+        }
+
+        if (Yii::$app->request->isAjax){
+            $video = Video::findOne($id);
+            if ($video){
+                $iframe = <<<IFRAME
+<iframe width="560" height="315" src="https://www.youtube.com/embed/{$video->video_id}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+IFRAME;
+                $rs = ['success' => 'yes', 'message' => 'video is finded', 'iframe' => $iframe ];
+            }else{
+                $rs = ['success' => 'no', 'message' => 'video is NOT finded', ];
+            }
+            die(json_encode($rs));
+        }
     }
 
     //
