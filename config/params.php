@@ -24,5 +24,6 @@ return [
     'fileMaxSize' => 10*1024*1024,
     'youtube_api_key_1' => 'AIzaSyA8uSUgr6vMKaEHYXzGKjltL6OzhM8IuqM',
     'youtube_api_key_2' => 'AIzaSyB1bK2ug49EZTgCJ4icWjt79e7ETmqul58',
-
+    'youytube_channelid_template' => 'https://www.youtube.com/channel/',
+    'youytube_pathUploads' => realpath(dirname(__FILE__)).'\..\web\youytube_imgs\\',
 ];

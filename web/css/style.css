@@ -517,6 +517,29 @@ span.success{
 .mb10{
 	margin-bottom: 10px;
 }
+.mt10{
+	margin-top: 10px;
+}
+
+.yt_img{
+	max-width: 320px;
+	min-height: 180px;
+	margin: 0 auto;
+	position: relative;
+}
+
+.yt_duration{
+	position: absolute;
+	display: inline-block;
+	color: white;
+	top: 87%;
+	left: 77%;
+	background-color: hsl(0, 1%, 16%);;
+	padding: 1px 6px;
+	font-weight: 700;
+	font-size: 12px;
+	border-radius: 5px;
+}
 
 .fz14{
 	font-size: 14px;

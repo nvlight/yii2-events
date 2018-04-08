@@ -31,7 +31,17 @@ class VideoController extends Controller
         // &part=snippet,contentDetails,statistics&fields=items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(medium),channelTitle,localized),statistics)
         $video_id = $id;
         $api_key = Yii::$app->params['youtube_api_key_2'];
-        $url = "https://www.googleapis.com/youtube/v3/videos?id=$video_id&key=$api_key&part=snippet,contentDetails,statistics&fields=items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(medium),channelTitle,localized),statistics)";
+        //$url = "https://www.googleapis.com/youtube/v3/videos?id=$video_id&key=$api_key&part=snippet,contentDetails,statistics&fields=items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(medium),channelId,channelTitle,localized),statistics)";
+
+        $params = array(
+            'part' => 'contentDetails',
+            'id' => $video_id,
+            'key' => $api_key,
+            'part' => 'snippet,contentDetails,statistics',
+            'fields' => 'items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(default,medium,high),channelTitle,channelId,localized),statistics)'
+        );
+        $url = 'https://www.googleapis.com/youtube/v3/videos?' . http_build_query($params);
+
         $curlSession = curl_init();
 
         curl_setopt($curlSession, CURLOPT_URL, $url);
@@ -109,6 +119,37 @@ class VideoController extends Controller
                     $video->duration = new DateInterval($time); $video->duration = $video->duration->format('%H:%I:%S');
                     $video->viewcount = $res2->statistics->viewCount;
                     $video->channeltitle = $res2->snippet->channelTitle;
+                    $video->channelid = $res2->snippet->channelId;
+
+                    // save thumbnails
+                    $opts = array('http' =>
+                        array(
+                            'method' => 'GET',
+                            'max_redirects' => '0',
+                            'ignore_errors' => '1',
+                        )
+                    , 'ssl' => array(
+                            'verify_peer' => true,
+                            'cafile' => '/SRV/php721/extras/ssl/' . "cacert.pem",
+                            'ciphers' => 'HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2',
+                            'disable_compression' => true,
+                        )
+                    );
+                    $context = stream_context_create($opts);
+                    $thumbnails = $res2->snippet->thumbnails;
+                    $thumbs = ['default','medium','high']; $thumbnails_json = '{}'; $thumbnails_arr = [];
+                    foreach ($thumbs as $k => $v){
+                        $explode = explode('/',$thumbnails->$v->url);
+                        $filename = $explode[count($explode)-2];
+                        $filequality = $explode[count($explode)-1];
+                        $fgc = file_get_contents($thumbnails->$v->url,false,$context);
+                        if ($fgc !== false) {
+                            $thumbnails_arr[] = $filename . '$' . $filequality;
+                            file_put_contents( Yii::$app->params['youytube_pathUploads'] . $filename . '$' . $filequality,$fgc);
+                        }
+                    }
+                    $thumbnails_json = json_encode($thumbnails_arr);
+                    $video->thumbnails = $thumbnails_json;
                 }
             }
 
@@ -120,9 +161,12 @@ class VideoController extends Controller
                     return $this->redirect('index');
                 }
             }
-            echo Debug::d($video->errors,'error',2,1);
+            //echo Debug::d($video->errors,'error',2,1);
         }
-        $all = Video::find(['i_user' => $_SESSION['user']['id']])->with('categoryvideo')->all();
+        $all = Video::find(['i_user' => $_SESSION['user']['id'], ])->where(['active' => '1'])
+            ->with('categoryvideo')->all();
+        //echo Debug::d(count($all),'count rows',1,0);
+        //echo Debug::d($all,'all_videos',1,2);
         $this->layout = '_main';
         return $this->render('index', ['model' => $video, 'all' => $all]);
     }
@@ -153,11 +197,14 @@ class VideoController extends Controller
     }
 
     //
-    public function actionTestapi2(){
+    public function actionTestapi2($id=''){
 
         // используется вариант с CURL
-
         $video_id = 'wHObvCfiUyI';
+        if ($id !== ''){
+            $video_id = $id;
+        }
+
         $api_key = Yii::$app->params['youtube_api_key_2'];
 
         $params = array(
@@ -209,11 +256,15 @@ class VideoController extends Controller
         return $this->render('main',['data' => $jsonData ]);
     }
 
-    public function actionTestapi3(){
+    //
+    public function actionTestapi3($id=''){
 
         // используется вариант с fOpen
-
         $video_id = 'wHObvCfiUyI';
+        if ($id !== ''){
+            $video_id = $id;
+        }
+
         $api_key = Yii::$app->params['youtube_api_key_1'];
 
         $url = 'https://www.googleapis.com/youtube/v3/videos';
@@ -263,19 +314,24 @@ class VideoController extends Controller
     }
 
     //
-    public function actionTestapi()
+    public function actionTestapi($id='')
     {
         // используется вариант с fileGetContents
-
         $video_id = '83OavSpuXXY';
-        $api_key = Yii::$app->params['youtube_api_key_1'];
-        $params = [
-            'part' => 'snippet',
-            'id' => $video_id,
-            'key' => $api_key
-        ];
+        if ($id !== ''){
+            $video_id = $id;
+        }
 
-        $url = "https://www.googleapis.com/youtube/v3/videos?" . http_build_query($params);
+        $api_key = Yii::$app->params['youtube_api_key_1'];
+        $params = array(
+            'part' => 'contentDetails',
+            'id' => $video_id,
+            'key' => $api_key,
+            'part' => 'snippet,contentDetails,statistics',
+            'fields' => 'items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(default,medium,high),channelTitle,localized),statistics)'
+        );
+        $url = 'https://www.googleapis.com/youtube/v3/videos?' . http_build_query($params);
+
         $opts = array('http' =>
             array(
                 'method' => 'GET',
@@ -293,7 +349,20 @@ class VideoController extends Controller
 
         $context = stream_context_create($opts);
         $json_result = file_get_contents ($url,false ,$context);
-        echo Debug::d(json_decode($json_result),'json_result',1,1);
+        $json_decode = json_decode($json_result)->items[0];
+        //echo Debug::d($json_decode,'json_result',1,1);
+        $thumbnails = $json_decode->snippet->thumbnails;
+        echo Debug::d( $thumbnails,'$thumbnails',1,0);
+        $thumbs = ['default','medium','high'];
+        foreach ($thumbs as $k => $v){
+            $explode = explode('/',$thumbnails->$v->url);
+            $filename = $explode[count($explode)-2];
+            $filequality = $explode[count($explode)-1];
+            $fgc = file_get_contents($thumbnails->$v->url,false,$context);
+            file_put_contents( Yii::$app->params['youytube_pathUploads'] . $filename . '$' . $filequality,$fgc);
+        }
+        //echo Debug::d( $thumbs_array,'$thumbs_array',1,1);
+        // convert to array
     }
 
     //

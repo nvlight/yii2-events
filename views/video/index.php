@@ -34,11 +34,12 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     [
                         'label'     => 'Мои видео',
                         'content'   =>  $this->render('showvideos', ['model' => $model,'all' => $all]),
+                        'active'    =>  true
                     ],
                     [
                         'label'     =>  'Добавить видео',
                         'content'   =>  $this->render('addvideo', ['model' => $model, ]),
-                        'active'    =>  true
+
                     ],
 
                 ]
