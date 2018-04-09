@@ -41,7 +41,7 @@ class Video extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['i_user', 'i_cat', 'title', 'description', 'video_id', 'duration', 'viewcount', 'channelid', 'channeltitle', 'thumbnails'], 'required'],
+            [['i_user', 'i_cat', 'title', 'description', 'video_id', 'duration', 'viewcount', 'channelid', 'channeltitle', 'thumbnails','url'], 'required'],
             [['i_user', 'i_cat', 'viewcount'], 'integer'],
             [['description', 'thumbnails'], 'string'],
             [['duration', 'dt_publish', 'dt_created', 'dt_updated'], 'safe'],

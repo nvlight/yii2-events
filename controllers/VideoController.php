@@ -18,6 +18,7 @@ use Google_Client;
 use Google_Service_YouTube;
 use Google_Service_Books;
 use DateInterval;
+use app\models\VideoSearch;
 
 class VideoController extends Controller
 {
@@ -424,5 +425,19 @@ IFRAME;
 
         $this->layout = '_main';
         return $this->render('testmaxheight',['rs' => $rs ]);
+    }
+
+    //
+    public function actionSearch(){
+
+        $searchModel = new VideoSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+
+        $this->layout = '_main';
+        return $this->render('_index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+
     }
 }
