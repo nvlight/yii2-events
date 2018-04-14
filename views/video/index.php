@@ -41,7 +41,18 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         'content'   =>  $this->render('addvideo', ['model' => $model, ]),
 
                     ],
-
+                    [
+                        'label'     =>  'Поиск видео',
+                        'url' => \yii\helpers\Url::to(['video/search'],true),
+                    ],
+                    [
+                        'label'     =>  'Поиск видео 2',
+                        'url' => \yii\helpers\Url::to(['video/search2'],true),
+                    ],
+                    [
+                        'label'     =>  'Поиск видео YT 1',
+                        'url' => \yii\helpers\Url::to(['video/yt-search1'],true),
+                    ],
                 ]
             ]); ?>
         </div>

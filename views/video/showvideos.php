@@ -63,8 +63,11 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                             <?=\yii\helpers\Html::a($v->channeltitle, Yii::$app->params['youytube_channelid_template'] . $v->channelid,['target' => '_blank',])?>
                                         </strong>
                                     </p>
-                                    <p class="" style="">
+                                    <p class="" style="margin-bottom: 0; ">
                                         <span>Просмотров: <strong><?=$v->viewcount?></strong></span>
+                                    </p>
+                                    <p class="" style="margin-bottom: 0; ">
+                                        <span>Опубликовано: <strong><?=mb_substr($v->dt_publish,0,10)?></strong></span>
                                     </p>
 
                             </div>
@@ -100,8 +103,8 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             </div>
             <div class="modal-body">
                 <iframe width="560" height="315"
-                        src="https://www.youtube.com/embed/"
-                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                    src="https://www.youtube.com/embed/"
+                    frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
                 </iframe>
             </div>
             <div class="modal-footer">

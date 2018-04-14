@@ -57,14 +57,14 @@ class File extends \yii\db\ActiveRecord
     //
     public static function getUserFilesInfo(){
 
-        $file_count = File::findAll(['i_user' => $_SESSION['user']['id']]);
-        //echo Debug::d($file_count,'file_count');
-        $file_size = File::find(['i_user' => $_SESSION['user']['id']])->sum('filesize');
+        $file_count = File::find()->where(['i_user' => $_SESSION['user']['id']])->count();
+        //echo Debug::d((int)$file_count,'file_count',2);
+        $file_size = File::find()->where(['i_user' => $_SESSION['user']['id']])->sum('filesize');
         //echo $file_size; die;
 
         return [
-            'count' => $file_count ? count($file_count) : 0,
-            'filesize' => $file_size,
+            'count' => (int)$file_count,
+            'filesize' => (int)$file_size,
         ];
     }
 

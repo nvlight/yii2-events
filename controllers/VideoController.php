@@ -19,6 +19,7 @@ use Google_Service_YouTube;
 use Google_Service_Books;
 use DateInterval;
 use app\models\VideoSearch;
+use app\models\VideoSearch2;
 
 class VideoController extends Controller
 {
@@ -164,38 +165,12 @@ class VideoController extends Controller
             }
             //echo Debug::d($video->errors,'error',2,1);
         }
-        $all = Video::find(['i_user' => $_SESSION['user']['id'], ])->where(['active' => '1'])
+        $all = Video::find()->where(['active' => '1', 'i_user' => $_SESSION['user']['id']])
             ->with('categoryvideo')->all();
         //echo Debug::d(count($all),'count rows',1,0);
         //echo Debug::d($all,'all_videos',1,2);
         $this->layout = '_main';
         return $this->render('index', ['model' => $video, 'all' => $all]);
-    }
-
-    //
-    public function actionSearch1(){
-
-        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
-        // используется вариант с самим объектом youyube -> search -> listSearch
-
-        $ids[] = 'N584L3HdLfg';
-        $api_key = Yii::$app->params['youtube_api_key_1'];
-
-        $client = new Google_Client();
-        $client->setDeveloperKey($api_key);
-        $youtube = new Google_Service_YouTube($client);
-
-        //$rs = $youtube->videos->listVideos('snippet, statistics, contentDetails', [
-        //    'id' => $ids,
-        //]);
-        $rs = $youtube->search->listSearch('id,snippet', array(
-            'q' => 'x79 huanan',
-            'maxResults' => 7,
-        ));
-
-        //echo Debug::d($rs2,'youtube result');
-        $this->layout = '_main';
-        return $this->render('search',['rs' => $rs ]);
     }
 
     //
@@ -374,14 +349,24 @@ class VideoController extends Controller
     }
 
     //
-    public function actionWatch($id=''){
+    public function actionWatch($id=false){
 
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
         $video = Video::findOne($id);
+        if ($video) $id = $video->video_id;
         //echo Debug::d($video,'video');
         $this->layout = '_main';
-        return $this->render('watch',['video' => $video]);
+        return $this->render('watch',[$id => $id]);
+    }
+
+    //
+    public function actionWatchYt($id=false){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        $this->layout = '_main';
+        return $this->render('watchyt',['id' => $id]);
     }
 
     //
@@ -406,6 +391,22 @@ IFRAME;
     }
 
     //
+    public function actionGetYtVideoByHash($id=''){
+
+        if (!Authlib::appIsAuth()) {
+            echo json_decode(['success' => 'no', 'message' => 'auth is required']); die;
+        }
+
+        if (Yii::$app->request->isAjax){
+            $iframe = <<<IFRAME
+<iframe width="560" height="315" src="https://www.youtube.com/embed/{$id}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+IFRAME;
+            $rs = ['success' => 'yes', 'message' => 'video is finded', 'iframe' => $iframe ];
+            die(json_encode($rs));
+        }
+    }
+
+    //
     public function actionMaxheight(){
 
         $ids[] = 'N584L3HdLfg';
@@ -420,7 +421,7 @@ IFRAME;
         //]);
         $rs = $youtube->search->listSearch('id,snippet', array(
             'q' => 'x79 huanan',
-            'maxResults' => 7,
+            'maxResults' => 3,
         ));
 
         $this->layout = '_main';
@@ -434,10 +435,89 @@ IFRAME;
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         $this->layout = '_main';
-        return $this->render('_index', [
+        return $this->render('search', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
 
     }
+
+    //
+    public function actionSearch2(){
+
+        //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        //echo Debug::d($searchModel,'searchModel',1,2);
+
+        $rs = false; $model = new VideoSearch2();
+        if (Yii::$app->request->isPost){
+            //echo Debug::d($searchModel,'searchModel');
+            echo Debug::d($_REQUEST,'request');
+            $nkey = 'VideoSearch2';
+            if (array_key_exists($nkey,$_REQUEST) && is_array($_REQUEST[$nkey]) && count($_REQUEST[$nkey])){
+                //$a = Yii::$app->request->post(['Video']);
+                $a = $_POST[$nkey];
+                $searchModel = Video::find()
+                    ->where(['i_user' => $_SESSION['user']['id'], 'active' => '1']);
+                //
+                $model->i_cat = 0;
+                if (array_key_exists('i_cat',$a) && $a['i_cat'] !== '0' ){
+                    $searchModel = $searchModel->andWhere(['like', 'i_cat',    $a['i_cat'] ]);
+                    $model->i_cat = $a['i_cat'];
+                }
+                if (array_key_exists('title',$a)){
+                    $model->title = $a['title'];
+                    $searchModel = $searchModel->andWhere(['like', 'title',    $a['title'] ]);
+                }
+                if (array_key_exists('duration',$a)){
+                    $model->duration = $a['duration'];
+                    $searchModel = $searchModel->andWhere(['like', 'duration', $a['duration'] ]);
+                }
+                //echo Debug::d($searchModel,'$searchModel');
+                //$searchModel = $searchModel->all();
+                $searchModel = $searchModel->asArray()->all();//->count();
+                $rs = $searchModel;
+                //echo Debug::d($searchModel,'$searchModel',1,1);
+            }
+        }
+
+        $this->layout = '_main';
+        return $this->render('search2', [
+            'model' => $model, 'rs' => $rs
+        ]);
+
+    }
+
+    //
+    // Search in YOUTUBE API
+    //
+    public function actionYtSearch1(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        // используется вариант с самим объектом youyube -> search -> listSearch
+
+        $ids[] = 'N584L3HdLfg';
+        $api_key = Yii::$app->params['youtube_api_key_1'];
+
+        $client = new Google_Client();
+        $client->setDeveloperKey($api_key);
+        $youtube = new Google_Service_YouTube($client);
+
+        //$rs = $youtube->videos->listVideos('snippet, statistics, contentDetails', [
+        //    'id' => $ids,
+        //]);
+        $rs = $youtube->search->listSearch('id,snippet', array(
+            'q' => 'x79 huanan',
+            'maxResults' => 3,
+            'videoDuration' => 'medium',
+            'type' => 'video',
+
+        ));
+
+        //echo Debug::d($rs,'youtube result');
+        $this->layout = '_main';
+        return $this->render('ytsearch1',['rs' => $rs ]);
+    }
+
+
+
 }

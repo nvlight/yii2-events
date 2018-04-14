@@ -17,6 +17,7 @@ use yii\web\Controller;
 use yii\web\UploadedFile;
 use app\components\AuthLib;
 use yii\helpers\FileHelper;
+use app\components\Debug;
 
 class DocController extends Controller
 {
@@ -82,7 +83,8 @@ class DocController extends Controller
             }
         }
         // получим тут все вайлы текущего пользователя
-        $userFiles = File::findAll(['i_user' => $_SESSION['user']['id']]);
+        $userFiles = File::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+        //echo Debug::d($userFiles,'$userFiles');
         $this->layout = '_main';
         return $this->render('load', ['model' => $model, 'userFiles' => $userFiles]);
     }
