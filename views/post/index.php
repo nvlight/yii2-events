@@ -52,7 +52,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
 
                                 <?php
-                                    $types2 = Type::find()->all();
+                                    $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
                                     $types30 = ArrayHelper::map($types2,'id','name');
                                     $params21 = [
                                         //'prompt' => 'Выберите категорию'

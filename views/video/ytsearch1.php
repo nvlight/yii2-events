@@ -9,6 +9,7 @@
 use app\components\Debug;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\widgets\ActiveForm;
 
 ?>
 
@@ -92,53 +93,72 @@ use yii\helpers\Url;
 
 <div class="ytsearch1">
 
+
+    <form action="<?=Url::to(['video/yt-search1'],true)?>" method="POST">
+
+        <input type="text" name="yt-search-text" value="<?php (isset($ss)) ? $c = $ss : $c =''; echo $c; ?>">
+        <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->getCsrfToken()?>" />
+
+        <div class="form-group">
+            <?= Html::submitButton('Искать', ['class' => 'btn btn-primary']) ?>
+        </div>
+
+    </form>
+
     <?php
+        //echo Debug::d($part,'part',1,1);
         //echo Debug::d($rs,'rs',1,1);
-        if (is_object($rs) ){
+        if (is_object($rs) && is_array($rs['modelData']) && is_array($rs['modelData']['pageInfo']) && array_key_exists('totalResults',$rs['modelData']['pageInfo'] ) && $rs['modelData']['pageInfo']['totalResults'] > 0 ){
             $items = $rs['modelData']['items'];
             //echo count($items);
             //echo Debug::d($items,'$items',1); die;
             ?>
-            <table>
-                <tr>
-                    <th>id</th>
-                    <th>title</th>
-                    <th>description</th>
-                    <th>channelTitle</th>
-                    <th>PublishedAt</th>
-                    <th>youtube link</th>
-                </tr>
-                <?php
-                    foreach($items as $k => $v){
-                        ?>
-                        <tr>
-                            <td>
-                                <?php
-                                    //echo Html::a('show', Url::to(['video/watch-yt','id' => $v['id']['videoId']],true), ['target' => '_blank'] );
-                                    echo Html::a(Html::img(Url::to($v['snippet']['thumbnails']['default']['url'],true)), Url::to(['video/watch-yt','id' => $v['id']['videoId']],true),
-                                        ['target' => '_blank', 'class' => 'loadVideoToModal', 'data-id' => $v['id']['videoId']] );
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tr>
+                                <th>id</th>
+                                <th>title</th>
+                                <th>description</th>
+                                <th>channelTitle</th>
+                                <th>PublishedAt</th>
+                                <th>youtube link</th>
+                            </tr>
+                            <?php
+                            foreach($items as $k => $v){
+                                ?>
+                                <tr>
+                                    <td>
+                                        <?php
+                                        //echo Html::a('show', Url::to(['video/watch-yt','id' => $v['id']['videoId']],true), ['target' => '_blank'] );
+                                        echo Html::a(Html::img(Url::to($v['snippet']['thumbnails']['default']['url'],true)), Url::to(['video/watch-yt','id' => $v['id']['videoId']],true),
+                                            ['target' => '_blank', 'class' => 'loadVideoToModal', 'data-id' => $v['id']['videoId']] );
 
-                                    //<a class="cp loadVideoToModal" data-id="19">
-                                    //echo Html::img(Url::to($v['snippet']['thumbnails']['default']['url'],true));
-                                ?>
-                            </td>
-                            <td><?=$v['snippet']['title']?></td>
-                            <td><?=$v['snippet']['description']?></td>
-                            <td>
-                                <?=\yii\helpers\Html::a($v['snippet']['channelTitle'], Yii::$app->params['youytube_channelid_template'] . $v['snippet']['channelId'],['target' => '_blank',])?>
-                            </td>
-                            <td><?=$v['snippet']['publishedAt']?></td>
-                            <td>
-                                <?php echo Html::a('youtube',
-                                    Url::to("https://www.youtube.com/watch?v=" . $v['id']['videoId'],true),
-                                    ['target' => '_blank'] )
-                                ?>
-                            </td>
-                        </tr>
-                        <?php
-                    }
-                ?>
-            </table>
+                                        //<a class="cp loadVideoToModal" data-id="19">
+                                        //echo Html::img(Url::to($v['snippet']['thumbnails']['default']['url'],true));
+                                        ?>
+                                    </td>
+                                    <td><?=$v['snippet']['title']?></td>
+                                    <td><?=$v['snippet']['description']?></td>
+                                    <td>
+                                        <?=\yii\helpers\Html::a($v['snippet']['channelTitle'], Yii::$app->params['youytube_channelid_template'] . $v['snippet']['channelId'],['target' => '_blank',])?>
+                                    </td>
+                                    <td><?=$v['snippet']['publishedAt']?></td>
+                                    <td>
+                                        <?php echo Html::a('youtube',
+                                            Url::to("https://www.youtube.com/watch?v=" . $v['id']['videoId'],true),
+                                            ['target' => '_blank'] )
+                                        ?>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                            ?>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <?php
         }
     ?>
@@ -154,14 +174,8 @@ use yii\helpers\Url;
                 <h4 class="modal-title" id="myModalLabel">Просмотр видео</h4>
             </div>
             <div class="modal-body">
-                <iframe width="560" height="315"
-                        src="https://www.youtube.com/embed/"
-                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
-                </iframe>
+
             </div>
-<!--            <div class="modal-footer">-->
-<!--                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>-->
-<!--            </div>-->
         </div>
     </div>
 </div>

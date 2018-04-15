@@ -237,7 +237,7 @@ CFCF;
 
                     <?php
                         // получение массива для 2-го параметра чекбоксЛиста
-                        $types = Type::find()->asArray()->all();
+                        $types = Type::find()->where(['i_user' => $_SESSION['user']['id']])->asArray()->all();
                         $naa = [];
                         foreach($types as $ck => $cv){
                             $naa[$cv['id']] = $cv['name'];
@@ -350,7 +350,7 @@ CFCF;
                         <input type="hidden" value="" id="evid">
 
                         <?php
-                            $types2 = Type::find()->all();
+                            $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
                             $types30 = ArrayHelper::map($types2,'id','name');
                             $params21 = [
                                 //'prompt' => 'Выберите категорию'
@@ -435,7 +435,7 @@ CFCF;
                         <?php
                         // need ?! --- cats, $event
                         $catsMain = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                        $types2 = Type::find()->all();
+                        $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
                         //echo Debug::d($types); die;
                         $eventMain = new Event();
 

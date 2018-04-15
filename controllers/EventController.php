@@ -628,7 +628,7 @@ class EventController extends \yii\web\Controller
             // #stage 1
             $type_checked_all = $cats_checked_all = null;
             if (array_key_exists('type',$_GET)){
-                $types = Type::find()->where(['>','id',0])->asArray()->all();
+                $types = Type::find()->where(['>','id',0])->andWhere(['i_user' => $_SESSION['user']['id']])->asArray()->all();
                 $event_type = []; $type_checked_all = 1;
                 foreach($types as $tk => $tv) $event_type[] = $tv['id'];
                 //echo Debug::d($types,'types');

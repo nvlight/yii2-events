@@ -27,7 +27,7 @@ class PostController extends \yii\web\Controller
         $cats = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
         $event = new Event();
         $type = new Type();
-        $types = Type::find()->all();
+        $types = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
 
         return $this->render('index', compact('model','cats','event','type','types') );
     }

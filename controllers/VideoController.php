@@ -505,17 +505,26 @@ IFRAME;
         //$rs = $youtube->videos->listVideos('snippet, statistics, contentDetails', [
         //    'id' => $ids,
         //]);
-        $rs = $youtube->search->listSearch('id,snippet', array(
-            'q' => 'x79 huanan',
-            'maxResults' => 3,
+        $ss = '';
+        if(Yii::$app->request->isPost && array_key_exists('yt-search-text', $_POST)){
+            $ss = $_POST['yt-search-text'];
+        }
+
+        $part = "snippet"; // $part = "id,snippet";
+        $rs = $youtube->search->listSearch($part, array(
+            'q' => $ss,
+            'maxResults' => 10,
             'videoDuration' => 'medium',
             'type' => 'video',
+            //'forMine' => true,
+            //'order'=>'viewCount',
+            'order'=>'date',
 
         ));
 
-        //echo Debug::d($rs,'youtube result');
+        //echo Debug::d($rs,'youtube result',1);
         $this->layout = '_main';
-        return $this->render('ytsearch1',['rs' => $rs ]);
+        return $this->render('ytsearch1',['rs' => $rs,'ss' => $ss,'part'=>$part]);
     }
 
 
