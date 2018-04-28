@@ -63,44 +63,30 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <div class="row">
                 <div class="col-md-4">
 
-                    <?php
-                    $afParams = [
-                        'method'=>'get',
-                        'options' => [
-                            'class' => 'frmChngRemains',
-                        ]
-                    ];
-                    //$form = ActiveForm::begin($afParams);
-                    ?>
-                    <div class="input-group mb10">
-                        <form class="form-inline">
-                            <div class="form-group mb10">
-                                <label for="basic-addon10">Общий лимит</label>
-                                <input type="text" name="remains" class="form-control user_limit" id="basic-addon10"
-                                       placeholder="Email" value="<?=html::encode($remains)?>">
-                            </div>
+                </div>
+                <div class="col-md-7">
+
+                    <form class="form-inline mb10">
+                        <div class="form-group">
+                            <label for="new_remains">Общий лимит</label>
+                            <input type="text" name="remains" class="form-control user_limit" id="new_remains" placeholder="remains"  value="<?=html::encode($remains)?>">
+                        </div>
+                        <div class="form-group">
                             <button type="submit" class="btn btn-default" id="chRemains">
-                                <span class="spinRefresh">
-                                    <i class="fa fa-refresh"></i>
-                                </span>
+                            <span class="spinRefresh">
+                                <i class="fa fa-refresh"></i>
+                            </span>
                                 <span class="spinPreload">
-                                    <i class="fa fa-spinner fa-spin"></i>
-                                </span>
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </span>
                                 Изменить
                             </button>
-
                             <nosript class="hidden">
                                 <?= Html::submitButton( '', ['class' => 'input-group-addon fa fa-refresh']) ?>
                             </nosript>
-                        </form>
+                        </div>
+                    </form>
 
-                    </div>
-                    <?php //ActiveForm::end(); ?>
-                </div>
-                <div class="col-md-4">
-                    <p class="log">
-
-                    </p>
                 </div>
             </div>
             <div class="row">
@@ -198,6 +184,7 @@ function updateUserLimit(){
             $('.billing_euro_kurs').text(rs['k'][2]);
             $('.billing_dollar_kurs').text(rs['k'][3]); 
             $('.new_user_limit').text(rs['k'][4]);
+            $('input.user_limit').val(rs['k'][4]);
         }        
       }
       ,error: function(res) {

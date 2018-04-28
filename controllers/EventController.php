@@ -551,12 +551,21 @@ class EventController extends \yii\web\Controller
      *
      *
      **/
+    public function actionSs($sortColumn='id',$sortType=SORT_DESC){
+
+        echo 'ss';
+    }
+
+    /**
+     *
+     *
+     **/
     public function actionSimpleFilter($sortColumn='id',$sortType=SORT_DESC){
 
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-        if (Yii::$app->request->isGet){
+        if (Yii::$app->request->isGet or Yii::$app->request->isAjax){
             $this->layout = '_main';
 
             //echo Debug::d($_REQUEST,'request');
@@ -595,7 +604,16 @@ class EventController extends \yii\web\Controller
                 )
                )
             {
-                return $this->render('simplefilter');
+                //
+                if (Yii::$app->request->isAjax){
+                    $json = ['success' => 'no', 'message' => 'Недостаточно входных параметров1','rs' => $_GET ];
+                    die(json_encode($json));
+                }elseif(Yii::$app->request->isGet){
+                    $json = ['success' => 'no', 'message' => 'Недостаточно входных параметров2','rs' => [] ];
+                    return $this->render('simplefilter', compact('json'));
+                }
+                //$json = ['success' => 'no', 'message' => 'Ошибка-1','rs' => [] ];
+                //return $this->render('simplefilter', compact('json'));
             }
             //echo Debug::d($_GET,'get'); die;
 
@@ -675,14 +693,20 @@ class EventController extends \yii\web\Controller
             $query = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
                 ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
                 ->andWhere(['in', 'i_cat', $ids_cats])
-                ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['<>', 'summ',  0])
-                ->orderBy($orderBy) // ['type' => SORT_ASC, 'id' => SORT_ASC]
+                ->andWhere(['in', 'type',  $ids_type]);
+            //
+            if (!array_key_exists('zero_summ',$_GET)){
+                $query = $query->andWhere(['<>', 'summ',  0]);
+            }else{
+                $query = $query->andWhere(['>=', 'summ',  0]);
+            }
+            $query = $query->orderBy($orderBy) // ['type' => SORT_ASC, 'id' => SORT_ASC]
                 // ->asArray()
                 //->all();
             ;
             //echo Debug::d($query,'in weight');
-            $q_counts = 50; $q_counts = Yii::$app->params['history_post_search'];
+            $q_counts = 50;
+            $q_counts = Yii::$app->params['history_post_search'];
             $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
                 'pageSizeParam' => false, 'forcePageParam' => false,  ]);
             $rs = $query->offset($pages->offset)
@@ -691,50 +715,29 @@ class EventController extends \yii\web\Controller
             //echo Debug::d($rs,'rs');
 
             if (!$rs){
-                $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
+                $json = ['success' => 'no', 'message' => 'Ошибка-2','rs' => [] ];
+                //die(json_encode($json));
                 return $this->render('simplefilter', compact('json'));
             }
 
             // тут же мы должны получить даты начала и конца поиска, а также сумму расходов и доходов за этот период
-            //
-            $event_type = '1'; $ids_type = explode(' ',$event_type);
-            $fl_dohody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                ->andWhere(['in', 'i_cat', $ids_cats])
-                ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['<>', 'summ',  0])
-                ->sum('summ')
-            ;
-            $event_type = '2'; $ids_type = explode(' ',$event_type);
-            $fl_rashody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                ->andWhere(['in', 'i_cat', $ids_cats])
-                ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['<>', 'summ',  0])
-                ->sum('summ')
-            ;
-            $event_type = '3'; $ids_type = explode(' ',$event_type);
-            $fl_dolgy = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                ->andWhere(['in', 'i_cat', $ids_cats])
-                ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['<>', 'summ',  0])
-                ->sum('summ')
-            ;
-            $event_type = '4'; $ids_type = explode(' ',$event_type);
-            $fl_vkladi = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                ->andWhere(['in', 'i_cat', $ids_cats])
-                ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['<>', 'summ',  0])
-                ->sum('summ')
-            ;
-            //echo Debug::d($fl_dohody,'$fl_dohody');
-            //echo Debug::d($fl_rashody,'$fl_rashody');
-            $fl_dohody  = intval($fl_dohody);
-            $fl_rashody = intval($fl_rashody);
-            $fl_dolgy = intval($fl_dolgy);
-            $fl_vkladi = intval($fl_vkladi);
+            $ev_tps = ['доходы' => 1,'расходы' => 2,'долги' => 3,'вклады' => 4,];
+            $ev_res = [];
+            foreach($ev_tps as $evk => $evv){
+                $new_q =  Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
+                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
+                    ->andWhere(['in', 'i_cat', $ids_cats])
+                    ->andWhere(['<>', 'summ',  0]);
+                $new_q = $new_q->andWhere(['in', 'type',  [$evv]]);
+                //echo Debug::d($new_q->where);
+                $ev_res[] = $new_q->sum('summ');
+            }
+            //echo Debug::d($ev_res,'ev_res');
+
+            $fl_dohody  = intval($ev_res[0]);
+            $fl_rashody = intval($ev_res[1]);
+            $fl_dolgy = intval($ev_res[2]);
+            $fl_vkladi = intval($ev_res[3]);
             $fl_diff = abs($fl_dohody - $fl_rashody);
             if ($fl_rashody > $fl_dohody) {
                 $fl_diff *= (-1);
@@ -751,14 +754,22 @@ class EventController extends \yii\web\Controller
             $trs[] = ['Сумма долгов и вкладов', $summ_dv,$evr1,$evr2];
             $trs[] = ['Сумма расходов, долгов и вкладов', $summ_rdv,$evr1,$evr2];
             $trs[] = ['Разница между доходами и тратами', $diff_d_rdv,$evr1,$evr2];
-            $evr = [$evr1, $evr2];
-            $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!', 'rs' => $rs,
-                'pages' => $pages, 'trs' =>  $trs, 'evr' => $evr, 'buildHttpQuery' => $buildHttpQuery,
-                'orderBy' => $orderBy, 'dt_diff' => $dt_diff, 'ids_cats' => $ids_cats2, 'ids_type' => $ids_type2,
-                 'type_checked_all' => $type_checked_all, 'cats_checked_all' => $cats_checked_all,
-                'evr1' => $evr1, 'evr2' => $evr2,
-
+            $json = [
+                'success' => 'yes', 'message' => 'Фильт успешно отработал!',
+                'rs' => $rs,
+                'pages' => $pages,
+                'trs' =>  $trs,
+                'buildHttpQuery' => $buildHttpQuery,
+                'orderBy' => $orderBy,
+                'dt_diff' => $dt_diff,
+                'ids_cats' => $ids_cats2,
+                'ids_type' => $ids_type2,
+                'type_checked_all' => $type_checked_all,
+                'cats_checked_all' => $cats_checked_all,
+                'evr1' => $evr1,
+                'evr2' => $evr2,
             ];
+            //die(json_encode($json));
             return $this->render('simplefilter', compact('json'));
         }
     }

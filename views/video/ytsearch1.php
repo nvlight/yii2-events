@@ -11,6 +11,10 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 
+$this->title = 'Events | Кино | Поиск';
+
+$this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events,Page videos - watch video'], 'keywords');
 ?>
 
 <style>
@@ -93,17 +97,48 @@ use yii\widgets\ActiveForm;
 
 <div class="ytsearch1">
 
-
-    <form action="<?=Url::to(['video/yt-search1'],true)?>" method="POST">
-
-        <input type="text" name="yt-search-text" value="<?php (isset($ss)) ? $c = $ss : $c =''; echo $c; ?>">
-        <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->getCsrfToken()?>" />
-
-        <div class="form-group">
-            <?= Html::submitButton('Искать', ['class' => 'btn btn-primary']) ?>
+    <div class="row">
+        <div class="col-md-12">
+            <?php
+                echo Debug::d($_REQUEST,'request');
+                //echo Debug::d($rs,'record set');
+            ?>
         </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <form action="<?=Url::to(['video/yt-search1'],true)?>" method="POST">
 
-    </form>
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Search query</label>
+                    <input type="text" name="yt-search-text" class="form-control"
+                           id="exampleYtQuery" placeholder="Enter search string"
+                           value="<?php (isset($q)) ? $c = $q : $c =''; echo $c; ?>">
+                    <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->getCsrfToken()?>" />
+                </div>
+                <div class="form-group">
+                    <label for="exampleOrder">Order</label>
+                    <select class="form-control" id="exampleOrder" name="order">
+                        <?php
+                            foreach($order_array as $ok => $ov){
+                                ?>
+                                    <option value="<?=$ok?>" <?php if ($ok === $order['key']): ?> selected <?php endif; ?> >
+                                        <?=$ov?>
+                                    </option>
+                                <?php
+                            }
+                        ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <?= Html::submitButton('find it!', ['class' => 'btn btn-primary']) ?>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
 
     <?php
         //echo Debug::d($part,'part',1,1);
@@ -118,7 +153,7 @@ use yii\widgets\ActiveForm;
                     <div class="table-responsive">
                         <table class="table">
                             <tr>
-                                <th>id</th>
+                                <th>watch now!</th>
                                 <th>title</th>
                                 <th>description</th>
                                 <th>channelTitle</th>
@@ -146,7 +181,7 @@ use yii\widgets\ActiveForm;
                                     </td>
                                     <td><?=$v['snippet']['publishedAt']?></td>
                                     <td>
-                                        <?php echo Html::a('youtube',
+                                        <?php echo Html::a('go2',
                                             Url::to("https://www.youtube.com/watch?v=" . $v['id']['videoId'],true),
                                             ['target' => '_blank'] )
                                         ?>

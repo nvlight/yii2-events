@@ -172,6 +172,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         'action' => ['/site/action---SimpleFilter'],
                         'options' => [
                             'class' => 'frmDoFilter',
+                            'id' => 'simpleFilter'
                         ]
                     ]); ?>
 
@@ -196,10 +197,10 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                             echo '<label class="control-label">Выберите период</label>';
                             echo DatePicker::widget([
                                 'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
-                                'name' => 'from_date',
+                                'name' => 'range1',
                                 'value' => $dtr2,
                                 'type' => DatePicker::TYPE_RANGE,
-                                'name2' => 'to_date',
+                                'name2' => 'range2',
                                 'value2' => date('d-m-Y'),
                                 'language' => 'ru',
 
@@ -234,6 +235,23 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         </div>
 CFCF;
                     ?>
+
+
+                    <div class="class-radioCheckBox_zerosumm">
+                        <label for="">Искать строки с нулевой суммой</label>
+                        <div class="class-search-for-zero-summ">
+                            <label>
+                                <input type="checkbox" name="zero_summ"
+                                    <?php if (array_key_exists('zero_summ',$_GET)): ?>
+                                        checked="checked"
+                                    <?php endif; ?>
+                                       value="0">
+                                <i class="fa fa-square-o fa-2x"></i>
+                                <i class="fa fa-check-square-o fa-2x"></i>
+                                <span>Да</span>
+                            </label>
+                        </div>
+                    </div>
 
                     <?php
                         // получение массива для 2-го параметра чекбоксЛиста
@@ -305,7 +323,7 @@ CFCF;
                                 $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .
                                     '<i class="fa fa-check-square-o fa-2x"></i>' ."\n";
                                 $return .= '<span>' . ucwords($label) . '</span>' ."\n";
-                                $return .= '</label><br/>';
+                                $return .= '</label>';
 
                                 return $return;
                             },
@@ -429,6 +447,7 @@ CFCF;
                             'action' => ['/site/add-event'],
                             'options' => [
                                 'class' => 'addEvent',
+                                'id' => 'siteAddEvent'
                             ]
                         ]); ?>
 
@@ -455,27 +474,7 @@ CFCF;
                         <?= $form->field($eventMain, 'type')->dropDownList($types3,$params2)->label('Выберите тип события'); ?>
 
                         <?php
-                        //                            $form->field($eventMain,'type',[
-                        //                            'template' => '<label for="">Выберите тип</label><div>{input}</div>',
-                        //                            ])->radioList(
-                        //                                [1 => 'Доход', 2 => 'Расход'],
-                        //                                [
-                        //                                    'item' => function($index, $label, $name, $checked, $value) {
-                        //                                        $ch = '';
-                        //                                        if ($index === 0) {
-                        //                                            $ch = "checked=''";
-                        //                                        }
-                        //                                        $return = '<label>';
-                        //                                        $return .= '<input type="radio" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
-                        //                                        $return .= '<i class="fa fa-circle-o fa-2x"></i>' ."\n" .
-                        //                                            '<i class="fa fa-dot-circle-o fa-2x"></i>' ."\n";
-                        //                                        $return .= '<span>' . ucwords($label) . '</span>' ."\n";
-                        //                                        $return .= '</label><br/>';
-                        //
-                        //                                        return $return;
-                        //                                    }
-                        //                                ]
-                        //                            );
+
                         ?>
 
                         <?php

@@ -495,7 +495,6 @@ IFRAME;
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         // используется вариант с самим объектом youyube -> search -> listSearch
 
-        $ids[] = 'N584L3HdLfg';
         $api_key = Yii::$app->params['youtube_api_key_1'];
 
         $client = new Google_Client();
@@ -505,28 +504,107 @@ IFRAME;
         //$rs = $youtube->videos->listVideos('snippet, statistics, contentDetails', [
         //    'id' => $ids,
         //]);
-        $ss = '';
-        if(Yii::$app->request->isPost && array_key_exists('yt-search-text', $_POST)){
-            $ss = $_POST['yt-search-text'];
+        $q = ''; $order['value'] = 'relevance'; $order['key'] = 0;
+        $order_array = [];
+        $order_array[] = 'relevance';
+        $order_array[] = 'viewCount';
+        $order_array[] = 'rating';
+        $order_array[] = 'title';
+        $order_array[] = 'date';
+        $order_array[] = 'videoCount';
+        if(Yii::$app->request->isPost) {
+            if (array_key_exists('yt-search-text', $_POST)){
+                $q = $_POST['yt-search-text'];
+            }
+            if (array_key_exists('order', $_POST)){
+                foreach($order_array as $ok => $ov){
+                    if ( ($ok) === intval($_POST['order'])) {
+                        $order['value'] = $order_array[$ok];
+                        $order['key'] = $ok;
+                    }
+                }
+            }
         }
 
-        $part = "snippet"; // $part = "id,snippet";
-        $rs = $youtube->search->listSearch($part, array(
-            'q' => $ss,
+        $search_array = [
+            'q' => $q,
             'maxResults' => 10,
             'videoDuration' => 'medium',
             'type' => 'video',
             //'forMine' => true,
-            //'order'=>'viewCount',
-            'order'=>'date',
+            'order'=> $order['value'],
+            //'safeSearch' => 'none',
+            'safeSearch' => 'strict',
+            //'safeSearch' => 'moderate',
+        ];
 
-        ));
+        $part = "snippet";
+        $rs = $youtube->search->listSearch($part, $search_array);
 
         //echo Debug::d($rs,'youtube result',1);
         $this->layout = '_main';
-        return $this->render('ytsearch1',['rs' => $rs,'ss' => $ss,'part'=>$part]);
+        return $this->render('ytsearch1',['rs' => $rs,'q' => $q,
+            'part'=>$part, 'order_array' => $order_array, 'order' => $order,
+
+        ]);
     }
 
 
+    //
+    public function actionChannels()
+    {
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        // используется вариант с fileGetContents
+        // channels
+
+        $params = array(
+            'part' => 'contentDetails',
+            'mine' => true,
+        );
+        $url = 'https://www.googleapis.com/youtube/v3/channels?' . http_build_query($params);
+
+        $params = array(
+            'part' => 'contentDetails',
+            'playlistId' => 'LL3PyIqYQ7lw7YKHRLqIvXlw',
+        );
+        $url = 'https://www.googleapis.com/youtube/v3/playlistItems?' . http_build_query($params);
+
+        $opts = array('http' =>
+            array(
+                'method' => 'GET',
+                'max_redirects' => '0',
+                'ignore_errors' => '1',
+            )
+        , 'ssl' => array(
+                'verify_peer' => true,
+                'cafile' => '/SRV/php721/extras/ssl/' . "cacert.pem",
+                'ciphers' => 'HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2',
+                //'CN_match' => $cn_match,
+                'disable_compression' => true,
+            )
+        );
+
+        $context = stream_context_create($opts);
+        $json_result = fopen($url, 'r', false, $context);
+        $json_decode = json_decode(stream_get_contents($json_result));
+        //echo Debug::d(stream_get_meta_data($json_result),'stream_get_meta_data($stream)');
+        echo Debug::d($json_decode,'stream_get_meta_data($stream)');
+
+        //
+//        $api_key = Yii::$app->params['youtube_api_key_1'];
+//        $client = new Google_Client();
+//        $client->setDeveloperKey($api_key);
+//        $youtube = new Google_Service_YouTube($client);
+//        $rs = $youtube->search->listSearch('id,snippet', array(
+//            'q' => 'x79 huanan',
+//            'maxResults' => 3,
+//        ));
+
+    }
+
+    public function actionQuickstart(){
+        return $this->render('quickstart');
+    }
 
 }

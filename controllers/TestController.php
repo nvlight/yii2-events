@@ -304,4 +304,59 @@ TB;
             ->one();
         //echo Debug::d($Event,'Event');
     }
+
+    public function actionDb(){
+
+        // возвращает набор строк. каждая строка - это ассоциативный массив с именами столбцов и значений.
+        // если выборка ничего не вернёт, то будет получен пустой массив.
+        //$posts = Yii::$app->db->createCommand('SELECT * FROM video')->queryAll();
+        //echo Debug::d($posts,'posts 1');
+
+        // вернёт одну строку (первую строку)
+        // false, если ничего не будет выбрано
+        //$post = Yii::$app->db->createCommand('SELECT * FROM video WHERE id=19')->queryOne();
+        //echo "<pre>"; print_r($post); echo "</pre>";
+        //echo Debug::d($post,'posts 2');
+
+        // вернёт один столбец (первый столбец)
+        // пустой массив, при отсутствии результата
+        //$titles = Yii::$app->db->createCommand('SELECT title FROM video')->queryColumn();
+        //echo Debug::d($titles,'posts 3');
+        // вернёт скалярное значение
+        // или false, при отсутствии результата
+        //$count = Yii::$app->db->createCommand('SELECT COUNT(*) FROM video')->queryScalar();
+        //echo Debug::d($count,'posts 4');
+
+        /// ### next stage - using построитель запросов
+        $q = (new Query())->select('video.id, video.i_user, i_cat, title,url,video_id,active,channelid,channeltitle,categoryvideo.name as catname')
+            ->from('video')
+            ->where(['>=','video.id',0]);
+        $q = $q->andWhere('active=:active');
+        $q = $q->addParams([':active' => 1]);
+        $q = $q->join('left join','categoryvideo','video.i_cat = categoryvideo.id');
+        $q = $q->indexBy(function ($row) {return $row['video_id'];});
+        $q = $q->limit(2)->offset(1);
+        $qd = $q->createCommand();
+        $rs = $q->all();
+        //$rs = $q->one();
+        //$rs = $q->count();
+        echo Debug::d($rs,'rs',2);
+        echo Debug::d($qd->sql,'$qd->query',1);
+        echo Debug::d($qd->params,'$qd->params',1);
+        //echo Debug::d($qd->queryAll(),'$qd->queryAll()',1);
+
+        //$q2 = (new Query())->select('')->from('user,type')->all();
+        //echo Debug::d($q2,'q2');
+
+
+
+    }
+
+
+    public function actionTestJs1(){
+        echo 'testJs1';
+
+        echo Debug::d($_GET,'get');
+    }
+
 }

@@ -222,76 +222,97 @@
     /* */
     $('.doFilter').on('click', function () {
         console.log('doFilter');
-        var params = {};
-        // 1
-        params['event_type'] = '';
-        var cd = $('.class-radioCheckBox').find('label input');
-        var tc = '';
-        $.each(cd, function (index, value) {
-            if ($(this).is(':checked')) {
-                tc += $(this).val() + ' ';
-            }
-            //console.log( index + ": " + $(this).val() );
-        });
-        params['event_type'] = tc;
-        //
-        var c = $('.class-catsCheckBox').find('label input');
-        var rc = '';
-        $.each(c, function (index, value) {
-            if ($(this).is(':checked')) {
-                rc += $(this).val() + ' ';
-            }
-            //console.log( index + ": " + $(this).val() );
-        });
-        params['event_cats'] = rc;
-        //3
-        var c1 = $('#mainfilter_dtrange1').val();
-        var c2 = $('#mainfilter_dtrange2').val();
-        params['range1'] = c1;
-        params['range2'] = c2;
 
-        console.log('doFilter: starting...');
-        $.ajax({
-            url: '/event/filter',
-            type: 'GET',
-            data: params,
-            success: function (res, status) {
-                console.log('status: '+status);
-                var rs = $.parseJSON(res);
-                if (rs['success'] === 'yes') {
-                    //console.log('успешно, получили список');
-                    if (rs['rs'].length) {
-                        //console.log(rs['rs'].length);
-                        $('table.gg-history > tbody tr').remove();
-                        $('ul.pagination').remove();
-                        $("table.gg-history").after(rs['pages']);
-                        for (var i = 0; i < rs['rs'].length; i++) {
-                            $('table.gg-history').append(rs['rs'][i]);
-                            //console.log(rs['rs'][i]);
-                        }
-                        // и добавляем строку с доходами и расходами
-                        var trs_count = rs['trs'].length;
-                        for (var i = 0; i < trs_count; i++) {
-                            $('table.gg-history').append(rs['trs'][i]);
-                            //console.log(rs['rs'][i]);
-                        }
-                    }
-                } else {
-                    //alert('Ничего не найдено!');
-                    console.log('успешно, не нашли');
-                }
-            }
-            , error: function (res) {
-                alert('we got error --- ' + res);
-            }
-            , beforeSend: function (e) {
-                //console.log('beforeSend');
-            }
-            , complete: function () {
-                //console.log('complete');
-                $('#modalSimpleFilter').modal('hide');
-            }
-        });
+        // старый код, делал аякс запрос с последующим получением данных и их обновлением на странице
+        // данный код будет просто перебрасывать пользователя на страницу фильтра, с передачей приведенных параметров хД
+        var new_params = $( '#simpleFilter' ).serializeArray();
+        var http_build = '';
+        for(var i = 0; i < new_params.length; i++) {
+            //c[new_params[i]['name']] = new_params[i]['value'];
+            if ( new_params[i]['name'] !== '_csrf' )
+                http_build += "" + new_params[i]['name'] + "=" + new_params[i]['value'] + "&";
+        }
+        http_build = '?' + http_build;
+        var new_path = window.document.location.origin + '/event/simple-filter' + http_build;
+        window.location.href = new_path;
+
+        // console.log( params2 );
+        // var params = {};
+        // // 1
+        // params['Event'] = [];
+        // params['Event']['type'] = [];
+        // var cd = $('.class-radioCheckBox').find('label input');
+        // var tc = []; var i = 0;
+        // $.each(cd, function (index, value) {
+        //     if ($(this).is(':checked')) {
+        //         tc[i] = $(this).val();
+        //         i++;
+        //     }
+        // });
+        // if (tc.length) {
+        //     params['Event']['type'] = tc;
+        // }
+        // // 2
+        // params['Event']['i_cat'] = [];
+        // var c = $('.class-catsCheckBox').find('label input');
+        // var rc = []; var i = 0;
+        // $.each(c, function (index, value) {
+        //     if ($(this).is(':checked')) {
+        //         rc[i] = $(this).val();
+        //         i++;
+        //     }
+        // });
+        // if (rc.length) {
+        //     params['Event']['i_cat'] = rc;
+        // }
+        //
+        // //3
+        // var c1 = $('#mainfilter_dtrange1').val();
+        // var c2 = $('#mainfilter_dtrange2').val();
+        // params['range1'] = c1;
+        // params['range2'] = c2;
+        // var zs = $("input[name='zero_summ']").prop("checked");
+        // if (zs){
+        //     params['zero_summ'] = 'yes';
+        // }
+        //
+        // console.log(params);
+        // console.log('doFilter: starting...');
+        // $.ajax({
+        //     url: '/event/simple-filter',
+        //     type: 'GET',
+        //     data: params2,
+        //     success: function (res, status) {
+        //         console.log('status: '+status);
+        //         var rs = res;
+        //         if (rs['success'] === 'yes') {
+        //             if (rs['rs'].length) {
+        //                 $('table.gg-history > tbody tr').remove();
+        //                 $('ul.pagination').remove();
+        //                 $("table.gg-history").after(rs['pages']);
+        //                 for (var i = 0; i < rs['rs'].length; i++) {
+        //                     $('table.gg-history').append(rs['rs'][i]);
+        //                 }
+        //                 var trs_count = rs['trs'].length;
+        //                 for (var i = 0; i < trs_count; i++) {
+        //                     $('table.gg-history').append(rs['trs'][i]);
+        //                     //console.log(rs['rs'][i]);
+        //                 }
+        //             }
+        //         } else {
+        //             console.log('успешно, не нашли');
+        //         }
+        //     }
+        //     , error: function (res) {
+        //         alert('we got error --- ' + res);
+        //     }
+        //     , beforeSend: function (e) {
+        //     }
+        //     , complete: function () {
+        //         $('#modalSimpleFilter').modal('hide');
+        //     }
+        // });
+
     });
 
 //});

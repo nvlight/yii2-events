@@ -138,6 +138,17 @@ p.reg{
 	margin-left: 5px;
 
 }
+
+.modal-dialog.modal-resp{
+	width: auto;
+	margin-top: 0;
+}
+
+.forSimpleFilter-ckeckAndUncheckAll+div label:nth-child(n) {
+	display: block;
+	font-size: 14px;
+}
+
 .caption i{
 	color: #5FB9D2;
 	font-size: 20px;	
@@ -729,7 +740,7 @@ a.convert2xlsx:active{
 
 label.btn span,label span {
 	font-size: 1.5em ;
-	font-size: 17px;
+	font-size: 14px;
 	color: #5D636E;
 	font-weight: 300;
 }
@@ -811,8 +822,10 @@ label.btn span,label span {
 }
 
 
-#simpleFilterModal_radioCheckBox label:nth-child(n+2){
-	margin-left: 15px;
+#simpleFilterModal_radioCheckBox label:nth-child(n){
+	display: block;
+	font-size: 14px;
+
 }
 
 
