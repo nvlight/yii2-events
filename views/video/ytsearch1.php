@@ -100,7 +100,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
     <div class="row">
         <div class="col-md-12">
             <?php
-                echo Debug::d($_REQUEST,'request');
+                echo Debug::d($_REQUEST,'request',2);
                 //echo Debug::d($rs,'record set');
             ?>
         </div>
@@ -110,30 +110,99 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <form action="<?=Url::to(['video/yt-search1'],true)?>" method="POST">
 
                 <div class="form-group">
-                    <label for="exampleInputEmail1">Search query</label>
+                    <label for="videoQueryString"><?=$q['caption']?></label>
                     <input type="text" name="yt-search-text" class="form-control"
-                           id="exampleYtQuery" placeholder="Enter search string"
-                           value="<?php (isset($q)) ? $c = $q : $c =''; echo $c; ?>">
+                           id="videoQueryString" placeholder="Enter search string"
+                           value="<?php echo Html::encode($q['value']); ?>">
+                </div>
+                <div class="form-group">
+                    <label for="maxResults"><?=$maxResults['caption']?></label>
+                    <input type="text" name="maxResults" class="form-control"
+                           id="maxResults" placeholder="Enter results count from [0-50]"
+                           value="<?php echo Html::encode($maxResults['value']); ?>">
+                </div>
+                <div class="form-group">
                     <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>" value="<?= Yii::$app->request->getCsrfToken()?>" />
                 </div>
                 <div class="form-group">
-                    <label for="exampleOrder">Order</label>
-                    <select class="form-control" id="exampleOrder" name="order">
+                    <label for="videoOrder"><?=$order['caption']?></label>
+                    <select class="form-control" id="videoOrder" name="order">
                         <?php
-                            foreach($order_array as $ok => $ov){
+                            foreach($orderArray as $k => $v){
                                 ?>
-                                    <option value="<?=$ok?>" <?php if ($ok === $order['key']): ?> selected <?php endif; ?> >
-                                        <?=$ov?>
+                                    <option value="<?=Html::encode($k)?>" <?php if ($k === $order['key']): ?> selected <?php endif; ?> >
+                                        <?=Html::encode($v)?>
                                     </option>
                                 <?php
                             }
                         ?>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="videoDuration"><?=$duration['caption']?></label>
+                    <select class="form-control" id="videoDuration" name="duration">
+                        <?php
+                        foreach($durationArray as $k => $v){
+                            ?>
+                            <option value="<?=Html::encode($k)?>" <?php if ($k === $duration['key']): ?> selected <?php endif; ?> >
+                                <?=Html::encode($v)?>
+                            </option>
+                            <?php
+                        }
+                        ?>
+                    </select>
+                </div>
+<!--                <div class="form-group">-->
+<!--                    <label for="videoType">--><?//=$type['caption']?><!--</label>-->
+<!--                    <select class="form-control" id="videoType" name="type">-->
+<!--                        --><?php
+//                        foreach($typeArray as $k => $v){
+//                            ?>
+<!--                            <option value="--><?//=Html::encode($k)?><!--" --><?php //if ($k === $type['key']): ?><!-- selected --><?php //endif; ?><!-- >-->
+<!--                                --><?//=Html::encode($v)?>
+<!--                            </option>-->
+<!--                            --><?php
+//                        }
+//                        ?>
+<!--                    </select>-->
+<!--                </div>-->
+                <div class="form-group">
+                    <label for="id_publishedAfter">publishedAfter</label>
+                    <?php
+                    echo \kartik\date\DatePicker::widget([
+                        'language' => 'ru',
+                        'name' => 'publishedAfter',
+                        "value" =>  $publishedAfter,
+                        'options' => ['placeholder' => 'выберите дату', 'id' => 'id_publishedAfter'],
+                        'pluginOptions' => [
+                            'autoclose'=>true,
+                            'todayHighlight' => true,
+                            'format' => 'yyyy-mm-dd',
+                        ]
+                    ]);
+                    ?>
+                </div>
+                <div class="form-group">
+                    <label for="id_publishedBefore">publishedBefore</label>
+                        <?php
+                            echo \kartik\date\DatePicker::widget([
+                                'language' => 'ru',
+                                'name' => 'publishedBefore',
+                                "value" =>  $publishedBefore,
+                                'options' => ['placeholder' => 'выберите дату', 'id' => 'id_publishedBefore'],
+                                'pluginOptions' => [
+                                    'autoclose'=>true,
+                                    'todayHighlight' => true,
+                                    'format' => 'yyyy-mm-dd',
+                                ]
+                            ]);
+                        ?>
+                </div>
 
                 <div class="form-group">
                     <?= Html::submitButton('find it!', ['class' => 'btn btn-primary']) ?>
                 </div>
+
 
             </form>
         </div>
@@ -179,7 +248,9 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <td>
                                         <?=\yii\helpers\Html::a($v['snippet']['channelTitle'], Yii::$app->params['youytube_channelid_template'] . $v['snippet']['channelId'],['target' => '_blank',])?>
                                     </td>
-                                    <td><?=$v['snippet']['publishedAt']?></td>
+                                    <td>
+                                        <?=Yii::$app->formatter->asDatetime($v['snippet']['publishedAt'],'dd-MM-Y h:i:s')?>
+                                    </td>
                                     <td>
                                         <?php echo Html::a('go2',
                                             Url::to("https://www.youtube.com/watch?v=" . $v['id']['videoId'],true),

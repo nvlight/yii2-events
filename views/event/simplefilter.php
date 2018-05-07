@@ -37,7 +37,7 @@ $action = Yii::$app->controller->action->id;
         //echo Debug::d($json['rs'][0],'trs');
     }
     //echo Debug::d($_SERVER,'server');
-    echo Debug::d($_GET,'GET');
+    //echo Debug::d($_GET,'GET');
 ?>
 
     <div class="row">
@@ -384,6 +384,173 @@ CFCF;
             </div>
         </div>
     </div>
+
+
+<!-- модальное окно для правки и показа (2 ин 1) события -->
+<div class="modal fade" id="modalEventEdit" tabindex="-1" role="dialog" aria-labelledby="modalEventEditLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalEventEditTitle">
+                    Редактирование события
+                </h4>
+            </div>
+            <div class="modal-body">
+                <section class="changeEventModal">
+                    <div class="inner">
+
+                        <?php $form = ActiveForm::begin([
+                            'method'=>'post',
+                            'action' => ['/site/change-event'],
+                            'options' => [
+                                'class' => 'changeEvent',
+                            ]
+                        ]); ?>
+
+                        <input type="hidden" value="" id="evid">
+
+                        <?php
+                        $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+                        $types30 = ArrayHelper::map($types2,'id','name');
+                        $params21 = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'changeEventModal_typeId'
+                        ];
+                        $params = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'changeEventModal_catId'
+                        ];
+                        ?>
+                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params)->label('Выберите категорию'); ?>
+                        <?= $form->field($eventMain, 'type')->dropDownList($types30,$params21)->label('Выберите тип события'); ?>
+
+                        <?php
+                        echo $form->field($eventMain, 'dtr', ['options' => ['class' => 'changeEventModal_date']])
+                            ->widget(DatePicker::className(),[
+                                    'language' => 'ru',
+                                    'name' => 'dp_3',
+                                    'type' => 2,
+                                    "value" =>  '16-11-2017',
+                                    'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
+                                    'pluginOptions' => [
+                                        'autoclose'=>true,
+                                        'todayHighlight' => true,
+                                        'format' => 'dd-mm-yyyy',
+                                    ]
+                                ]
+                            );
+
+                        ?>
+
+                        <?= $form->field($eventMain, 'summ')->label('Введите сумму') ?>
+                        <?= $form->field($eventMain, 'desc')->label('Введите описание') ?>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                            <button type="button" class="btn btn-primary btn-gg2 changeSubmitButton"
+                                    data-dismiss="modal" >
+                                Изменить
+                            </button>
+                            <button type="button" class="btn btn-primary btn-gg2 changeOkButton"
+                                    data-dismiss="modal" >
+                                Ок
+                            </button>
+                            <?php //echo Html::button('Изменить', ['class' => '']) ?>
+                        </div>
+
+                        <?php ActiveForm::end(); ?>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- модальное окно для добавления события -->
+<div class="modal fade" id="modalAddPost" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Добавление нового события
+                </h4>
+            </div>
+            <div class="modal-body">
+
+                <section class="addEventModal">
+                    <div class="inner">
+
+                        <?php $form = ActiveForm::begin([
+                            'method'=>'post',
+                            'action' => ['/site/add-event'],
+                            'options' => [
+                                'class' => 'addEvent',
+                                'id' => 'siteAddEvent'
+                            ]
+                        ]); ?>
+
+                        <?php
+                        // need ?! --- cats, $event
+                        $catsMain = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+                        $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+                        //echo Debug::d($types); die;
+                        $eventMain = new Event();
+
+                        // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
+                        $cats3 = ArrayHelper::map($catsMain,'id','name');
+                        $types3 = ArrayHelper::map($types2,'id','name');
+                        $params1 = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'dropDownId_3'
+                        ];
+                        $params2 = [
+                            //'prompt' => 'Выберите категорию'
+                            'id' => 'idDropDownTypes'
+                        ];
+                        ?>
+                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params1)->label('Выберите категорию'); ?>
+                        <?= $form->field($eventMain, 'type')->dropDownList($types3,$params2)->label('Выберите тип события'); ?>
+
+                        <?php
+
+                        ?>
+
+                        <?php
+                        echo $form->field($eventMain, 'dtr')->widget(DatePicker::className(),[
+                            'language' => 'ru',
+                            'name' => 'check_issue_date',
+                            "value" =>  '16-11-2017',
+                            'options' => ['placeholder' => 'выберите дату', 'id' => 'addEventModal_datePicker'],
+                            'pluginOptions' => [
+                                'autoclose'=>true,
+                                'todayHighlight' => true,
+                                'format' => 'dd-mm-yyyy',
+                            ]
+                        ]);
+                        ?>
+
+                        <?= $form->field($eventMain, 'summ')->label('Введите сумму') ?>
+                        <?= $form->field($eventMain, 'desc')->label('Введите описание') ?>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                            <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg2']) ?>
+                        </div>
+
+                        <?php ActiveForm::end(); ?>
+
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php
 

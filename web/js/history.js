@@ -221,19 +221,17 @@
 
     /* */
     $('.doFilter').on('click', function () {
-        console.log('doFilter');
+        console.log('do simple filter');
 
         // старый код, делал аякс запрос с последующим получением данных и их обновлением на странице
         // данный код будет просто перебрасывать пользователя на страницу фильтра, с передачей приведенных параметров хД
         var new_params = $( '#simpleFilter' ).serializeArray();
         var http_build = '';
         for(var i = 0; i < new_params.length; i++) {
-            //c[new_params[i]['name']] = new_params[i]['value'];
             if ( new_params[i]['name'] !== '_csrf' )
                 http_build += "" + new_params[i]['name'] + "=" + new_params[i]['value'] + "&";
         }
-        http_build = '?' + http_build;
-        var new_path = window.document.location.origin + '/event/simple-filter' + http_build;
+        var new_path = window.document.location.origin + '/event/simple-filter?' + http_build;
         window.location.href = new_path;
 
         // console.log( params2 );

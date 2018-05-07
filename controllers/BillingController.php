@@ -6,6 +6,7 @@ use app\components\AuthLib;
 use app\components\Debug;
 use app\models\User;
 use Yii;
+use app\models\Billing;
 
 class BillingController extends \yii\web\Controller
 {
@@ -32,9 +33,16 @@ class BillingController extends \yii\web\Controller
         //$remains = number_format($remains, 2, ',', ' ');
         //echo Debug::d($remains,'remains');
         //echo Debug::d($_GET,'get');
+        $courses = Billing::getCourses();
 
         $this->layout = '_main';
-        return $this->render('index', compact('remains'));
+        return $this->render('index', compact('remains', 'courses'));
+    }
+
+    //
+    public function actionUpdateCourses(){
+        (new Billing())->updateCourses();
+        return $this->redirect(['billing/index']);
     }
 
     /*

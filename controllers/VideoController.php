@@ -504,47 +504,133 @@ IFRAME;
         //$rs = $youtube->videos->listVideos('snippet, statistics, contentDetails', [
         //    'id' => $ids,
         //]);
-        $q = ''; $order['value'] = 'relevance'; $order['key'] = 0;
-        $order_array = [];
-        $order_array[] = 'relevance';
-        $order_array[] = 'viewCount';
-        $order_array[] = 'rating';
-        $order_array[] = 'title';
-        $order_array[] = 'date';
-        $order_array[] = 'videoCount';
+
+        $orderArray = [
+            'relevance', 'viewCount', 'rating', 'title', 'date', 'videoCount',
+        ];
+        //
+        $durationArray = [
+            'any', 'long', 'medium', 'short',
+        ];
+        //
+        $typeArray = [
+            'video', 'channel', 'playlist',
+        ];
+        //
+        $q['key'] = '';
+        $q['caption'] = 'Query string';
+        $q['value'] = '';
+        ///
+        $maxResults['key'] = 0;
+        $maxResults['caption'] = 'maxResults';
+        $maxResults['value'] = 7;
+        //
+        $order['key'] = 0;
+        $order['value'] = $orderArray[0];
+        $order['caption'] = 'Order';
+        //
+        $duration['key'] = 0;
+        $duration['value'] = $durationArray[0];
+        $duration['caption'] = 'duration';
+        //
+        $type['key'] = 0;
+        $type['value'] = $typeArray[0];
+        $type['caption'] = 'type';
+        //
+        $order['key'] = 0;
+        $order['value'] = $orderArray[0];
+        $order['caption'] = 'Order';
+        //
+        $publishedBefore = date('Y-m-d\Th:i:s\Z');
+        //echo $publishedBefore; echo "<br>";
+        $publishedAfter = '1970-01-01T00:00:00Z';
+        //
         if(Yii::$app->request->isPost) {
             if (array_key_exists('yt-search-text', $_POST)){
-                $q = $_POST['yt-search-text'];
+                $q['value'] = $_POST['yt-search-text'];
             }
             if (array_key_exists('order', $_POST)){
-                foreach($order_array as $ok => $ov){
-                    if ( ($ok) === intval($_POST['order'])) {
-                        $order['value'] = $order_array[$ok];
-                        $order['key'] = $ok;
+                foreach($orderArray as $k => $v){
+                    if ( ($k) === intval($_POST['order'])) {
+                        $order['key'] = $k;
+                        $order['value'] = $v;
                     }
                 }
             }
+            if (array_key_exists('order', $_POST)){
+                foreach($durationArray as $k => $v){
+                    if ( ($k) === intval($_POST['duration'])) {
+                        $duration['key'] = $k;
+                        $duration['value'] = $v;
+                    }
+                }
+            }
+            if (array_key_exists('type', $_POST)){
+                foreach($typeArray as $k => $v){
+                    if ( ($k) === intval($_POST['type'])) {
+                        $type['key'] = $k;
+                        $type['value'] = $v;
+                    }
+                }
+            }
+            if (array_key_exists('maxResults', $_POST)){
+                $maxResults['value'] = intval($_POST['maxResults']);
+                if ( !($maxResults['value'] >= 0 && $maxResults['value'] <= 50) ){
+                    $maxResults['value'] = 7;
+                }
+            }
+            if (array_key_exists('publishedBefore', $_POST) && mb_strlen($_POST['publishedBefore']) >= 8 ){
+                $publishedBefore = Yii::$app->formatter->asDatetime($_POST['publishedBefore'],DATE_RFC3339);
+                $publishedBefore = Yii::$app->formatter->asDatetime($_POST['publishedBefore'],'Y-MM-dd\Th:i:s');
+                $publishedBefore .= 'Z';
+                //echo $publishedBefore; echo "<br>";
+                //echo $publishedAfter; echo "<br>";
+                //die;
+            }
+            if (array_key_exists('publishedAfter', $_POST)){
+                $publishedAfter = Yii::$app->formatter->asDatetime($_POST['publishedAfter'],DATE_RFC3339);
+                $publishedAfter = Yii::$app->formatter->asDatetime($_POST['publishedAfter'],'Y-MM-dd\Th:i:s');
+                $publishedAfter .= 'Z';
+                //echo $publishedBefore; echo "<br>";
+                //echo $publishedAfter; echo "<br>";
+                //die;
+            }
         }
 
-        $search_array = [
-            'q' => $q,
-            'maxResults' => 10,
-            'videoDuration' => 'medium',
+        $part = "snippet";
+        $filters = [
+            'q' => $q['value'],
+            'maxResults' => $maxResults['value'],
+            'videoDuration' => $duration['value'],
             'type' => 'video',
             //'forMine' => true,
-            'order'=> $order['value'],
             //'safeSearch' => 'none',
             'safeSearch' => 'strict',
             //'safeSearch' => 'moderate',
+            'type' => $type['value'],
+            'order'=> $order['value'],
+            //'eventType' => 'completed',
+            'publishedBefore' => $publishedBefore,
+            'publishedAfter' => $publishedAfter,
+
         ];
 
-        $part = "snippet";
-        $rs = $youtube->search->listSearch($part, $search_array);
-
+        $publishedBefore = mb_substr($publishedBefore,0,10);
+        $publishedAfter  = mb_substr($publishedAfter, 0,10);
+        //
+        $rs = $youtube->search->listSearch($part, $filters);
+        //echo $publishedBefore; echo "<br>";
         //echo Debug::d($rs,'youtube result',1);
         $this->layout = '_main';
-        return $this->render('ytsearch1',['rs' => $rs,'q' => $q,
-            'part'=>$part, 'order_array' => $order_array, 'order' => $order,
+        return $this->render('ytsearch1',['rs' => $rs,
+            'q' => $q,
+            'part'=>$part,
+            'orderArray' => $orderArray, 'order' => $order,
+            'durationArray' => $durationArray, 'duration' => $duration,
+            'typeArray' => $typeArray, 'type' => $type,
+            'maxResults' => $maxResults,
+            'publishedBefore' => $publishedBefore,
+            'publishedAfter' => $publishedAfter,
 
         ]);
     }

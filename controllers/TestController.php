@@ -19,14 +19,19 @@ class TestController extends \yii\web\Controller
     public function actionIndex()
     {
         $this->layout = '_main';
-        $model = new ContactForm();
-        //session_start();
-        //$this->layout = '_main';
-        //$cats = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-        //echo Debug::d($cats,'cats');
-        //echo Debug::d(Yii::$app->db);
+        // 1970-01-01T00:00:00Z
+        //$publishedBefore = date('Y-m-d\Th:i:s\Z');
+        $publishedBefore = '2017-03-21 10:20:12';
+        if (Yii::$app->request->isGet && array_key_exists('publishedBefore', $_GET)){
+            echo 'Da!';
+            $publishedBefore = $_GET['publishedBefore'];
+            $publishedBefore = Yii::$app->formatter->asDate($publishedBefore,'Y-m-d\Th:i:s\Z');
+        }else{
+            echo 'no!';
+        }
+        //echo $publishedBefore;
 
-        return $this->render('index',['model' => $model]);
+        return $this->render('index',['publishedBefore' => $publishedBefore]);
     }
 
     public function actionEvent()

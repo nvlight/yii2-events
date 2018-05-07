@@ -12,29 +12,25 @@ $this->registerMetaTag(['name' => 'description', 'content' => 'Приложен�
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page billing'], 'keywords');
 ?>
     <div class="bill-inset">
-        <?php
-        if (Yii::$app->session->hasFlash('logined')):
-            ?>
+        <?php if (Yii::$app->session->hasFlash('logined')): ?>
             <h4 class="alert-success p10" ><?=Html::encode(Yii::$app->session->getFlash('logined'))?></h4>
-        <?php
-        endif;
-        ?>
+        <?php endif; ?>
         <?php
         if (Yii::$app->session->hasFlash('registrated')):
             ?>
             <h4 class="alert-success p10" >
                 <?=Html::encode(Yii::$app->session->getFlash('registrated'))?>
             </h4>
+        <?php endif; ?>
+        <?php if (Yii::$app->session->hasFlash('updateRemains')): ?>
+            <h4 class="alert-success p10" >
+                <?=Html::encode(Yii::$app->session->getFlash('updateRemains'))?>
+            </h4>
+        <?php endif; ?>
         <?php
-        endif;
-        if (Yii::$app->session->hasFlash('updateRemains')):
-        ?>
-        <h4 class="alert-success p10" >
-            <?=Html::encode(Yii::$app->session->getFlash('updateRemains'))?>
-        </h4>
-        <?php
-        endif;
-        ?>
+        if (Yii::$app->session->hasFlash('courses')): ?>
+            <h4 class="alert-success p10" ><?=Html::encode(Yii::$app->session->getFlash('courses'))?></h4>
+        <?php endif; ?>
 
         <div class="page-caption clearfix">
             <h2 class="pull-left" >Страница счета</h2>
@@ -61,24 +57,21 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         ?>
         <div class="page-content">
             <div class="row">
-                <div class="col-md-4">
-
-                </div>
-                <div class="col-md-7">
+                <div class="col-md-12">
 
                     <form class="form-inline mb10">
                         <div class="form-group">
-                            <label for="new_remains">Общий лимит</label>
+                            <label for="new_remains">Общий лимит в рублях</label>
                             <input type="text" name="remains" class="form-control user_limit" id="new_remains" placeholder="remains"  value="<?=html::encode($remains)?>">
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-default" id="chRemains">
-                            <span class="spinRefresh">
-                                <i class="fa fa-refresh"></i>
-                            </span>
+                        <span class="spinRefresh">
+                            <i class="fa fa-refresh"></i>
+                        </span>
                                 <span class="spinPreload">
-                                <i class="fa fa-spinner fa-spin"></i>
-                            </span>
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </span>
                                 Изменить
                             </button>
                             <nosript class="hidden">
@@ -90,63 +83,42 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4">
-                    <table class="table gg-billing">
-                        <!-- <caption>
-                            Счет
-                        </caption> -->
-                        <thead>
-                        <tr">
-                        <td colspan="2">Счет</td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr class="active">
-                            <td><i class="fa fa-rub" aria-hidden="true"></i> </td>
-                            <td class="new_user_limit"><?=html::encode($remains)?></td>
-                        </tr>
-                        <tr class="active">
-                            <td><i class="fa fa-eur" aria-hidden="true"></i></td>
-                            <td class="billing_euro_schet"><?=html::encode(round($remains/Yii::$app->params['euro'],2,PHP_ROUND_HALF_DOWN))?></td>
-                        </tr>
-                        <tr class="active">
-                            <td><i class="fa fa-usd" aria-hidden="true"></i> </td>
-                            <td class="billing_dollar_schet"><?=html::encode(round($remains/Yii::$app->params['dollar'],2,PHP_ROUND_HALF_DOWN))?></td>
-                        </tr>
-                        </tbody>
-
-                    </table>
-                </div>
-                <div class="col-md-8">
-                    <table class="table gg-course">
-                        <thead>
-                        <tr>
-                            <td>Курс</td>
-                        </tr>
-                        <tr>
-                            <th>Валюта</th>
-                            <th>Курс</th>
-                            <th>Дата</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>rub</td>
-                            <td>1</td>
-                            <td><?= date('d.m.Y')?></td>
-                        </tr>
-                        <tr>
-                            <td>Eur</td>
-                            <td class="billing_euro_kurs"><?=html::encode(round(1/Yii::$app->params['euro'],4,PHP_ROUND_HALF_DOWN))?></td>
-                            <td><?= date('d.m.Y')?></td>
-                        </tr>
-                        <tr>
-                            <td>Usd</td>
-                            <td class="billing_dollar_kurs"><?=html::encode(round(1/Yii::$app->params['dollar'],4,PHP_ROUND_HALF_DOWN))?></td>
-                            <td><?= date('d.m.Y')?></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                <div class="col-md-12">
+                    <?php
+                        //echo Debug::d($courses,'$courses');
+                    ?>
+                    <h4>Timestamp: <?= Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-mm-dd H:i:s')?></h4>
+                    <h5>Count: <?= count($courses['rs']['Valute'])?></h5>
+                    <div class="mb10">
+                        <?=Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
+                    </div>
+                    <?php if ($courses['success'] === 'yes'): ?>
+                        <table class="table gg-billing">
+                            <thead>
+                                <tr>
+                                    <td>NumCode</td>
+                                    <td>CharCode</td>
+                                    <td>Name</td>
+                                    <td>Value</td>
+                                    <td>Previous</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($courses['rs']['Valute'] as $k => $v): ?>
+                                    <tr>
+                                        <td><?=$v['NumCode']?></td>
+                                        <td><?=$v['CharCode']?></td>
+                                        <td><?=$v['Name']?></td>
+                                        <td><?=$v['Value']/$v['Nominal']?></td>
+                                        <td><?=$v['Previous']/$v['Nominal']?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php ?>
+                        <?php ?>
+                        <?php ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -179,12 +151,12 @@ function updateUserLimit(){
         var rs = $.parseJSON(res);
         if (rs['success'] === 'yes'){
             //console.log('limit change is success & reload is completed');  
-            $('.billing_euro_schet').text(rs['k'][0]);
-            $('.billing_dollar_schet').text(rs['k'][1]);
-            $('.billing_euro_kurs').text(rs['k'][2]);
-            $('.billing_dollar_kurs').text(rs['k'][3]); 
-            $('.new_user_limit').text(rs['k'][4]);
-            $('input.user_limit').val(rs['k'][4]);
+            // $('.billing_euro_schet').text(rs['k'][0]);
+            // $('.billing_dollar_schet').text(rs['k'][1]);
+            // $('.billing_euro_kurs').text(rs['k'][2]);
+            // $('.billing_dollar_kurs').text(rs['k'][3]); 
+            // $('.new_user_limit').text(rs['k'][4]);
+            // $('input.user_limit').val(rs['k'][4]);
         }        
       }
       ,error: function(res) {
