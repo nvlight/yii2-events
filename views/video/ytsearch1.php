@@ -272,7 +272,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 </div>
 
 <!-- Модаль -->
-<div class="modal fade" id="watchVideModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="watchLideModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -303,7 +303,7 @@ function getYtVideoById(id){
         if (rs['success'] === 'yes'){
             //console.log('limit change is success & reload is completed');  
             $('.modal-body').html(rs['iframe']);
-            $('#watchVideModal').modal('show');
+            $('#watchLideModal').modal('show');
         }        
       }
       ,error: function(res) {
@@ -325,7 +325,17 @@ $('.loadVideoToModal').on('click', function() {
     getYtVideoById(id);
     return false; 
 });
+
+//
+$('#watchLideModal').on('hidden.bs.modal', function () {
+    //console.log('do something…'); 
+    $('.modal-body').html('');
+});
+
+
+
 JS;
+
 
 $this->registerJs($js1);
 ?>

@@ -78,7 +78,7 @@ class VideoController extends Controller
         $youtubePattern_1 = 'https://www.youtube.com/';
         $youtubePattern_2 = 'https://youtu.be/';
         if (mb_strpos($link, $youtubePattern_1) !== false){
-            if (mb_strlen($link) > $youtubePattern_1){
+            if (mb_strlen($link) > mb_strlen($youtubePattern_1)){
                 $subs0 = (mb_substr($link,24));
                 //echo Debug::d($subs0);
                 if (mb_strpos($subs0, '=')){
@@ -89,7 +89,7 @@ class VideoController extends Controller
                 }
             }
         }elseif(mb_strpos($link, $youtubePattern_2) !== false){
-            if (mb_strlen($link) > $youtubePattern_2)
+            if (mb_strlen($link) > mb_strlen($youtubePattern_2))
                 $subs = (mb_substr($link,17));
         }
         // вывод текущего разобранного ИД
@@ -398,8 +398,9 @@ IFRAME;
         }
 
         if (Yii::$app->request->isAjax){
+            // <iframe width="560" height="315" src="https://www.youtube.com/embed/7rGxox4gAgE?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             $iframe = <<<IFRAME
-<iframe width="560" height="315" src="https://www.youtube.com/embed/{$id}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/{$id}?rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 IFRAME;
             $rs = ['success' => 'yes', 'message' => 'video is finded', 'iframe' => $iframe ];
             die(json_encode($rs));
@@ -621,6 +622,12 @@ IFRAME;
         $rs = $youtube->search->listSearch($part, $filters);
         //echo $publishedBefore; echo "<br>";
         //echo Debug::d($rs,'youtube result',1);
+
+        // debug video by id
+        //$testVideoId = 'https://www.youtube.com/watch?v=JZT8R1pkNW4';
+        //$testVideoRs = self::actionYoutubeFindVideoById(self::actionYoutubeParseUrl($testVideoId));
+        //echo Debug::d($testVideoRs,'$testVideoRs');
+
         $this->layout = '_main';
         return $this->render('ytsearch1',['rs' => $rs,
             'q' => $q,
@@ -689,6 +696,28 @@ IFRAME;
 
     }
 
+    public function actionChannels2()
+    {
+        if (!Authlib::appIsAuth()) {
+            AuthLib::appGoAuth();
+        }
+
+        $api_key = Yii::$app->params['youtube_api_key_2'];
+
+        $client = new Google_Client();
+        $client->setDeveloperKey($api_key);
+        //$youtube = new Google_Service_YouTube($client);
+        $books = new Google_Service_Books($client);
+        $optParams = array('filter' => 'free-ebooks');
+        $results = $books->volumes->listVolumes('Henry David Thoreau', $optParams);
+        foreach ($results as $item) {
+            echo $item['volumeInfo']['title'], "<br /> \n";
+        }
+
+
+    }
+
+    //
     public function actionQuickstart(){
         return $this->render('quickstart');
     }
