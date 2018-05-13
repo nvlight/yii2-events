@@ -8,6 +8,7 @@ use app\components\AuthLib;
 use app\models\Type;
 use app\models\Category;
 use app\components\Debug;
+use yii\widgets\Pjax;
 
 $this->title = 'Events | Категории';
 
@@ -194,10 +195,15 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     'prompt' => 'Выберите категорию'
                                 ];
                                 ?>
-                                <?php $typeForm = ActiveForm::begin([
-                                    'action' => ['/post/add-type'],
+                                <?php
+                                $response = '';
+                                //Pjax::begin([]);
+
+                                $typeForm = ActiveForm::begin([
+                                    //'action' => ['/post/add-type'],
                                     'options' => [
                                         'class' => 'addType',
+                                        'data' => ['pjax' => true],
                                     ]
                                 ]); ?>
 
@@ -212,16 +218,29 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <div class="help-block"></div>
                                 </div>
 
-                                <?= $typeForm->field($type, 'name') ?>
+<!--                                <div class="form-group">-->
+<!--                                    --><?php ////echo Html::a("Показать дату", ['post/index'], ['class' => 'btn btn-lg btn-success']) ?>
+<!--                                    --><?php ////echo Debug::d($response,'$response'); ?>
+<!--                                </div>-->
+
+                                <?= $typeForm->field($type, 'name')  ?>
                                 <?= $typeForm->field($type, 'color') ?>
 
                                 <div class="form-group">
                                     <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg']) ?>
                                 </div>
-                                <?php ActiveForm::end(); ?>
+                                <?php
+                                    ActiveForm::end();
+                                    //Pjax::end();
+                                ?>
 
                             </div>
                         </section>
+                        <?php
+                            //echo $randomString;
+                            //echo $randomKey;
+                            //$this->render('multiple', compact('randomString', 'randomKey'));
+                        ?>
                     </div>
 
                 </div>

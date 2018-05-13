@@ -17,13 +17,8 @@ class LoadDocForm extends Model
 
     public function rules(){
         return [
-            [ ['file'], 'file',
-              'extensions' => 'png, jpg, jpeg, gif, docx, xlsx, pdf, djvu, rar, zip, 7z,txt',
-              'maxSize' => Yii::$app->params['fileMaxSize'],
-              //'skipOnEmpty' => false, // пропускать, если файл 0 размера
-              'maxFiles' => 5,
-              //'tooLarge'=>'File has to be smaller than 50MB'
-            ],
+            //[['file'], 'file', 'extensions' => 'png, jpg, jpeg, gif, docx, xlsx, pdf, rar, djvu, zip, 7z,txt', 'maxSize' => Yii::$app->params['fileMaxSize'], 'maxFiles' => 5,],
+            ['file', 'file', 'extensions' => 'tar,png, jpg, jpeg, gif, docx, xlsx, pdf, rar, djvu, zip, 7z, txt,', 'maxSize' => Yii::$app->params['fileMaxSize'], 'maxFiles' => 5, 'checkExtensionByMimeType' => false],
             [ ['file'], 'required' ],
         ];
     }

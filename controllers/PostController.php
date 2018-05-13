@@ -9,6 +9,7 @@ use app\models\Type;
 use app\components\Debug;
 use Yii;
 use yii\db\Query;
+use yii\base\Security;
 
 class PostController extends \yii\web\Controller
 {
@@ -29,7 +30,13 @@ class PostController extends \yii\web\Controller
         $type = new Type();
         $types = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
 
-        return $this->render('index', compact('model','cats','event','type','types') );
+        $security = new Security();
+        $randomString = $security->generateRandomString();
+        $randomKey = $security->generateRandomKey();
+
+        return $this->render('index',
+            compact('model','event','type', 'randomString','randomKey' )
+        );
     }
 
     /*
@@ -223,9 +230,20 @@ class PostController extends \yii\web\Controller
 //            }
 //            echo Debug::d($json);
         }
-
     }
 
+    //
+    public function actionMultiple()
+    {
+        $security = new Security();
+        $randomString = $security->generateRandomString();
+        $randomKey = $security->generateRandomKey();
+        $this->layout = '_main';
+        return $this->render('multiple', [
+            'randomString' => $randomString,
+            'randomKey' => $randomKey,
+        ]);
+    }
 
     /*
      *
