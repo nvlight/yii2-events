@@ -162,7 +162,6 @@ class PostController extends \yii\web\Controller
         //
         if (Yii::$app->request->isAjax){
             $model = new Type();
-            $json = ['success' => 'no', 'message' => 'Валидация не удалась!'];
             //echo Debug::d(Yii::$app->request->post());
             //$model->name = Yii::$app->request->post()['Type']['name'];
             //$model->color = Yii::$app->request->post()['Type']['color'];
@@ -176,11 +175,15 @@ class PostController extends \yii\web\Controller
                         'id' => $model->id, 'name' => $model->name
                     ];
                 }
+            }else{
+                $json = ['success' => 'no', 'message' => $model->errors];
             }
             die(json_encode($json));
         }elseif (Yii::$app->request->isPost){
             $model = new Type();
-            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $model->load(Yii::$app->request->post());
+            $model->i_user = $_SESSION['user']['id'];
+            if ($model->validate()) {
 
                 if ($model->save()){
                     $json = ['success' => 'yes', 'message' => 'Тип события добавлен!',
@@ -189,7 +192,7 @@ class PostController extends \yii\web\Controller
                     $json = ['success' => 'no', 'message' => 'Ошибка при добавлении типа события'];
                 }
             }else{
-                $json = ['success' => 'no', 'message' => 'Валидация не удалась!'];
+                $json = ['success' => 'no', 'message' => $model->errors];
             }
             Yii::$app->session->setFlash('addPost',$json['message']);
             Yii::$app->session->setFlash('success',$json['success']);

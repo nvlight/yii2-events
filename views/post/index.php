@@ -6,6 +6,7 @@ use kartik\date\DatePicker;
 use yii\widgets\ActiveField;
 use app\components\AuthLib;
 use app\models\Type;
+use app\models\Category;
 use app\components\Debug;
 
 $this->title = 'Events | Категории';
@@ -31,7 +32,10 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <?php if (Yii::$app->session->hasFlash('addPost')) : ?>
                     <?php $success = Yii::$app->session->getFlash('success') === 'yes' ? 'success' : 'danger' ?>
                         <h4 class="alert-<?=$success?> p10 m015" >
-                            <?= Yii::$app->session->getFlash('addPost') ?>
+                            <?php
+                                echo Yii::$app->session->getFlash('addPost')
+                                //echo Debug::d(Yii::$app->session->getFlash('addPost'));
+                            ?>
                         </h4>
                     <?php endif; ?>
 
@@ -50,31 +54,22 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     ]
                                 ]); ?>
 
-
                                 <?php
-                                    $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                                    $types30 = ArrayHelper::map($types2,'id','name');
-                                    $params21 = [
-                                        //'prompt' => 'Выберите категорию'
-                                        'id' => 'changeEventModal_typeId'
-                                    ];
-                                ?>
-
-                                <?php
-                                // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
-                                $cats2 = ArrayHelper::map($cats,'id','name');
                                 $params = [
-                                    //'prompt' => 'Выберите категорию'
                                     'class' => 'dropDownClass_1',
-                                    'id' => 'dropDownId_1'
+                                    'id' => 'dropDownId_1',
+                                    'prompt'=>'Выберите категорию'
                                 ];
-                                ?>
-                                <?= $form->field($event, 'i_cat')->dropDownList($cats2,$params)
-                                    ->label('Выберите категорию'); ?>
-                                <?= $form->field($event, 'type')->dropDownList($types30,$params21)
-                                    ->label('Выберите тип события'); ?>
+                                echo $form->field($event, 'i_cat')->dropDownList(
+                                    Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                    $params
+                                )->label('Категория');
 
-                                <?php
+                                echo $form->field($event, 'type')->dropDownList(
+                                    Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                    ['id' => 'types_id', 'class' => 'types_class', 'prompt'=>'Выберите тип события' ]
+                                )->label('Тип события');
+
                                 //echo $form->field($event, 'dtr')->widget(\yii\widgets\MaskedInput::className(), [ 'mask' => '99-99-9999', ]);
                                 echo $form->field($event, 'dtr')
                                     ->widget(DatePicker::className(),[
@@ -149,28 +144,31 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                 ]); ?>
 
                                 <?php
-                                // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
-                                $cats2 = ArrayHelper::map($cats,'id','name');
                                 $params = [
-                                    //'prompt' => 'Выберите категорию'
                                     'class' => 'dropDownClass_2',
-                                    'id' => 'dropDownId_2'
-
+                                    'id' => 'dropDownId_2',
+                                    'prompt' => 'Выберите категорию',
                                 ];
-                                ?>
-                                <?= $form->field($event, 'i_cat')->dropDownList($cats2,$params)->label('Выберите категорию'); ?>
 
-                                <?= $form->field($model, 'name',[
+                                echo $form->field($event, 'i_cat')->dropDownList(
+                                    Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                    $params
+                                )->label('Категория');
+
+                                echo $form->field($model, 'name',[
                                         'inputOptions' => [
                                             'id' => 'changeCat-name',
                                         ],]
-                                )->label('Введите название')
+                                    )
+                                    ->label('Введите название',['for' => 'changeCat-name'])
 
                                 ?>
                                 <?= $form->field($model, 'limit',[
                                     'inputOptions' => [
                                         'id' => 'changeCat-limit',
-                                    ],])->label('Введите лимит') ?>
+                                    ],])
+                                    ->label('Введите лимит',['for' => 'changeCat-limit'])
+                                ?>
 
                                 <div class="form-group">
                                     <?= Html::submitButton('Редактировать', ['class' => 'btn btn-primary btn-gg']) ?>
@@ -189,11 +187,11 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                             <div class="inner">
 
                                 <?php
-                                $types2 = ArrayHelper::map($types,'id','name');
                                 $typeParams = [
                                     //'prompt' => 'Выберите категорию'
                                     'class' => 'dropDownType_Class',
-                                    'id' => 'dropDownType_Id'
+                                    'id' => 'dropDownType_Id',
+                                    'prompt' => 'Выберите категорию'
                                 ];
                                 ?>
                                 <?php $typeForm = ActiveForm::begin([
@@ -205,7 +203,12 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
                                 <div class="form-group field-type-curr required">
                                     <label class="control-label" for="type-curr">Существующие типы событий</label>
-                                    <?php echo Html::dropDownList('select', '', $types2,['id' => 'types_id', 'class' => 'types_class']); ?>
+                                    <?php echo Html::dropDownList(
+                                        'select', '',
+                                        Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                        ['id' => 'types_id', 'class' => 'types_class', ]
+                                    );
+                                    ?>
                                     <div class="help-block"></div>
                                 </div>
 
@@ -306,11 +309,11 @@ $('form.addType').on('beforeSubmit', function(e){
             //console.log(np);
 			if (np['success'] === 'yes'){
 			    alert(np['message']);
-				$('#types_id').append($('<option>', {
+				$('.types_class').append($('<option>', {
 					value: np['id'],
 					text: np['name']
 				}));
-				$("#types_id > option[value="+np['id']+"]").attr('selected','selected');
+				$(".types_class > option[value="+np['id']+"]").attr('selected','selected');
 			}   
 		},
 		error: function(res){
