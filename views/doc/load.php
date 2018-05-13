@@ -51,10 +51,14 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     ?>
 
                     <?php if (\Yii::$app->session->hasFlash('loadFile')): ?>
-                        <p class="alert-success p10 fz16"><?=\Yii::$app->session->getFlash('loadFile')?></p>
+                        <p class="alert-success p10 fz16">
+                            <?=\Yii::$app->session->getFlash('loadFile')?>
+                        </p>
                     <?php endif; ?>
 
-                    <?=$form->field($model,'file')->fileInput()->label('') ?>
+                    <?=$form->field($model,'file[]')
+                        ->fileInput(['multiple' => true ]) //, 'accept' => 'image/*'])
+                        ->label('') ?>
 
                     <button>Отправить</button>
 

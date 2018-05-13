@@ -87,7 +87,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <?php
                         //echo Debug::d($courses,'$courses');
                     ?>
-                    <h4>Timestamp: <?= Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-mm-dd H:i:s')?></h4>
+                    <h4>Timestamp: <?= Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd H:i:s')?></h4>
                     <h5>Count: <?= count($courses['rs']['Valute'])?></h5>
                     <div class="mb10">
                         <?=Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>

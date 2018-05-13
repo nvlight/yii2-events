@@ -158,18 +158,24 @@ class PostController extends \yii\web\Controller
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         //
+
+        //
         if (Yii::$app->request->isAjax){
             $model = new Type();
-            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
-
+            $json = ['success' => 'no', 'message' => 'Валидация не удалась!'];
+            //echo Debug::d(Yii::$app->request->post());
+            //$model->name = Yii::$app->request->post()['Type']['name'];
+            //$model->color = Yii::$app->request->post()['Type']['color'];
+            $model->load(Yii::$app->request->post());
+            $model->i_user = $_SESSION['user']['id'];
+            if ( (1===1) && ($model->validate()) ) {
+                $json = ['success' => 'no', 'message' => 'Ошибка при добавлении типа события'];
                 if ($model->save()){
-                    $json = ['success' => 'yes', 'message' => 'Тип события добавлен!',
-                        'id' => $model->id, 'name' => $model->name];
-                }else{
-                    $json = ['success' => 'no', 'message' => 'Ошибка при добавлении типа события'];
+                    $json = [
+                        'success' => 'yes', 'message' => 'Тип события добавлен!',
+                        'id' => $model->id, 'name' => $model->name
+                    ];
                 }
-            }else{
-                $json = ['success' => 'no', 'message' => 'Валидация не удалась!'];
             }
             die(json_encode($json));
         }elseif (Yii::$app->request->isPost){
@@ -188,6 +194,31 @@ class PostController extends \yii\web\Controller
             Yii::$app->session->setFlash('addPost',$json['message']);
             Yii::$app->session->setFlash('success',$json['success']);
             return $this->redirect(['post/index']);
+        }
+        elseif (Yii::$app->request->isGet){
+//            $model = new Type();
+//            //$model->name = 'some types name!';
+//            //$model->color = 'eee';
+//            //$model->id = 23;
+//            $_POST['Type']['name'] = 'some';
+//            $_POST['Type']['color'] = 'aaa';
+//            echo Debug::d($_POST);
+//            echo Debug::d(Yii::$app->request->post());
+//            $model->load($_POST);
+//            $model->i_user = 1;
+//
+//            if ($model->validate()) {
+//
+//                if ($model->save()){
+//                    $json = ['success' => 'yes', 'message' => 'Тип события добавлен!',
+//                        'id' => $model->id, 'name' => $model->name];
+//                }else{
+//                    $json = ['success' => 'no', 'message' => 'Ошибка при добавлении типа события'];
+//                }
+//            }else{
+//                $json = ['success' => 'no', 'message' => 'Валидация не удалась!','errors' => $model->errors];
+//            }
+//            echo Debug::d($json);
         }
 
     }

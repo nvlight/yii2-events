@@ -187,7 +187,6 @@ class VideoController extends Controller
         $api_key = Yii::$app->params['youtube_api_key_2'];
 
         $params = array(
-            'part' => 'contentDetails',
             'id' => $video_id,
             'key' => $api_key,
             'part' => 'snippet,contentDetails,statistics',
@@ -352,12 +351,13 @@ class VideoController extends Controller
     public function actionWatch($id=false){
 
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
-
+        //die($id);
         $video = Video::findOne($id);
         if ($video) $id = $video->video_id;
-        //echo Debug::d($video,'video');
+        //echo Debug::d($video,'video'); die;
+        //die((bool)$video);
         $this->layout = '_main';
-        return $this->render('watch',[$id => $id]);
+        return $this->render('watch',['id' => $id]);
     }
 
     //
@@ -627,7 +627,6 @@ IFRAME;
         //$testVideoId = 'https://www.youtube.com/watch?v=JZT8R1pkNW4';
         //$testVideoRs = self::actionYoutubeFindVideoById(self::actionYoutubeParseUrl($testVideoId));
         //echo Debug::d($testVideoRs,'$testVideoRs');
-
         $this->layout = '_main';
         return $this->render('ytsearch1',['rs' => $rs,
             'q' => $q,
@@ -708,6 +707,7 @@ IFRAME;
         $client->setDeveloperKey($api_key);
         //$youtube = new Google_Service_YouTube($client);
         $books = new Google_Service_Books($client);
+        //Google_Service_YouTube::YOUTUBE_READONLY
         $optParams = array('filter' => 'free-ebooks');
         $results = $books->volumes->listVolumes('Henry David Thoreau', $optParams);
         foreach ($results as $item) {

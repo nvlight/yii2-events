@@ -16,7 +16,14 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
 <div class="row">
     <?php if ($id): ?>
-        <iframe width="560" height="315" src="https://www.youtube.com/embed/<?=$id?>" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <iframe
+            width="560" height="315"
+            src="https://www.youtube.com/embed/<?=$id?>"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+        >
+        </iframe>
     <?php else: ?>
         <h3>Не удалось воспроизвести видео, пожалуйста, попробуйте позже</h3>
     <?php endif; ?>

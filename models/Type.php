@@ -27,13 +27,14 @@ class Type extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['name','color'], 'required'],
+            [['name','color','i_user'], 'required'],
             ['name', 'unique', 'targetAttribute' => ['name'],'message' =>  'Тип {name} уже занят.'],
             [['name'], 'string', 'max' => 55],
             [['name'], 'string', 'min' => 3],
+            [['i_user'], 'integer'],
 //            [['color'], 'string', 'max' => 6],
 //            [['color'], 'string', 'min' => 3],
-            [['color'], 'match', 'pattern' => '/^([0-9abcdef]+){3,6}$/', 'message' => 'Цвет должен быть в формате abc123/cd3'],
+            [['color'], 'match', 'pattern' => '/^([0-9abcdef]+){3,6}$/i', 'message' => 'Цвет должен быть в формате abc123/cd3'],
         ];
     }
 

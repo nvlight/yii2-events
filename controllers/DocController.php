@@ -26,6 +26,25 @@ class DocController extends Controller
 
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
+        $model = new LoadDocForm();
+        if (Yii::$app->request->post()){
+            $model->file = UploadedFile::getInstances($model,'file');
+            if ($model->upload()) {
+                // file is uploaded successfully
+                return;
+            }
+        }
+        // получим тут все вайлы текущего пользователя
+        $userFiles = File::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+        //echo Debug::d($userFiles,'$userFiles');
+        $this->layout = '_main';
+        return $this->render('load', ['model' => $model, 'userFiles' => $userFiles]);
+    }
+
+    public function actionLoad2(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
 //        $hash = password_hash('filename', PASSWORD_BCRYPT);
 //        $pass = '$2y$10$OKDaILL7inWHCUFr0bukwOgMIg/CCqdtkX5YQ9XHxHGFs.fp4IRBS.jpg';
 //        $hash = preg_replace("#[/\\\]#",'',$hash);
@@ -33,7 +52,7 @@ class DocController extends Controller
 
         $model = new LoadDocForm();
         if (Yii::$app->request->post()){
-            $model->file = UploadedFile::getInstance($model,'file');
+            $model->file = UploadedFile::getInstances($model,'file');
             if ($model->validate()){
 
                 // предотвращение числа загрузки файлов больше чем лимит
@@ -46,40 +65,41 @@ class DocController extends Controller
                 }
 
                 // предотвращение объема трафика
-                if ( ($userFilesInfo['filesize'] + $model->file->size) > Yii::$app->params['fileMaxSize']){
+                $model_file_sizes = 0;
+                foreach($model->file as $file) { $model_file_sizes += $file->size; }
+                if ( ($userFilesInfo['filesize'] + $model_file_sizes) > Yii::$app->params['fileMaxSize']){
                     Yii::$app->session->setFlash('loadFile','Превышения объема загружаемых файлов!');
                     $userFiles = File::findAll(['i_user' => $_SESSION['user']['id']]);
                     $this->layout = '_main';
                     return $this->render('load', ['model' => $model, 'userFiles' => $userFiles]);
                 }
 
-                // предотвращение дублирования файла по имени - способ потом надо изменить...
-//                $search_origin = File::findOne(['i_user' => $_SESSION['user']['id'], 'name' => $model->file->name]);
-//                if ($search_origin) {
-//                    Yii::$app->session->setFlash('loadFile','Такой файл уже был загружен!');
-//                    $userFiles = File::findAll(['i_user' => $_SESSION['user']['id']]);
-//                    $this->layout = '_main';
-//                    return $this->render('load', ['model' => $model, 'userFiles' => $userFiles]);
-//                }
+                $saved_files = '';
+                foreach($model->file as $file) {
+                    $path = Yii::$app->params['pathUploads'];
+                    $hash = password_hash($file, PASSWORD_BCRYPT);
+                    $hash = preg_replace("#[/\\\]#", '_', $hash) . '.' . $file->extension;
+                    //echo 'hash: ' . $hash;
+                    // т.к. файлов несколько, сохраним их все
 
-                Yii::$app->session->setFlash('loadFile','Файл загружен');
-                $path = Yii::$app->params['pathUploads'];
-                $hash = password_hash($model->file, PASSWORD_BCRYPT);
-                $hash = preg_replace("#[/\\\]#",'_',$hash) . '.' . $model->file->extension;
-                //echo 'hash: ' . $hash;
-                if ($model->file){
-                    $model->file->saveAs($path . $hash);
-                    //
-                    $file = new File();
-                    $file->i_user = $_SESSION['user']['id'];
-                    $file->name = $model->file->name;
-                    $file->hash = $hash;
-                    $file->filesize = filesize($path . $hash);
-                    $filename = htmlentities($model->file->name);
-                    if ($file->save()) Yii::$app->session->setFlash('loadFile','Файл \'' . $filename . '\' загружен!');
-                }else{
-                    Yii::$app->session->setFlash('loadFile','Пустой файл!');
+                    if ($file) {
+                        $file->saveAs($path . $hash);
+                        // также сохраним это в базе данных
+                        $file2 = new File();
+                        $file2->i_user = $_SESSION['user']['id'];
+                        $file2->name = $file->name;
+                        $file2->hash = $hash;
+                        $file2->filesize = filesize($path . $hash);
+                        $filename = htmlentities($file->name);
+                        if ($file2->save()) {
+                            //Yii::$app->session->setFlash('loadFile', 'Файл \'' . $filename . '\' загружен!');
+                            $saved_files .= 'Файл \'' . $filename . '\' загружен! ' . "<br/>";
+                        }else {
+                            $saved_files .= 'Файл \'' . $filename . '\' не загружен загружен! ' . "<br/>";
+                        }
+                    }
                 }
+                Yii::$app->session->setFlash('loadFile', $saved_files);
             }
         }
         // получим тут все вайлы текущего пользователя

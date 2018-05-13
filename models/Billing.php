@@ -47,9 +47,22 @@ class Billing extends Model
     //
     public function updateCourses(){
 
-        $res = self::getCourses();
-        if ($res['success'] === 'yes'){
-            Yii::$app->session->setFlash('courses',$res['message']);
+        $res = false;
+        $filename = './courses.json';
+        try {
+            // http://www.cbr.ru/scripts/XML_daily.asp
+            // https://www.cbr-xml-daily.ru/daily_json.js
+            $url = 'https://www.cbr-xml-daily.ru/daily_json.js';
+            $nd = file_get_contents($url);
+            if ($nd) {
+                file_put_contents($filename, $nd);
+                $res = true;
+            }
+        }catch (\Exception $e){
+
+        }
+        if ($res){
+            Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
         }
         return;
     }
