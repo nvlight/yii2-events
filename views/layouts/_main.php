@@ -229,6 +229,8 @@ if (array_key_exists('1',$rr)) {
     </div>
 </div>
 
+<div id="go_to_top" style="display: none;"><i class="fa fa-chevron-up"></i></div>
+
 <?php
 $js1 = <<<JS
 
@@ -236,6 +238,34 @@ $js1 = <<<JS
         //e.preventDefault();
         //return false;
     });
+
+// $(window).scroll(function () {
+//     if ($(this).scrollTop() > 0) {
+//         $('#go_to_top').fadeIn();
+//     } else {
+//         $('#go_to_top').fadeOut();
+//     }
+// });
+// $('#go_to_top').click(function () {
+//     $('body,html').animate({
+//         scrollTop: 0
+//     }, 400);
+//     return false;
+// });
+
+$(window).scroll(function(){
+if ($(this).scrollTop() > 200) {
+$('#go_to_top').fadeIn();
+} else {
+$('#go_to_top').fadeOut();
+}
+});
+ 
+$('#go_to_top').click(function(){
+$("html, body").animate({ scrollTop: 0 }, 0);
+return false;
+});
+
 
 JS;
 

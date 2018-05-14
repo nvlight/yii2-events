@@ -214,6 +214,26 @@ p.reg{
 	display: table-cell;
 }
 
+#go_to_top {
+	position: fixed;
+	right: 14px;
+	right: 1rem;
+	bottom: 14px;
+	bottom: 5rem;
+	display: none;
+	padding: 12px 15px;
+	background-color: #232323;
+	color: #fff;
+	font-weight: bold;
+	border-radius: 11px;
+	cursor: pointer;
+}
+#go_to_top:hover{
+	background-color: #191919;
+	transition: all .7s;
+	color: #888888;
+}
+
 .mainul{
 	margin-bottom: 0;
 }
@@ -224,6 +244,7 @@ p.reg{
 .mainul li:hover{
 	background-color: #000;
 	color: #fff;
+	transition: all .7s;
 }
 .mainul li:hover a{
 	color: #fff;
