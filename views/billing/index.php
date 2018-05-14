@@ -38,9 +38,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 <!--                <i class="fa fa-refresh" aria-hidden="true"></i>-->
 <!--            </span>-->
         </div>
-        <div class="page-hr">
-            <hr>
-        </div>
+        <div class="page-hr"></div>
         <?php
         try {
             10/0;

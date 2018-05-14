@@ -22,9 +22,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <h2 class="pull-left" >Страница документов</h2>
     </div>
 
-    <div class="page-hr">
-        <hr>
-    </div>
+    <div class="page-hr"></div>
     <div class="page-content">
 
         <div class="load_user_documents">

@@ -22,20 +22,13 @@ class PostController extends \yii\web\Controller
     {
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-        $this->layout = '_main';
-        $model = new Category();
-        //$cats = Category::findAll(['>=','id',0]);
-        $cats = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
+        $caregory = new Category();
         $event = new Event();
         $type = new Type();
-        $types = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
 
-        $security = new Security();
-        $randomString = $security->generateRandomString();
-        $randomKey = $security->generateRandomKey();
-
+        $this->layout = '_main';
         return $this->render('index',
-            compact('model','event','type', 'randomString','randomKey' )
+            compact('caregory','event','type' )
         );
     }
 
@@ -232,16 +225,185 @@ class PostController extends \yii\web\Controller
         }
     }
 
-    //
+    /*
+     *
+     *
+     * */
+    public function actionAddTypePjax()
+    {
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        if (Yii::$app->request->isPost){
+            $model = new Type();
+            $model->load(Yii::$app->request->post());
+            $model->i_user = $_SESSION['user']['id'];
+
+            $isExistAnatherOne = Type::findOne(['name' => $model->name, 'i_user' => $_SESSION['user']['id']]);
+            if ($isExistAnatherOne){
+                Yii::$app->session->setFlash('addType','Тип событий с таким названием уже существует!');
+                Yii::$app->session->setFlash('success','no');
+                $categories = Category::find()->select(['name','id'])
+                    ->where(['i_user' => $_SESSION['user']['id']])
+                    ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+                $types = Type::find()->select(['name','id'])
+                    ->where(['i_user' => $_SESSION['user']['id']])
+                    ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+                return $this->render('multiple',compact('categories','types'));
+            }
+
+            if (($model->validate()) && ($model->save()) ) {
+                Yii::$app->session->setFlash('addType','Тип событий добавлен!');
+                Yii::$app->session->setFlash('success','yes');
+
+            }else{
+                Yii::$app->session->setFlash('addType','Тип событий не добавлен!');
+                Yii::$app->session->setFlash('success','no');
+            }
+        }
+        $categories = Category::find()->select(['name','id'])
+            ->where(['i_user' => $_SESSION['user']['id']])
+            ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+        $types = Type::find()->select(['name','id'])
+            ->where(['i_user' => $_SESSION['user']['id']])
+            ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+        return $this->render('multiple',compact('categories','types'));
+    }
+
+    /*
+     *
+     *
+     **/
+    public function actionAddCategoryPjax()
+    {
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //
+        if (Yii::$app->request->isPost){
+
+            $model = new Category();
+            //$model->name = Yii::$app->request->post('Category')['name'];
+            //$model->limit = Yii::$app->request->post('Category')['limit'];
+            $model->load(Yii::$app->request->post());
+            $model->i_user = $_SESSION['user']['id'];
+            //
+            $isExistAnatherOne = Category::findOne(['name' => $model->name, 'i_user' => $_SESSION['user']['id']]);
+            if ($isExistAnatherOne){
+                Yii::$app->session->setFlash('addCategory','Категория с таким названием уже существует!');
+                Yii::$app->session->setFlash('success','no');
+                $categories = Category::find()->select(['name','id'])
+                    ->where(['i_user' => $_SESSION['user']['id']])
+                    ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+                $types = Type::find()->select(['name','id'])
+                    ->where(['i_user' => $_SESSION['user']['id']])
+                    ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+                return $this->render('multiple',compact('categories','types'));
+            }
+            $res = ($model->insert());
+            if ($res){
+                Yii::$app->session->setFlash('addCategory','Категория добавлена!');
+                Yii::$app->session->setFlash('success','yes');
+            }else{
+                Yii::$app->session->setFlash('addCategory','Ошибка при добавлении категории');
+                Yii::$app->session->setFlash('success','no');
+            }
+            $categories = Category::find()->select(['name','id'])
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+            $types = Type::find()->select(['name','id'])
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+            return $this->render('multiple',compact('categories','types'));
+        }
+    }
+
+    /*
+     *
+     *
+     **/
+    public function actionChangeCategoryPjax()
+    {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //
+        if (Yii::$app->request->isPost){
+
+            $model = Category::findOne(['i_user' => $_SESSION['user']['id'], 'id' => Yii::$app->request->post('Event')['i_cat']]);
+            if (!$model){
+                $json = ['success' => 'no',  'message' => 'Ошибка при обновлении категории. Нет такой категории'];
+            }else {
+                $model->load(Yii::$app->request->post());
+                $model->i_user = $_SESSION['user']['id'];
+                $json = ['success' => 'no', 'message' => 'Ошибка при обновлении категории'];
+                if ($model->update()) {
+                    $json = ['success' => 'yes', 'message' => 'Категория обновлена'];
+                }
+            }
+            Yii::$app->session->setFlash('changeCategory',$json['message']);
+            Yii::$app->session->setFlash('success',$json['success']);
+            $categories = Category::find()->select(['name','id'])
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+            $types = Type::find()->select(['name','id'])
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+            return $this->render('multiple',compact('categories','types'));
+        }
+    }
+
+    /*
+     *
+     *
+     * */
+    public function actionAddEventPjax()
+    {
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        //
+        if (Yii::$app->request->isPost){
+            $ev = new Event();
+            $ev->load(Yii::$app->request->post());
+            $ev->i_user = $_SESSION['user']['id'];
+            if (!$ev->validate()) {
+                Yii::$app->session->setFlash('addEvent','Некорректные входные данные!');
+                Yii::$app->session->setFlash('success','no');
+            }else {
+                $ev->dtr = Yii::$app->formatter->asTime($ev->dtr, 'yyyy-MM-dd'); # 14:09
+                $ev->summ = (int)$ev->summ;
+                $rs = $ev->insert();
+                if ($rs) {
+                    Yii::$app->session->setFlash('addEvent', 'Событие успешно добавлено!');
+                    Yii::$app->session->setFlash('success', 'yes');
+                } else {
+                    Yii::$app->session->setFlash('addEvent', 'При добавлении события произошла ошибка');
+                    Yii::$app->session->setFlash('success', 'no');
+                }
+            }
+            $categories = Category::find()->select(['name','id'])
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+            $types = Type::find()->select(['name','id'])
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+            return $this->render('multiple',compact('categories','types'));
+        }
+    }
+
+    /*
+     *
+     *
+     * */
     public function actionMultiple()
     {
-        $security = new Security();
-        $randomString = $security->generateRandomString();
-        $randomKey = $security->generateRandomKey();
+        $categories = Category::find()->select(['name','id'])
+            ->where(['i_user' => $_SESSION['user']['id']])
+            ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
+        $types = Type::find()->select(['name','id'])
+            ->where(['i_user' => $_SESSION['user']['id']])
+            ->indexBy('id')->orderBy(['id' => SORT_DESC])->column();
         $this->layout = '_main';
         return $this->render('multiple', [
-            'randomString' => $randomString,
-            'randomKey' => $randomKey,
+            'types' => $types,
+            'categories' => $categories,
+
         ]);
     }
 
@@ -270,7 +432,7 @@ class PostController extends \yii\web\Controller
         }elseif (Yii::$app->request->isPost){
 
             $model = Category::findOne(['i_user' => $_SESSION['user']['id'],
-                                        'id' => Yii::$app->request->post('Event')['i_cat']]);
+                'id' => Yii::$app->request->post('Event')['i_cat']]);
             $model->i_user = $_SESSION['user']['id'];
             $model->name =  Yii::$app->request->post('Category')['name'];
             $model->limit = Yii::$app->request->post('Category')['limit'];

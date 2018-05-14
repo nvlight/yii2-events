@@ -39,9 +39,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         </div>
 
     </div>
-    <div class="page-hr">
-        <hr>
-    </div>
+    <div class="page-hr"></div>
 
     <?php if (Yii::$app->session->hasFlash('delEvent')) : ?>
         <h4 class="alert-success for-flash1" >

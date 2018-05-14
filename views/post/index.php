@@ -21,9 +21,8 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             <h2 class="pull-left" >Страница записей</h2>
         </div>
 
-        <div class="page-hr">
-            <hr>
-        </div>
+        <div class="page-hr"></div>
+
         <div class="page-content">
 
             <div class="row">
@@ -41,63 +40,63 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                     <?php endif; ?>
 
                     <div class="col-md-6">
-                        <section class="addEvent">
-                            <header>
-                                <h4>Добавить событие</h4>
-                            </header>
-                            <div class="inner">
+                    <section class="addEvent">
+                        <header>
+                            <h4>Добавить событие</h4>
+                        </header>
+                        <div class="inner">
 
-                                <?php $form = ActiveForm::begin([
-                                    'method'=>'post',
-                                    'action' => ['/post/add-event'],
-                                    'options' => [
-                                        'class' => 'addEvent',
-                                    ]
-                                ]); ?>
+                            <?php $form = ActiveForm::begin([
+                                'method'=>'post',
+                                'action' => ['/post/add-event'],
+                                'options' => [
+                                    'class' => 'addEvent',
+                                ]
+                            ]); ?>
 
-                                <?php
-                                $params = [
-                                    'class' => 'dropDownClass_1',
-                                    'id' => 'dropDownId_1',
-                                    'prompt'=>'Выберите категорию'
-                                ];
-                                echo $form->field($event, 'i_cat')->dropDownList(
-                                    Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-                                    $params
-                                )->label('Категория');
+                            <?php
+                            $params = [
+                                'class' => 'dropDownClass_1',
+                                'id' => 'dropDownId_1',
+                                'prompt'=>'Выберите категорию'
+                            ];
+                            echo $form->field($event, 'i_cat')->dropDownList(
+                                Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                $params
+                            )->label('Категория');
 
-                                echo $form->field($event, 'type')->dropDownList(
-                                    Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-                                    ['id' => 'types_id', 'class' => 'types_class', 'prompt'=>'Выберите тип события' ]
-                                )->label('Тип события');
+                            echo $form->field($event, 'type')->dropDownList(
+                                Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                ['id' => 'types_id', 'class' => 'types_class', 'prompt'=>'Выберите тип события' ]
+                            )->label('Тип события');
 
-                                //echo $form->field($event, 'dtr')->widget(\yii\widgets\MaskedInput::className(), [ 'mask' => '99-99-9999', ]);
-                                echo $form->field($event, 'dtr')
-                                    ->widget(DatePicker::className(),[
-                                            'language' => 'ru',
-                                            'name' => 'dp_2',
-                                            'type' => 2,
-                                            "value" =>  '16-11-2017',
-                                            'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
-                                            'pluginOptions' => [
-                                                'autoclose'=>true,
-                                                'todayHighlight' => true,
-                                                'format' => 'dd-mm-yyyy',
-                                            ]
+                            //echo $form->field($event, 'dtr')->widget(\yii\widgets\MaskedInput::className(), [ 'mask' => '99-99-9999', ]);
+                            echo $form->field($event, 'dtr')
+                                ->widget(DatePicker::className(),[
+                                        'language' => 'ru',
+                                        'name' => 'dp_2',
+                                        'type' => 2,
+                                        "value" =>  '16-11-2017',
+                                        'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
+                                        'pluginOptions' => [
+                                            'autoclose'=>true,
+                                            'todayHighlight' => true,
+                                            'format' => 'dd-mm-yyyy',
                                         ]
-                                    );
-                                ?>
+                                    ]
+                                );
+                            ?>
 
-                                <?= $form->field($event, 'summ')->label('Введите сумму') ?>
-                                <?= $form->field($event, 'desc')->label('Введите описание') ?>
+                            <?= $form->field($event, 'summ')->label('Введите сумму') ?>
+                            <?= $form->field($event, 'desc')->label('Введите описание') ?>
 
-                                <div class="form-group">
-                                    <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg']) ?>
-                                </div>
-                                <?php ActiveForm::end(); ?>
+                            <div class="form-group">
+                                <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg']) ?>
                             </div>
-                        </section>
-                    </div>
+                            <?php ActiveForm::end(); ?>
+                        </div>
+                    </section>
+                </div>
 
                     <div class="col-md-6">
 
@@ -113,8 +112,20 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     ]
                                 ]); ?>
 
-                                <?= $form->field($model, 'name')->label('Введите название') ?>
-                                <?= $form->field($model, 'limit')->label('Введите лимит') ?>
+                                <div class="form-group">
+                                    <label class="control-label" for="dropDownId_3">Существующие категории</label>
+                                    <?php echo Html::dropDownList(
+                                        'select', '',
+                                        Category::find()->select(['name','id'])
+                                            ->where(['i_user' => $_SESSION['user']['id']])
+                                            ->indexBy('id')->orderBy(['id' => SORT_DESC])->column(),
+                                        ['id' => 'dropDownId_3', 'class' => 'types_class', ]
+                                        ); //->label('Категория',['for' => 'dropDownId_3']);
+                                    ?>
+                                </div>
+
+                                <?= $form->field($caregory, 'name')->label('Введите название') ?>
+                                <?= $form->field($caregory, 'limit')->label('Введите лимит') ?>
 
                                 <div class="form-group">
                                     <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary btn-gg']) ?>
@@ -156,7 +167,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     $params
                                 )->label('Категория');
 
-                                echo $form->field($model, 'name',[
+                                echo $form->field($caregory, 'name',[
                                         'inputOptions' => [
                                             'id' => 'changeCat-name',
                                         ],]
@@ -164,7 +175,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     ->label('Введите название',['for' => 'changeCat-name'])
 
                                 ?>
-                                <?= $form->field($model, 'limit',[
+                                <?= $form->field($caregory, 'limit',[
                                     'inputOptions' => [
                                         'id' => 'changeCat-limit',
                                     ],])
@@ -208,11 +219,11 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                 ]); ?>
 
                                 <div class="form-group field-type-curr required">
-                                    <label class="control-label" for="type-curr">Существующие типы событий</label>
+                                    <label class="control-label" for="types_id2">Существующие типы событий</label>
                                     <?php echo Html::dropDownList(
                                         'select', '',
                                         Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-                                        ['id' => 'types_id', 'class' => 'types_class', ]
+                                        ['id' => 'types_id2', 'class' => 'types_class', ]
                                     );
                                     ?>
                                     <div class="help-block"></div>
