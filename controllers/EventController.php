@@ -116,21 +116,20 @@ class EventController extends \yii\web\Controller
         $model = new Event();
         $model->summ = 0;
         $model->dtr = date('Y-m-d');
+        $this->layout = '_main';
         if ($model->load(Yii::$app->request->post())) {
             $model->i_user = $_SESSION['user']['id'];
             if ( $model->validate() &&  $model->save()){
                 return $this->redirect(['show', 'id' => $model->id]);
             }
-            $this->layout = '_main';
-            return $this->render('update',  [
-                'model' => $model,
-            ]);
-        } else {
-            $this->layout = '_main';
             return $this->render('update',  [
                 'model' => $model,
             ]);
         }
+        return $this->render('update',  [
+            'model' => $model,
+        ]);
+
     }
 
     /*
@@ -172,7 +171,7 @@ class EventController extends \yii\web\Controller
                 ->with('category')->with('types')->asArray()->one();
             //echo Debug::d($query,'query');
             if ($query){
-                $query['dtr'] = \Yii::$app->formatter->asTime($query['dtr'], 'dd.MM.yyyy');
+                $query['dtr'] = \Yii::$app->formatter->asTime($query['dtr'], Yii::$app->formatter->dateFormat);
                 unset($query['i_user']);
                 $json = ['success' => 'yes', 'message' => 'Событие получено!', 'event' => $query ];
             }else{
@@ -289,7 +288,7 @@ class EventController extends \yii\web\Controller
                 $json = ['success' => 'no', 'message' => 'Ошибка при получении обновленной записи!' ];
                 die(json_encode($json));
             }
-            $rsu['dtr'] = Yii::$app->formatter->asTime($rsu['dtr'], 'dd.MM.yyyy');
+            $rsu['dtr'] = Yii::$app->formatter->asTime($rsu['dtr'], Yii::$app->formatter->dateFormat);
 
             $json = ['success' => 'yes', 'message' => 'Редактирование события завершено!', 'item' => $rsu];
             die(json_encode($json));
@@ -683,8 +682,8 @@ class EventController extends \yii\web\Controller
                 $event_range2 = date('d-m-Y');
             }
 
-            $evr1 = \Yii::$app->formatter->asTime($event_range1, 'dd.MM.yyyy');
-            $evr2 = \Yii::$app->formatter->asTime($event_range2, 'dd.MM.yyyy');
+            $evr1 = \Yii::$app->formatter->asTime($event_range1, Yii::$app->formatter->dateFormat);
+            $evr2 = \Yii::$app->formatter->asTime($event_range2, Yii::$app->formatter->dateFormat);
 
             $event_range1 = \Yii::$app->formatter->asTime($event_range1, 'yyyy-MM-dd'); # 14:09
             $event_range2 = \Yii::$app->formatter->asTime($event_range2, 'yyyy-MM-dd'); # 14:09
@@ -793,8 +792,8 @@ class EventController extends \yii\web\Controller
             $ids_cats = explode(' ',$event_cats);
             $event_range1 = Yii::$app->request->get('range1');
             $event_range2 = Yii::$app->request->get('range2');
-            $evr1 = \Yii::$app->formatter->asTime($event_range1, 'dd.MM.yyyy');
-            $evr2 = \Yii::$app->formatter->asTime($event_range2, 'dd.MM.yyyy');
+            $evr1 = \Yii::$app->formatter->asTime($event_range1, Yii::$app->formatter->dateFormat);
+            $evr2 = \Yii::$app->formatter->asTime($event_range2, Yii::$app->formatter->dateFormat);
             if (!$event_range1) { $event_range1 = date('d-m-Y'); $evr1 = $event_range1; }
             if (!$event_range2) { $event_range2 = date('d-m-Y'); $evr2 = $event_range2; }
             $event_range1 = \Yii::$app->formatter->asTime($event_range1, 'yyyy-MM-dd'); # 14:09

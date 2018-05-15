@@ -450,4 +450,10 @@ class PostController extends \yii\web\Controller
         }
     }
 
+    public function actionTest()
+    {
+        $this->layout = '_main';
+        return $this->render('test');
+    }
+
 }

@@ -18,6 +18,10 @@ $this->title = 'Events | История';
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page history'], 'keywords');
 
+$event = new Event();
+$category = new Category();
+$type = new Type();
+
 ?>
 
 <div class="bill-inset">
@@ -89,7 +93,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         </thead>
                         <tbody>
                             <?php
-                                //echo Debug::d($events); die;
                                 if (count($events)) :
                                 foreach ($events as $ek => $ev):
                             ?>
@@ -98,9 +101,11 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <td class="item_cat"><?=$ev['category']->name?></td>
                                     <td class="item_desc"><?=$ev->desc?></td>
                                     <td class="item_summ"><?=$ev->summ?></td>
-                                    <td class="item_dtr"><?= Yii::$app->formatter->asDate($ev->dtr);?></td>
-                                    <td class="item_type"><span class="dg_type_style" style="background-color: #<?=$ev['types']['color']?>;  " >
-                                            <?=$ev->types->name?></span>
+                                    <td class="item_dtr"><?=$ev->dtr?></td>
+                                    <td class="item_type">
+                                        <span class="dg_type_style" style="background-color: #<?=$ev['types']['color']?>;  " >
+                                            <?=$ev->types->name?>
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="btn-action" title="Просмотр">
@@ -136,8 +141,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         </tbody>
                     </table>
                     </div>
-                    <?php
-                        //echo \app\components\Debug::d($pages,'pages');
+                    <?php                     
                         echo LinkPager::widget([
                             'pagination' => $pages,
                     ]); ?>
@@ -174,39 +178,21 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         ]
                     ]); ?>
 
-                    <?php
-                    // need ?! --- cats, $event
-                    $catsMain = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                    //echo Debug::d($cats);
-                    $eventMain = new Event();
-
-                    // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
-                    $cats3 = ArrayHelper::map($catsMain,'id','name');
-                    $params = [
-                        //'prompt' => 'Выберите категорию'
-                        'id' => 'changeEventModal_catId'
-                    ];
-                    ?>
-
                     <div class="modal-period mb10">
                         <?php
-                            $dtr1 = Event::find()->min('dtr');
-                            $dtr2 = Yii::$app->formatter->asTime($dtr1, 'dd-MM-yyyy');
                             echo '<label class="control-label">Выберите период</label>';
                             echo DatePicker::widget([
                                 'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
                                 'name' => 'range1',
-                                'value' => $dtr2,
+                                'value' => Event::find()->min('dtr'),
                                 'type' => DatePicker::TYPE_RANGE,
                                 'name2' => 'range2',
-                                'value2' => date('d-m-Y'),
+                                'value2' => Yii::$app->formatter->asDate(date('Y-m-d')),
                                 'language' => 'ru',
-
                                 'pluginOptions' => [
                                     'autoclose'=>true,
-                                    'format' => 'dd-mm-yyyy',
+                                    'format' => 'yyyy-mm-dd',
                                     'todayHighlight' => true,
-
                                 ],
                                 'options' => [
                                     'class' => 'ch_zhiv1',
@@ -234,7 +220,6 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 CFCF;
                     ?>
 
-
                     <div class="class-radioCheckBox_zerosumm">
                         <label for="">Искать строки с нулевой суммой</label>
                         <div class="class-search-for-zero-summ">
@@ -259,7 +244,7 @@ CFCF;
                             $naa[$cv['id']] = $cv['name'];
                         }
 
-                        echo $form->field($eventMain,'type',[
+                        echo $form->field($event,'type',[
                             'template' => "<label for=''>Выберите тип</label>                                             
                                              $chechBoxexForTypeFilter
                                            <div>{input}</div>",
@@ -302,10 +287,7 @@ CFCF;
                     foreach($cats as $ck => $cv){
                         $na[$cv['id']] = $cv['name'];
                     }
-                    //echo \app\components\Debug::d($cats);
-                    //echo \app\components\Debug::d($na);
-
-                    echo $form->field($eventMain,'i_cat',[
+                    echo $form->field($event,'i_cat',[
                         'template' => "<label for=''>Выберите категории</label>
                                             $chechBoxexForCatFilter
                                         <div>{input}</div>",
@@ -341,88 +323,6 @@ CFCF;
     </div>
 </div>
 
-<!-- модальное окно для правки и показа (2 ин 1) события -->
-<div class="modal fade" id="modalEventEdit" tabindex="-1" role="dialog" aria-labelledby="modalEventEditLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="modalEventEditTitle">
-                    Редактирование события
-                </h4>
-            </div>
-            <div class="modal-body">
-                <section class="changeEventModal">
-                    <div class="inner">
-
-                        <?php $form = ActiveForm::begin([
-                            'method'=>'post',
-                            'action' => ['/site/change-event'],
-                            'options' => [
-                                'class' => 'changeEvent',
-                            ]
-                        ]); ?>
-
-                        <input type="hidden" value="" id="evid">
-
-                        <?php
-                            $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                            $types30 = ArrayHelper::map($types2,'id','name');
-                            $params21 = [
-                                //'prompt' => 'Выберите категорию'
-                                'id' => 'changeEventModal_typeId'
-                            ];
-                            $params = [
-                                //'prompt' => 'Выберите категорию'
-                                'id' => 'changeEventModal_catId'
-                            ];
-                        ?>
-                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params)->label('Выберите категорию'); ?>
-                        <?= $form->field($eventMain, 'type')->dropDownList($types30,$params21)->label('Выберите тип события'); ?>
-
-                        <?php
-                            echo $form->field($eventMain, 'dtr', ['options' => ['class' => 'changeEventModal_date']])
-                                ->widget(DatePicker::className(),[
-                                    'language' => 'ru',
-                                    'name' => 'dp_3',
-                                    'type' => 2,
-                                    "value" =>  '16-11-2017',
-                                    'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
-                                    'pluginOptions' => [
-                                        'autoclose'=>true,
-                                        'todayHighlight' => true,
-                                        'format' => 'dd-mm-yyyy',
-                                    ]
-                                ]
-                            );
-
-                        ?>
-
-                        <?= $form->field($eventMain, 'summ')->label('Введите сумму') ?>
-                        <?= $form->field($eventMain, 'desc')->label('Введите описание') ?>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
-                            <button type="button" class="btn btn-primary btn-gg2 changeSubmitButton"
-                                    data-dismiss="modal" >
-                                Изменить
-                            </button>
-                            <button type="button" class="btn btn-primary btn-gg2 changeOkButton"
-                                    data-dismiss="modal" >
-                                Ок
-                            </button>
-                            <?php //echo Html::button('Изменить', ['class' => '']) ?>
-                        </div>
-
-                        <?php ActiveForm::end(); ?>
-
-                    </div>
-                </section>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- модальное окно для добавления события -->
 <div class="modal fade" id="modalAddPost" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -450,47 +350,35 @@ CFCF;
                         ]); ?>
 
                         <?php
-                        // need ?! --- cats, $event
-                        $catsMain = Category::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                        $types2 = Type::find()->where(['i_user' => $_SESSION['user']['id']])->all();
-                        //echo Debug::d($types); die;
-                        $eventMain = new Event();
 
-                        // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
-                        $cats3 = ArrayHelper::map($catsMain,'id','name');
-                        $types3 = ArrayHelper::map($types2,'id','name');
-                        $params1 = [
-                            //'prompt' => 'Выберите категорию'
-                            'id' => 'dropDownId_3'
-                        ];
-                        $params2 = [
-                            //'prompt' => 'Выберите категорию'
-                            'id' => 'idDropDownTypes'
-                        ];
-                        ?>
-                        <?= $form->field($eventMain, 'i_cat')->dropDownList($cats3,$params1)->label('Выберите категорию'); ?>
-                        <?= $form->field($eventMain, 'type')->dropDownList($types3,$params2)->label('Выберите тип события'); ?>
+                        echo $form->field($event, 'i_cat')->dropDownList(
+                            Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                            ['id' => 'addEvent_catsId', 'prompt' => 'Выберите категорию']
+                        )->label('Категория');
 
-                        <?php
+                        echo $form->field($event, 'type')->dropDownList(
+                            Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                            ['id' => 'addEvent_typesId', 'prompt'=>'Выберите тип события' ]
+                        )->label('Тип события');
 
                         ?>
 
                         <?php
-                        echo $form->field($eventMain, 'dtr')->widget(DatePicker::className(),[
+                        echo $form->field($event, 'dtr')->widget(DatePicker::className(),[
                             'language' => 'ru',
                             'name' => 'check_issue_date',
-                            "value" =>  '16-11-2017',
+                            'value' =>  Yii::$app->formatter->asDate(date('Y-m-d')),
                             'options' => ['placeholder' => 'выберите дату', 'id' => 'addEventModal_datePicker'],
                             'pluginOptions' => [
                                 'autoclose'=>true,
                                 'todayHighlight' => true,
-                                'format' => 'dd-mm-yyyy',
+                                'format' => 'yyyy-mm-dd',
                             ]
                         ]);
                         ?>
 
-                        <?= $form->field($eventMain, 'summ')->label('Введите сумму') ?>
-                        <?= $form->field($eventMain, 'desc')->label('Введите описание') ?>
+                        <?= $form->field($event, 'summ')->label('Введите сумму') ?>
+                        <?= $form->field($event, 'desc')->label('Введите описание') ?>
 
                         <div class="form-group">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
@@ -507,6 +395,83 @@ CFCF;
     </div>
 </div>
 
+<!-- модальное окно для правки и показа (2 ин 1) события -->
+<div class="modal fade" id="modalEventEdit" tabindex="-1" role="dialog" aria-labelledby="modalEventEditLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalEventEditTitle">
+                    Редактирование события
+                </h4>
+            </div>
+            <div class="modal-body">
+                <section class="changeEventModal">
+                    <div class="inner">
+
+                        <?php $form = ActiveForm::begin([
+                            'method'=>'post',
+                            'action' => ['/site/change-event'],
+                            'options' => [
+                                'class' => 'changeEvent',
+                            ]
+                        ]); ?>
+
+                        <input type="hidden" value="" id="evid">
+
+                        <?php
+                            echo $form->field($event, 'i_cat')->dropDownList(
+                                Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                ['id' => 'changeEventModal_catId',]
+                            )->label('Категория');
+
+                            echo $form->field($event, 'type')->dropDownList(
+                                Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                                ['id' => 'changeEventModal_typeId',]
+                            )->label('Тип события');
+
+                            echo $form->field($event, 'dtr', ['options' => ['class' => 'changeEventModal_date']])
+                                ->widget(DatePicker::className(),[
+                                    'language' => 'ru',
+                                    'name' => 'dp_3',
+                                    'type' => 2,
+                                    'value' =>  date('Y-m-d'),
+                                    'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
+                                    'pluginOptions' => [
+                                        'autoclose'=>true,
+                                        'todayHighlight' => true,
+                                        'format' => 'dd-mm-yyyy',
+                                    ]
+                                ]
+                            );
+
+                        ?>
+
+                        <?= $form->field($event, 'summ')->label('Введите сумму') ?>
+                        <?= $form->field($event, 'desc')->label('Введите описание') ?>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                            <button type="button" class="btn btn-primary btn-gg2 changeSubmitButton"
+                                    data-dismiss="modal" >
+                                Изменить
+                            </button>
+                            <button type="button" class="btn btn-primary btn-gg2 changeOkButton"
+                                    data-dismiss="modal" >
+                                Ок
+                            </button>
+                            <?php //echo Html::button('Изменить', ['class' => '']) ?>
+                        </div>
+
+                        <?php ActiveForm::end(); ?>
+
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php
 
 $this->registerJsFile("@web/js/history.js",[
@@ -515,6 +480,5 @@ $this->registerJsFile("@web/js/history.js",[
             \yii\bootstrap\BootstrapPluginAsset::className()
          ]
     ]);
-
 ?>
 

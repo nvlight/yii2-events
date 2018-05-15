@@ -147,8 +147,8 @@ TRH;
         return [
             [['i_user', 'i_cat', 'desc', 'dtr','type'], 'required'],
             [['i_user', 'i_cat', 'summ', 'type'], 'integer'],
-            [['dt'], 'safe'],
-            [['dtr'], 'string', 'length' => [8]],
+//            [['dtr'], 'string', 'length' => [8]],
+            [['dtr'], 'date'],
             [['desc'], 'string', 'max' => 101],
             [['note'], 'string', 'max' => 55],
         ];

@@ -20,7 +20,8 @@ $config = [
     'timeZone' => 'Europe/Moscow',
     'components' => [
         'formatter' => [
-            'dateFormat' => 'dd.MM.yyyy',
+            //'dateFormat' => 'dd.MM.yyyy',
+            'dateFormat' => 'yyyy-MM-dd',
         ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation

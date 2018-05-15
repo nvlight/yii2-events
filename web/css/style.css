@@ -246,6 +246,15 @@ p.reg{
 	color: #fff;
 	transition: all .7s;
 }
+.mainul li:hover{
+	background-color: #000;
+	color: #fff;
+	transition: all 1.4s;
+}
+.mainul li:hover a{
+	transition: all 1.4s;
+}
+
 .mainul li:hover a{
 	color: #fff;
 }
