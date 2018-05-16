@@ -10,6 +10,7 @@ use app\components\Debug;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use yii\bootstrap\Tabs;
 
 $this->title = 'Events | Кино | Поиск';
 
@@ -94,6 +95,37 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         -webkit-border-bottom-right-radius:5px; /* Saf3-4 */
     }
 </style>
+
+
+<div class="page-content">
+
+    <div class="row">
+        <?php echo Tabs::widget([
+            'items' => [
+                [
+                    'label'     => 'Мои видео',
+                    'url' => \yii\helpers\Url::to(['video/showvideos'],true),
+                ],
+                [
+                    'label'     => 'Добавить видео',
+                    'url' => \yii\helpers\Url::to(['video/add-video'],true),
+                ],
+                [
+                    'label'     =>  'Поиск видео',
+                    'url' => \yii\helpers\Url::to(['video/search'],true),
+                ],
+                [
+                    'label'     =>  'Поиск на YouTube',
+                    'url' => \yii\helpers\Url::to(['video/yt-search1'],true),
+                    'active'    =>  true
+                ],
+            ]
+        ]); ?>
+    </div>
+
+</div>
+
+<hr>
 
 <div class="ytsearch1">
 

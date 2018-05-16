@@ -35,7 +35,6 @@ class User extends \yii\db\ActiveRecord
             [['mail', 'uname', 'upass'], 'string', 'max' => 55],
             [['mail'], 'email'],
             [['remains'],'integer']
-            //['captcha', 'captcha'],
         ];
     }
 

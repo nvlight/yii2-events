@@ -18,6 +18,35 @@ $this->registerMetaTag(['name' => 'description', 'content' => 'Приложен�
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events,Page videos - add new video'], 'keywords');
 ?>
 
+
+<div class="page-content">
+
+    <div class="row">
+        <?php echo Tabs::widget([
+            'items' => [
+                [
+                    'label'     => 'Мои видео',
+                    'url' => \yii\helpers\Url::to(['video/showvideos'],true),
+                ],
+                [
+                    'label'     => 'Добавить видео',
+                    'url' => \yii\helpers\Url::to(['video/add-video'],true),
+                    'active'    =>  true
+                ],
+                [
+                    'label'     =>  'Поиск видео',
+                    'url' => \yii\helpers\Url::to(['video/search'],true),
+                ],
+                [
+                    'label'     =>  'Поиск на YouTube',
+                    'url' => \yii\helpers\Url::to(['video/yt-search1'],true),
+                ],
+            ]
+        ]); ?>
+    </div>
+
+</div>
+
 <div class="row">
     <div class="col-md-6">
         <hr>

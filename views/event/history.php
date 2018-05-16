@@ -366,7 +366,6 @@ CFCF;
                         <?php
                         echo $form->field($event, 'dtr')->widget(DatePicker::className(),[
                             'language' => 'ru',
-                            'name' => 'check_issue_date',
                             'value' =>  Yii::$app->formatter->asDate(date('Y-m-d')),
                             'options' => ['placeholder' => 'выберите дату', 'id' => 'addEventModal_datePicker'],
                             'pluginOptions' => [
@@ -433,14 +432,14 @@ CFCF;
                             echo $form->field($event, 'dtr', ['options' => ['class' => 'changeEventModal_date']])
                                 ->widget(DatePicker::className(),[
                                     'language' => 'ru',
-                                    'name' => 'dp_3',
                                     'type' => 2,
-                                    'value' =>  date('Y-m-d'),
+                                    //'value' =>  date('Y-m-d'),
+                                    'value' =>  Yii::$app->formatter->asDate($event->dtr),
                                     'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
                                     'pluginOptions' => [
                                         'autoclose'=>true,
                                         'todayHighlight' => true,
-                                        'format' => 'dd-mm-yyyy',
+                                        'format' => 'yyyy-mm-dd',
                                     ]
                                 ]
                             );

@@ -28,6 +28,7 @@ if (array_key_exists('0',$rr)) {
 if (array_key_exists('1',$rr)) {
     $raction = $rr[1];
 }
+//echo $rcontroller;
 
 ?>
 <?php $this->beginPage() ?>
@@ -89,7 +90,7 @@ if (array_key_exists('1',$rr)) {
                     'post',
                 ],
                 'fa-video-camera' => [
-                    'index',
+                    'showvideos',
                     'Кино',
                     'video',
                 ],
@@ -99,13 +100,14 @@ if (array_key_exists('1',$rr)) {
                     'doc',
                 ],
             ];
+            //echo Debug::d($st,'st'); die;
             ?>
 
             <div class="collapse navbar-collapse " id="bs-example-navbar-collapse-1">
                 <ul class="list-unstyled mainul">
                     <?php foreach ($st as $stk => $stv): ?>
                         <?php if (1==1) : ?>
-                            <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                            <li <?php if( ($rcontroller == $stv[2]) ) echo 'class="active"' ?> >
                                 <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
                                     <span class="ipic">
                                         <i class="fa <?=$stk?>" aria-hidden="true"></i>
@@ -119,6 +121,7 @@ if (array_key_exists('1',$rr)) {
                     <?php endforeach; ?>
 
                 </ul>
+                <?php //die; ?>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
@@ -127,7 +130,7 @@ if (array_key_exists('1',$rr)) {
     <ul class="list-unstyled mainul hidden-md hidden-lg">
         <?php foreach ($st as $stk => $stv): ?>
             <?php if (1==1) : ?>
-                <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                <li <?php if( ($rcontroller == $stv[2]) ) echo 'class="active"' ?> >
                     <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
                                         <span class="ipic">
                                             <i class="fa <?=$stk?>" aria-hidden="true"></i>
@@ -157,7 +160,7 @@ if (array_key_exists('1',$rr)) {
                         <ul class="list-unstyled mainul">
                             <?php foreach ($st as $stk => $stv): ?>
                                 <?php if (1==1) : ?>
-                                    <li <?php if( ($rcontroller == $stv[2]) && ($raction == $stv[0])) echo 'class="active"' ?> >
+                                    <li <?php if( ($rcontroller == $stv[2]) ) echo 'class="active"' ?> >
                                         <a href="<?=Url::to(["/{$stv[2]}/{$stv[0]}"]) ?>">
                                             <span class="ipic">
                                                 <i class="fa <?=$stk?>" aria-hidden="true"></i>

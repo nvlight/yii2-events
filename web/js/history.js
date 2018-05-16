@@ -25,9 +25,6 @@ $('#selectSearchColumn').on('change', function () {
         $('#searchColumn').attr('placeholder', 'Дата: yyyy-mm-dd');
         //console.log('yes - goal, goal!');
     }
-    //console.log('selectSearchColumn changed... to: ' + stext + ' option: ' + sval);
-    //console.log(sval);
-    //console.log(stext);
 });
 
 /* */
@@ -100,11 +97,8 @@ $('.changeSubmitButton').on('click', function (e) {
     var data = $('form.changeEvent').serialize();
     var params = {};
     params['evid'] = $('#evid').val();
-    params['event-summ'] = $('#event-summ').val();
-    params['event-desc'] = $('#event-desc').val();
-
-    //$('section.addEventModal input#event-summ').val(np['event']['summ']);
-    //$('section.addEventModal input#event-desc').val(np['event']['desc']);
+    params['event-summ'] = $('section.changeEventModal input#event-summ').val();
+    params['event-desc'] = $('section.changeEventModal input#event-desc').val();
 
     params['event-catid'] = $('#changeEventModal_catId option:selected').val();
     params['event-date'] = $('#changeEventModal_datePicker').val();
@@ -125,8 +119,9 @@ $('.changeSubmitButton').on('click', function (e) {
                 c.find('td[class=item_type] span').text(np['item']['types']['name'])
                     .css('background-color', '#'+np['item']['types']['color']);
                 $('#modalEventEdit').modal('hide');
+            }else{
+                console.log('Произошла ошибка');
             }
-
         },
         error: function (res) {
             console.log(res);
@@ -157,6 +152,8 @@ $('.table.gg-history').on('click', '.evActionUpdate', function () {
                 $('.changeSubmitButton').show();
                 $('#modalEventEdit').modal();
                 $('#modalEventEditTitle').text('Редактирование события');
+            }else{
+                console.log('Произошла ошибка');
             }
         },
         error: function (res) {
@@ -191,6 +188,8 @@ $('.table.gg-history').on('click', 'span > a.evActionView', function showEvent()
                 $('.changeSubmitButton').hide();
                 $('.changeOkButton').show();
                 $('#modalEventEditTitle').text('Просмотр события');
+            }else{
+                console.log('Произошла ошибка');
             }
         },
         error: function (res) {
@@ -215,6 +214,8 @@ $('.table.gg-history').on('click', '.evActionDelete', function () {
             var np = $.parseJSON(res);
             if (np['success'] === 'yes') {
                 $('.actionId_' + id).remove();
+            }else{
+                console.log('Произошла ошибка');
             }
         },
         error: function (res) {
@@ -224,12 +225,10 @@ $('.table.gg-history').on('click', '.evActionDelete', function () {
     return false;
 });
 
-/* */
+/* simple filter - сбор данных и их отправке в УРЛ-е гет запроса удаленному скрипту */
 $('.doFilter').on('click', function () {
     console.log('do simple filter');
 
-    // старый код, делал аякс запрос с последующим получением данных и их обновлением на странице
-    // данный код будет просто перебрасывать пользователя на страницу фильтра, с передачей приведенных параметров хД
     var new_params = $( '#simpleFilter' ).serializeArray();
     var http_build = '';
     for(var i = 0; i < new_params.length; i++) {
@@ -318,13 +317,10 @@ $('.doFilter').on('click', function () {
 
 });
 
-//});
-
+//
 $('form.addEvent').on('beforeSubmit', function(e){
-//e.preventDefault();
 var data = $(this).serialize();
-//alert('add category...')
-console.log('add event by modal form...');
+// console.log('add event by modal form...');
 $.ajax({
     url: '/event/add',
     type: 'POST',
@@ -332,13 +328,13 @@ $.ajax({
     success: function(res){
         //console.log(res);
         var np = $.parseJSON(res);
-        //alert(np['message']);
         $('#modalAddPost').modal('hide');
         if (np['success'] === 'yes'){
             $('form.addEvent').trigger( 'reset' );
+        }else{
+            console.log('Произошла ошибка');
         }
         $('table.gg-history').prepend(np['trh']);
-
     },
     error: function(res){
         console.log(res);
@@ -348,30 +344,25 @@ $.ajax({
 return false;
 });
 
+// check and unckeck all
+// stage 1
 $('.forSimpleFilter-ckeckAndUncheckAllTypes').find('label').first().find('span').on('click', function () {
-console.log('check all-1');
-// find('input').prop("checked")
+//console.log('check all-1');
 if (!$(this).parent().find('input').prop("checked")){
-    //console.log('check_all');
     $('#simpleFilterModal_radioCheckBox').find('input').prop("checked", true);
 }else{
-    //console.log('Uncheck_all');
     $('#simpleFilterModal_radioCheckBox').find('input').prop("checked", false);
 }
 
 });
-
+// stage 2
 $('.forSimpleFilter-ckeckAndUncheckAll').find('label').first().find('span').on('click', function () {
-console.log('check all-2');
-// find('input').prop("checked")
+//console.log('check all-2');
 if (!$(this).parent().find('input').prop("checked")){
-    //console.log('check_all');
     $('#simpleFilterModal_radioCheckBox2').find('input').prop("checked", true);
 }else{
-    //console.log('Uncheck_all');
     $('#simpleFilterModal_radioCheckBox2').find('input').prop("checked", false);
 }
-
 });
 
 //$('#modalSimpleFilter').modal('show');

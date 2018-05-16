@@ -32,7 +32,7 @@ class VideoController extends Controller
         // если есть, то немножко форматируем его, используя параметры
         // &part=snippet,contentDetails,statistics&fields=items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(medium),channelTitle,localized),statistics)
         $video_id = $id;
-        $api_key = Yii::$app->params['youtube_api_key_2'];
+        $api_key = Yii::$app->params['youtube_api_key_1'];
         //$url = "https://www.googleapis.com/youtube/v3/videos?id=$video_id&key=$api_key&part=snippet,contentDetails,statistics&fields=items(id,contentDetails,etag,snippet(publishedAt,title,description,thumbnails(medium),channelId,channelTitle,localized),statistics)";
 
         $params = array(
@@ -54,6 +54,11 @@ class VideoController extends Controller
         curl_close($curlSession);
         //echo Debug::d($jsonData,'json_dt',1);
         //echo 'count: ' . count($jsonData->items);
+        //die;
+
+        if (property_exists($jsonData,'error')){
+            return false;
+        }
 
         if (count($jsonData->items) == 1){
             return $jsonData->items[0];
@@ -99,7 +104,7 @@ class VideoController extends Controller
     }
 
     //
-    public function actionIndex(){
+    public function actionIndex222(){
 
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         $video = new Video();
@@ -170,7 +175,154 @@ class VideoController extends Controller
         //echo Debug::d(count($all),'count rows',1,0);
         //echo Debug::d($all,'all_videos',1,2);
         $this->layout = '_main';
-        return $this->render('index', ['model' => $video, 'all' => $all]);
+        return $this->render('showvideos', ['model' => $video, 'all' => $all]);
+    }
+
+    //
+    public function actionShowvideos(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        $video = new Video();
+        //
+        if (Yii::$app->request->isPost && $video->load(Yii::$app->request->post())){
+            $video->i_user = $_SESSION['user']['id'];
+
+            $res = self::actionYoutubeParseUrl($video->url);
+            if ($res !== false){
+                // ищем видео с таким ид
+                $res2 = self::actionYoutubeFindVideoById($res);
+                if ($res2 !== false){
+                    //echo Debug::d($res2, 'res2',1,1);
+                    $video->video_id = $res2->id;
+                    $video->dt_publish = new \DateTime($res2->snippet->publishedAt); $video->dt_publish = $video->dt_publish->format('Y-m-d');
+                    $video->title = $res2->snippet->title;
+                    $video->description = $res2->snippet->description;
+                    $time = $res2->contentDetails->duration;
+                    $video->duration = new DateInterval($time); $video->duration = $video->duration->format('%H:%I:%S');
+                    $video->viewcount = $res2->statistics->viewCount;
+                    $video->channeltitle = $res2->snippet->channelTitle;
+                    $video->channelid = $res2->snippet->channelId;
+
+                    // save thumbnails
+                    $opts = array('http' =>
+                        array(
+                            'method' => 'GET',
+                            'max_redirects' => '0',
+                            'ignore_errors' => '1',
+                        )
+                    , 'ssl' => array(
+                            'verify_peer' => true,
+                            'cafile' => '/SRV/php721/extras/ssl/' . "cacert.pem",
+                            'ciphers' => 'HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2',
+                            'disable_compression' => true,
+                        )
+                    );
+                    $context = stream_context_create($opts);
+                    $thumbnails = $res2->snippet->thumbnails;
+                    $thumbs = ['default','medium','high']; $thumbnails_json = '{}'; $thumbnails_arr = [];
+                    foreach ($thumbs as $k => $v){
+                        $explode = explode('/',$thumbnails->$v->url);
+                        $filename = $explode[count($explode)-2];
+                        $filequality = $explode[count($explode)-1];
+                        $fgc = file_get_contents($thumbnails->$v->url,false,$context);
+                        if ($fgc !== false) {
+                            $thumbnails_arr[] = $filename . '$' . $filequality;
+                            file_put_contents( Yii::$app->params['youytube_pathUploads'] . $filename . '$' . $filequality,$fgc);
+                        }
+                    }
+                    $thumbnails_json = json_encode($thumbnails_arr);
+                    $video->thumbnails = $thumbnails_json;
+                }
+            }
+
+            $video->dt_publish = Yii::$app->formatter->asTime($video->dt_publish, 'yyyy-MM-dd');
+
+            if ($video->validate()){
+                if ($video->save()){
+                    Yii::$app->session->setFlash('addVideo','Видео добавлено');
+                    return $this->redirect(['video/add-video']);
+                }
+            }
+            //echo Debug::d($video->errors,'error',2,1);
+        }
+        $all = Video::find()->where(['active' => '1', 'i_user' => $_SESSION['user']['id']])
+            ->with('categoryvideo')->all();
+        //echo Debug::d(count($all),'count rows',1,0);
+        //echo Debug::d($all,'all_videos',1,2);
+        $this->layout = '_main';
+        return $this->render('showvideos', ['videos' => $all]);
+    }
+
+    //
+    public function actionAddVideo(){
+
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+        $video = new Video();
+        //
+        if (Yii::$app->request->isPost && $video->load(Yii::$app->request->post())){
+            $video->i_user = $_SESSION['user']['id'];
+
+            $res = self::actionYoutubeParseUrl($video->url);
+            if ($res !== false){
+                // ищем видео с таким ид
+                $res2 = self::actionYoutubeFindVideoById($res);
+                if ($res2 !== false){
+                    //echo Debug::d($res2, 'res2',1,1);
+                    $video->video_id = $res2->id;
+                    $video->dt_publish = new \DateTime($res2->snippet->publishedAt); $video->dt_publish = $video->dt_publish->format('Y-m-d');
+                    $video->title = $res2->snippet->title;
+                    $video->description = $res2->snippet->description;
+                    $time = $res2->contentDetails->duration;
+                    $video->duration = new DateInterval($time); $video->duration = $video->duration->format('%H:%I:%S');
+                    $video->viewcount = $res2->statistics->viewCount;
+                    $video->channeltitle = $res2->snippet->channelTitle;
+                    $video->channelid = $res2->snippet->channelId;
+
+                    // save thumbnails
+                    $opts = array('http' =>
+                        array(
+                            'method' => 'GET',
+                            'max_redirects' => '0',
+                            'ignore_errors' => '1',
+                        )
+                    , 'ssl' => array(
+                            'verify_peer' => true,
+                            'cafile' => '/SRV/php721/extras/ssl/' . "cacert.pem",
+                            'ciphers' => 'HIGH:TLSv1.2:TLSv1.1:TLSv1.0:!SSLv3:!SSLv2',
+                            'disable_compression' => true,
+                        )
+                    );
+                    $context = stream_context_create($opts);
+                    $thumbnails = $res2->snippet->thumbnails;
+                    $thumbs = ['default','medium','high']; $thumbnails_json = '{}'; $thumbnails_arr = [];
+                    foreach ($thumbs as $k => $v){
+                        $explode = explode('/',$thumbnails->$v->url);
+                        $filename = $explode[count($explode)-2];
+                        $filequality = $explode[count($explode)-1];
+                        $fgc = file_get_contents($thumbnails->$v->url,false,$context);
+                        if ($fgc !== false) {
+                            $thumbnails_arr[] = $filename . '$' . $filequality;
+                            file_put_contents( Yii::$app->params['youytube_pathUploads'] . $filename . '$' . $filequality,$fgc);
+                        }
+                    }
+                    $thumbnails_json = json_encode($thumbnails_arr);
+                    $video->thumbnails = $thumbnails_json;
+                }
+            }
+
+            $video->dt_publish = Yii::$app->formatter->asTime($video->dt_publish, 'yyyy-MM-dd');
+
+            if ($video->validate()){
+                if ($video->save()){
+                    Yii::$app->session->setFlash('addVideo','Видео добавлено');
+                    return $this->redirect(['video/add-video']);
+                }
+            }
+            //echo Debug::d($video->errors,'error',2,1);
+        }
+
+        $this->layout = '_main';
+        return $this->render('addvideo',['model' => $video]);
     }
 
     //
@@ -430,13 +582,13 @@ IFRAME;
     }
 
     //
-    public function actionSearch(){
+    public function actionSearch222(){
 
         $searchModel = new VideoSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         $this->layout = '_main';
-        return $this->render('search', [
+        return $this->render('search222', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -444,7 +596,7 @@ IFRAME;
     }
 
     //
-    public function actionSearch2(){
+    public function actionSearch(){
 
         //$dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         //echo Debug::d($searchModel,'searchModel',1,2);
@@ -452,7 +604,7 @@ IFRAME;
         $rs = false; $model = new VideoSearch2();
         if (Yii::$app->request->isPost){
             //echo Debug::d($searchModel,'searchModel');
-            echo Debug::d($_REQUEST,'request');
+            //echo Debug::d($_REQUEST,'request');
             $nkey = 'VideoSearch2';
             if (array_key_exists($nkey,$_REQUEST) && is_array($_REQUEST[$nkey]) && count($_REQUEST[$nkey])){
                 //$a = Yii::$app->request->post(['Video']);
@@ -482,7 +634,7 @@ IFRAME;
         }
 
         $this->layout = '_main';
-        return $this->render('search2', [
+        return $this->render('search', [
             'model' => $model, 'rs' => $rs
         ]);
 

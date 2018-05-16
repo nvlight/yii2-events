@@ -9,6 +9,7 @@
 use lo\widgets\magnific\MagnificPopupAsset;
 use lo\widgets\magnific\MagnificPopup;
 use yii\helpers\Html;
+use yii\bootstrap\Tabs;
 
 $this->title = 'Events | Кино';
 
@@ -16,13 +17,37 @@ $this->registerMetaTag(['name' => 'description', 'content' => 'Приложен�
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events,Page videos - show videos'], 'keywords');
 ?>
 
+<div class="page-content">
+
+    <div class="row">
+        <?php echo Tabs::widget([
+            'items' => [
+                [
+                    'label'     => 'Мои видео',
+                    'url' => \yii\helpers\Url::to(['video/showvideos'],true),
+                    'active'    =>  true
+                ],
+                [
+                    'label'     => 'Добавить видео',
+                    'url' => \yii\helpers\Url::to(['video/add-video'],true),
+                ],
+                [
+                    'label'     =>  'Поиск видео',
+                    'url' => \yii\helpers\Url::to(['video/search'],true),
+                ],
+                [
+                    'label'     =>  'Поиск на YouTube',
+                    'url' => \yii\helpers\Url::to(['video/yt-search1'],true),
+                ],
+            ]
+        ]); ?>
+    </div>
+
+</div>
+
 <div class="row">
     <hr>
-    <?php
-    $videos = [];
-    $videos = $all;
 
-    ?>
     <?php if (isset($videos) && is_array($videos)) : ?>
         <?php if (count($videos)): ?>
             <div id="mpup">
@@ -31,19 +56,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         <?php $imgs = json_decode($v->thumbnails); $img1 = $imgs[1];  ?>
                         <div class="row">
                             <div class="col-md-12">
-                                    <?php
-                                        // for magnific popup
-                                        /*
-                                        <a href="<?php //echo \yii\helpers\Url::to('@web/youytube_imgs/' . $imgs[2],true)?>">
-                                            <div class="yt_img"  alt="<?php //echo $v->title?>"
-                                                 style="background-image: url(<?php //echo \yii\helpers\Url::to('@web/youytube_imgs/' . $img1,true)?>) " >
-                                                <span class="yt_duration"><?php //echo $v->duration?></span>
-                                            </div>
-                                        </a>
-                                        //*/
-                                    ?>
-
-<!--                                    data-toggle="modal" data-target="#watchVideModal"-->
+                                <div class="videoClass1">
                                     <a class="cp loadVideoToModal"  data-id="<?=$v->id?>" >
                                         <div class="yt_img"  alt="<?=$v->title?>"
                                              style="background-image: url(<?=\yii\helpers\Url::to('@web/youytube_imgs/' . $img1,true)?>) " >
@@ -69,7 +82,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                                     <p class="" style="margin-bottom: 0; ">
                                         <span>Опубликовано: <strong><?=mb_substr($v->dt_publish,0,10)?></strong></span>
                                     </p>
-
+                                </div>
                             </div>
                         </div>
                     </div>

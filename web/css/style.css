@@ -9,6 +9,11 @@ body{
 	border: 1px solid #000;
 }
 
+.videoClass1{
+	padding: 10px;
+	margin: 10px 0;
+}
+
 /*=======index.html========*/
 .main-auth h2{
 	font-family: 'Kurale';
