@@ -52,7 +52,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php $form = ActiveForm::begin(); ?>
 
         <?php
-            $youtube_cats = \app\models\Categoryvideo::find()->where(['i_user' => $_SESSION['user']['id']])->asArray()->all();
+            $youtube_cats = \app\models\Categoryvideo::find()
+                ->where(['i_user' => $_SESSION['user']['id']])
+                ->asArray()->all();
             // формируем массив, с ключем равным полю 'id' и значением равным полю 'name'
             //$youtube_cats = (array)$youtube_cats;
             //echo Debug::d($youtube_cats,'$youtube_cats');
@@ -104,7 +106,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                                     <p class="mt10"><?=$v['title']?></p>
                                     <p style="margin-bottom: 0; ">
-                                        <span class="">Категория: <strong><?=$v['i_cat']?></strong></span>
+                                        <span class="">Категория: <strong><?=$v['categoryvideo']['name']?></strong></span>
                                     </p>
                                     <p style="margin-bottom: 0; ">Канал:
                                         <strong>

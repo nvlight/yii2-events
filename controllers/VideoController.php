@@ -610,7 +610,8 @@ IFRAME;
                 //$a = Yii::$app->request->post(['Video']);
                 $a = $_POST[$nkey];
                 $searchModel = Video::find()
-                    ->where(['i_user' => $_SESSION['user']['id'], 'active' => '1']);
+                    ->where(['i_user' => $_SESSION['user']['id'], 'active' => '1'])
+                    ->with('categoryvideo');
                 //
                 $model->i_cat = 0;
                 if (array_key_exists('i_cat',$a) && $a['i_cat'] !== '0' ){
