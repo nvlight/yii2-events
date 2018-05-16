@@ -30,7 +30,6 @@ class AuthForm extends Model
                 [['mail', 'upass','verifyCode'], 'required'],
                 [['mail','upass'], 'string', 'max' => 55],
                 [['mail'], 'email'],
-                //['captcha', 'captcha'],
                 ['verifyCode', 'captcha', 'captchaAction'=>'/user/captcha'],
         ];
     }
@@ -44,6 +43,7 @@ class AuthForm extends Model
             'captcha' => 'Капча',
             'upass' => 'Пароль',
             'mail' => 'Email',
+            'verifyCode' => 'Капча'
         ];
     }
 

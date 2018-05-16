@@ -52,8 +52,14 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         'placeholder' => 'Введите пароль',
                         'class' => 'form-control'
                     ]
+                ])->passwordInput()
+                ?>
+                <?= $form->field($model, 'upass_repeat',
+                    ['inputOptions' => [
+                        'placeholder' => 'Повторите пароль',
+                        'class' => 'form-control'
                     ]
-                )->passwordInput()
+                ])->passwordInput();
                 ?>
                 <?= $form->field($model, 'uname',
                     ['inputOptions' => [

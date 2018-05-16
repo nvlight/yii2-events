@@ -18,6 +18,7 @@ use yii\base\Model;
 class RegistrationForm extends Model
 {
     public $upass;
+    public $upass_repeat;
     public $mail;
     public $uname;
     public $verifyCode;
@@ -28,10 +29,11 @@ class RegistrationForm extends Model
     public function rules()
     {
         return [
-                [['mail', 'upass','uname','verifyCode'], 'required'],
-                [['mail','upass','uname'], 'string', 'max' => 55],
-                [['mail'], 'email'],
-                ['verifyCode', 'captcha', 'captchaAction'=>'/user/captcha'],
+            [['mail', 'upass','uname','verifyCode'], 'required'],
+            [['mail','upass','uname'], 'string', 'max' => 55],
+            [['mail'], 'email'],
+            ['upass_repeat', 'compare', 'compareAttribute' => 'upass'],
+            ['verifyCode', 'captcha', 'captchaAction'=>'/user/captcha'],
         ];
     }
 
@@ -43,8 +45,10 @@ class RegistrationForm extends Model
         return [
             'captcha' => 'Капча',
             'upass' => 'Пароль',
+            'upass_repeat' => 'Повторите пароль',
             'mail' => 'Email',
             'uname' => 'Имя',
+            'verifyCode' => 'Капча'
         ];
     }
 

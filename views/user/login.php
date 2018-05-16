@@ -54,8 +54,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         'class' => 'form-control'
                     ]
 
-                    ]
-                )->passwordInput();
+                    ])->passwordInput();
 
                 echo $form->field($model, 'verifyCode')->widget(
                     Captcha::className(),
