@@ -50,7 +50,6 @@ class Event extends ActiveRecord
      */
     public function getCategory() {
         return $this->hasOne(Category::className(), ['id' => 'i_cat']);
-            //->viaTable('art_tag', ['tag_id' => 'id']);
     }
 
     /**
@@ -58,7 +57,6 @@ class Event extends ActiveRecord
      */
     public function getTypes() {
         return $this->hasOne(Type::className(), ['id' => 'type']);
-        //->viaTable('art_tag', ['tag_id' => 'id']);
     }
 
     /**

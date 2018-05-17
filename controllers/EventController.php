@@ -154,7 +154,6 @@ class EventController extends \yii\web\Controller
             }else{
                 throw new HttpException(404 ,'События с таким ID не найдено');
             }
-            //$this->layout = '_main';
             return $this->redirect(['event/history']);
         }
     }
@@ -206,9 +205,6 @@ class EventController extends \yii\web\Controller
                 $json = ['success' => 'no', 'message' => 'При добавлении события произошла ошибка!', 'err' => $rs];
                 die(json_encode($json));
             }
-            //$q1 = (new Query)->select("last_insert_id() as 'lid'")->all();
-            //$ev = Event::find()->where(['i_user' => $_SESSION['user']['id'], 'id' => $q1[0]['lid']])
-            //    ->with('category')->with('types')->one();
             $mb_dt = mb_substr($ev->dtr,0,10);
             $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
                 $mb_dt, $ev->types['name'], $ev->types['color'], $ev['category']->name);
@@ -505,25 +501,6 @@ class EventController extends \yii\web\Controller
         exit;
     }
 
-    /*
-     *
-     *
-     **/
-    public function actionPlan(){
-
-        //
-
-    }
-
-    /**
-     *
-     *
-     **/
-    public function actionSs($sortColumn='id',$sortType=SORT_DESC){
-
-        echo 'ss';
-    }
-
     /**
      *
      *
@@ -742,158 +719,6 @@ class EventController extends \yii\web\Controller
         }
     }
 
-    /**
-     *
-     *
-     */
-    public function actionFilter(){
 
-        //
-        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
-
-        if ((Yii::$app->request->isAjax)) {
-
-            $event_type = Yii::$app->request->get('event_type');
-            // небольшой хак, чтобы получить 4 типа событий )
-            // $event_type = '1 2 3 4';
-            $ids_type = explode(' ',$event_type);
-            $event_cats = Yii::$app->request->get('event_cats');
-            $ids_cats = explode(' ',$event_cats);
-            $event_range1 = Yii::$app->request->get('range1');
-            $event_range2 = Yii::$app->request->get('range2');
-            $evr1 = \Yii::$app->formatter->asTime($event_range1, Yii::$app->formatter->dateFormat);
-            $evr2 = \Yii::$app->formatter->asTime($event_range2, Yii::$app->formatter->dateFormat);
-            if (!$event_range1) { $event_range1 = date('d-m-Y'); $evr1 = $event_range1; }
-            if (!$event_range2) { $event_range2 = date('d-m-Y'); $evr2 = $event_range2; }
-            $event_range1 = \Yii::$app->formatter->asTime($event_range1, 'yyyy-MM-dd'); # 14:09
-            $event_range2 = \Yii::$app->formatter->asTime($event_range2, 'yyyy-MM-dd'); # 14:09
-
-            $query = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                ->andWhere(['in', 'i_cat', $ids_cats])
-                ->andWhere(['in', 'type',  $ids_type])
-                ->andWhere(['<>', 'summ',  0])
-                ->orderBy(['id' => SORT_DESC])
-                //->asArray()
-                //->all()
-            ;
-            //echo Debug::d($query,'in weight'); die;
-            //echo Debug::d($query,'in weight');
-            //$query = Event::find()->where(['i_user' => $_SESSION['user']['id']])->with('category');
-            $q_counts = 500; // т.к. у нас идет поиск, мы должны захватить как можно больше в 1 странице,
-            // тем более переход на 2-ю и более страницы не работает хД
-            $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-                'pageSizeParam' => false, 'forcePageParam' => false]); // 'route' => 'site/history'
-            $rs = $query->offset($pages->offset)
-                ->limit($pages->limit)
-                ->all();
-
-            $fl_count = count($rs);
-            if ($fl_count){
-                $pages_str = '';
-                if ($pages !== '') { $pages_str = LinkPager::widget([ 'pagination' => $pages ]); }
-                if (!$rs){
-                    $json = ['success' => 'no', 'message' => 'Ошибка','rs' => [] ];
-                    die(json_encode($json));
-                }
-                //
-                $nrs = [];
-                // table row html
-                foreach($rs as $rsk => $ev){
-                    $mb_dt = mb_substr($ev->dtr,0,10);
-                    $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
-                        $mb_dt,
-                        $ev->types['name'],
-                        $ev->types['color'],
-                        $ev['category']->name);
-                    $nrs[] = $trh;
-                }
-                // тут же мы должны получить даты начала и конца поиска, а также сумму расходов и доходов за этот период
-                //
-                $event_type = '1'; $ids_type = explode(' ',$event_type);
-                $fl_dohody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                $event_type = '2'; $ids_type = explode(' ',$event_type);
-                $fl_rashody = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                $event_type = '3'; $ids_type = explode(' ',$event_type);
-                $fl_dolgy = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                $event_type = '4'; $ids_type = explode(' ',$event_type);
-                $fl_vkladi = Event::find()->where(['i_user' => $_SESSION['user']['id'],])->with('category')
-                    ->andwhere(['between', 'dtr', $event_range1, $event_range2 ])
-                    ->andWhere(['in', 'i_cat', $ids_cats])
-                    ->andWhere(['in', 'type',  $ids_type])
-                    ->andWhere(['<>', 'summ',  0])
-                    //->all()
-                    ->sum('summ')
-                ;
-                //echo Debug::d($fl_dohody,'$fl_dohody');
-                //echo Debug::d($fl_rashody,'$fl_rashody');
-                $fl_dohody  = intval($fl_dohody);
-                $fl_rashody = intval($fl_rashody);
-                $fl_dolgy = intval($fl_dolgy);
-                $fl_vkladi = intval($fl_vkladi);
-                $fl_diff = abs($fl_dohody - $fl_rashody);
-                if ($fl_rashody > $fl_dohody) {
-                    $fl_diff *= (-1);
-                }
-                $summ_rdv = $fl_rashody + $fl_vkladi + $fl_dolgy;
-                $diff_d_rdv = $fl_dohody - $summ_rdv;
-                $summ_dv = $fl_vkladi + $fl_dolgy;
-                $trs1 = <<<TRS1
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Сумма доходов</td><td><strong>{$fl_dohody}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS1;
-                $trs2 = <<<TRS2
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Сумма расходов</td><td><strong>{$fl_rashody}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS2;
-                $trs3 = <<<TRS3
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Разница доходы - расходы</td><td><strong>{$fl_diff}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS3;
-                $trs4 = <<<TRS3
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Сумма долгов</td><td><strong>{$fl_dolgy}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS3;
-                $trs5 = <<<TRS3
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Сумма вкладов</td><td><strong>{$fl_vkladi}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS3;
-                $trs51 = <<<TRS3
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Сумма долгов и вкладов</td><td><strong>{$summ_dv}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS3;
-                $trs6 = <<<TRS3
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Сумма расходов, долгов и вкладов</td><td><strong>{$summ_rdv}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS3;
-                $trs7 = <<<TRS3
-$('table.gg-history').append("<tr> <td colspan='3' style='text-align: right;'>Разница между доходами и тратами</td><td><strong>{$diff_d_rdv}</strong></td><td colspan='2'>{$evr1} - {$evr2}</td> <td></td> </tr>");
-TRS3;
-                $trs = [$trs1, $trs2, $trs3,$trs4,$trs5,$trs51,$trs6,$trs7]; $evr = [$evr1, $evr2];
-                $json = ['success' => 'yes', 'message' => 'Фильт успешно отработал!','rs' => $nrs,
-                    'pages' => $pages_str, 'trs' =>  $trs, 'evr' => $evr,
-                ];
-
-                die(json_encode($json));
-            }
-
-            $json = ['success' => 'no', 'message' => 'Фильт успешно отработал, но ничего не нашел!', 'count' => $fl_count ];
-            die(json_encode($json));
-        }
-    }
 
 }
