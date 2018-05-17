@@ -43,8 +43,8 @@ class Video extends \yii\db\ActiveRecord
         return [
             [['i_user', 'i_cat', 'title', 'description', 'video_id', 'duration', 'viewcount', 'channelid', 'channeltitle', 'thumbnails','url'], 'required'],
             [['i_user', 'i_cat', 'viewcount'], 'integer'],
-            [['description', 'thumbnails'], 'string'],
-            [['duration', 'dt_publish', 'dt_created', 'dt_updated'], 'safe'],
+            [['description', 'thumbnails', 'duration'], 'string'],
+            [['dt_publish', 'dt_created', 'dt_updated'], 'safe'],
             [['title', 'video_id', 'note', 'channeltitle'], 'string', 'max' => 111],
             [['url'], 'string', 'max' => 255],
             [['active'], 'string', 'max' => 1],

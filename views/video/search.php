@@ -62,7 +62,7 @@ $this->params['breadcrumbs'][] = $this->title;
             $youtube_catsAh = ArrayHelper::map($youtube_cats,'id','name');
         ?>
         <?= $form->field($model, 'i_cat')
-            ->dropDownList($youtube_catsAh,['id' => 'ytCat'])->label('Выберите категорию'); ?>
+            ->dropDownList($youtube_catsAh,['id' => 'ytCat', 'prompt' => 'Выберите категорию' ])->label('Выберите категорию'); ?>
 
         <?= $form->field($model, 'title') ?>
         <?= $form->field($model, 'duration') ?>
@@ -152,10 +152,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 <h4 class="modal-title" id="myModalLabel">Просмотр видео</h4>
             </div>
             <div class="modal-body">
-                <iframe width="560" height="315"
-                        src="https://www.youtube.com/embed/"
-                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
-                </iframe>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
