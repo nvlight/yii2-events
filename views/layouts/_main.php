@@ -80,9 +80,9 @@ if (array_key_exists('1',$rr)) {
                     'event',
                 ],
                 'fa-calendar' => [
-                    'plan',
-                    'Планирование',
-                    'event',
+                    'index',
+                    'Графики',
+                    'graphic',
                 ],
                 'fa-archive' => [
                     'index',

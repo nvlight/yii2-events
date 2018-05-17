@@ -145,16 +145,9 @@ function updateUserLimit(){
       type: 'GET',
       data: {val:$('.user_limit').val()},
       success: function(res,status) {
-        //console.log('status: '+status);
         var rs = $.parseJSON(res);
         if (rs['success'] === 'yes'){
-            //console.log('limit change is success & reload is completed');  
-            // $('.billing_euro_schet').text(rs['k'][0]);
-            // $('.billing_dollar_schet').text(rs['k'][1]);
-            // $('.billing_euro_kurs').text(rs['k'][2]);
-            // $('.billing_dollar_kurs').text(rs['k'][3]); 
-            // $('.new_user_limit').text(rs['k'][4]);
-            // $('input.user_limit').val(rs['k'][4]);
+            console.log('limit change is success & reload is completed');
         }        
       }
       ,error: function(res) {

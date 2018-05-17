@@ -166,6 +166,12 @@ $('.loadVideoToModal').on('click', function() {
     getYtVideoById(id);
     return false; 
 });
+
+//
+$("#watchVideModal").on("hidden.bs.modal", function () {
+  $('.modal-body').html('');
+});
+
 JS;
 
 $this->registerJs($js1);

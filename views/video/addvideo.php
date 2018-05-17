@@ -66,10 +66,16 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             $arr_videocategory = ArrayHelper::map($videocategory,'id','name');
             ?>
 
-            <?= $form->field($model, 'i_cat')->dropDownList($arr_videocategory,['id' => 'videocategory'])
-                ->label('Выберите категорию'); ?>
-            <?= $form->field($model, 'url') ?>
-<!--            --><?php //$form->field($model, 'dt_publish')->widget(DatePicker::className(),[
+            <?= $form->field($model, 'i_cat')
+                ->dropDownList($arr_videocategory,['id' => 'videocategory'])
+                ->label('Выберите категорию') ?>
+            <?= $form->field($model, 'url',
+                ['inputOptions' => [
+                    'placeholder' => 'https://youtu.be/videoId или https://www.youtube.com/watch?v=videoId',
+                    'class' => 'form-control'
+                ]])->label('URL')//->hint('Введите короткий или длинный url видео на youtube');
+            ?>
+            <?php //$form->field($model, 'dt_publish')->widget(DatePicker::className(),[
 //                'language' => 'ru',
 //                'name' => 'dt_publish',
 //                'type' => 2,

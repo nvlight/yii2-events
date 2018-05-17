@@ -1,16 +1,16 @@
 <?php
-    //echo \app\components\Debug::d($catPlans,'catPlans');
+
 use yii\helpers\Html;
 
-$this->title = 'Events | Планирование';
+$this->title = 'Events | Графики и диаграммы';
 
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
-$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events,Page plan'], 'keywords');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events,Page graphik'], 'keywords');
 ?>
 
 <div class="bill-inset">
     <div class="page-caption clearfix">
-        <h2 class="pull-left" >Страница планирования</h2>
+        <h2 class="pull-left" >Страница графиков и диаграмм для событий</h2>
 
     </div>
     <div class="page-hr"></div>

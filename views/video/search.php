@@ -196,6 +196,11 @@ function getYtVideoById(id){
     });
 }
 
+//
+$("#watchVideModal").on("hidden.bs.modal", function () {
+  $('.modal-body').html('');
+});
+
 /* */
 $('.loadVideoToModal').on('click', function() {
     var id = $(this).data('id');
