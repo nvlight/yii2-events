@@ -1,16 +1,23 @@
 <?php
 
 use yii\helpers\Html;
+use miloschuman\highcharts\Highcharts;
+use miloschuman\highcharts\HighchartsAsset;
+use yii\web\JsExpression;
+use app\components\Debug;
 
 $this->title = 'Events | Графики и диаграммы';
 
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events,Page graphik'], 'keywords');
+
+HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting', 'modules/drilldown']);
+
 ?>
 
 <div class="bill-inset">
     <div class="page-caption clearfix">
-        <h2 class="pull-left" >Страница графиков и диаграмм для событий</h2>
+        <h2 class="pull-left" >Страница графиков и диаграмм</h2>
 
     </div>
     <div class="page-hr"></div>
@@ -18,65 +25,221 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
     ?>
     <div class="page-content">
-        <div class="rashodi clearfix mb4">
-            <div class="header pull-left">
-                <h4>Расходы</h4>
-            </div>
-            <div class="main pull-right">
-                <p>Общий остаток: <span class="text-success"><?=Html::encode($diff_main)?> Р</span> </p>
-            </div>
-        </div>
 
-        <div class="rashodi">
+<!--        <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>-->
 
-            <?php foreach ($catPlans as $cpk => $cpv): ?>
+        <?php
+        $pie_data = [];
+        if (isset($ob_rs) && is_array($ob_rs) && count($ob_rs)){
+            $i = 4;
+            foreach ($ob_rs as $k => $v){
+                $pie_data[] = [
+                    'name' => $v['nm'],
+                    'y' => intval($v['sm']),
+                    //'color' => new JsExpression("Highcharts.getOptions().colors[$i]")
+                    'color' => '#' . $v['cl'],
+                ];
+                $i++;
+            }
+        }
 
-                <?php
-                    //echo $cpv['p11'] . ' : ' . $cpv['p12'] . " : " . $cpv['p2'];
-                    $cp1 = abs(intval($cpv['p11']-$cpv['p12']));
-                    $cp1 = abs($cpv['p12']);
-                    $cp2 = intval($cpv['p2']); if ($cp2 === 0) { continue; }
-                    $cp3 = $cp2 - $cp1;
-                    $procent = 100 * ($cp1/$cp2);
-                    switch ($procent) {
-                        case $procent < 50 : $procent_class = ' progress-bar-success'; break;
-                        case (($procent >= 50) and ($procent <= 75)) : $procent_class = ' progress-bar-warning'; break;
-                        case ($procent >= 75) : $procent_class = ' progress-bar-danger'; break;
-                        default: $procent_class = "progress-bar-success";
+        $series_pie_1 = [
+            'type' => 'pie',
+            'name' => 'Сумма по типу',
+            'data' => [
+                [
+                    'name' => 'До',
+                    'y' => 13,
+                    'color' => new JsExpression('Highcharts.getOptions().colors[0]'), // Jane's color
+                ],
+            ],
+            'center' => [150, 100],
+            'size' => 100,
+            'showInLegend' => false,
+            'dataLabels' => [
+                'enabled' => false,
+            ],
+        ];
+        if (count($pie_data)) {
+            $series_pie_1['data'] = $pie_data;
+        }
+        $avg = [
+            'type' => 'spline',
+            'name' => 'Среднее',
+            'data' => [3, 2.67, 3, 6.33, 3.33],
+            'marker' => [
+                'lineWidth' => 2,
+                'lineColor' => new JsExpression('Highcharts.getOptions().colors[3]'),
+                'fillColor' => 'white',
+            ],
+        ];
+        $labels1 = [
+            'html' => 'Сумма по типам категорий',
+            'style' => [
+                'left' => '100px',
+                'top' => '30px',
+                'color' => new JsExpression('(Highcharts.theme && Highcharts.theme.textColor) || "black"'),
+            ],
+        ];
+
+        // сделаем массив сериес из наших вновь прибывших данных
+//        'series' => [
+//            [
+//                'name' => 'Доходы',
+//                'color' => '#5CB85C',
+//                'data' => [30000, 10000, 15000, 20000, 15000],
+//            ],
+        //
+        $months = [1,2,3,4,5,5,6,7,8,9,10,11,12];
+        $tp_ids = [1,2,3,4]; $tp = ['','Доход','Расход','Долг','Вклад'];
+        $na = []; $years = [2018];
+        foreach($years as $year){
+            foreach($months as $mk => $mv){
+                foreach($tp_ids as $tpk => $tpv){
+
+                    foreach($q_get_years_with_months as $dk => $dv){
+                        //
+                        if ($year == $dv['dtr'] && ($mv == $dv['mnth']) && $tpv == $dv['tp'] ){
+
+                            $na[$tpv]['name'] = $tp[$tpv];
+                            $na[$tpv]['color'] = '#'. $dv['cl'];
+                            $na[$tpv]['data'][$year][$dv['mnth']] = intval($dv['sm']);
+                        }
                     }
-                    // узнаем класс для расходов и осталось
-                    $nclass = 'success';
-                    $nclass = mb_substr($procent_class,strlen(' progress-bar-'));
-                    //
-                    if ($procent > 100) { $procent = 100; }
-                    // осталось или перебор
-                    $ostalos = "осталось";
-                    if ($cp3 < 0) { $ostalos = "превышен на"; }
-                ?>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="progress progress-striped1">
-                            <div class="progress-bar <?=$procent_class?>" style="width: <?=$procent?>%">
-                                <span class="sr-only"><?=$cpv['name']?></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="_ngcontent-c20">
+                }
+            }
+        }
+        // сортируем сам массив, а потом по ключам внутренний массив inner
+        // после добавляем недостающие ключи и обнуляем их, готово!
+        // еще раз сортируем $v['data']
+        ksort($na);
+        //echo Debug::d($na,'$na');
+        foreach($na as $k => &$v){ foreach($v['data'] as $kk => &$vv) { ksort($vv); } }
+        foreach($na as $k => &$v){
+            foreach($v['data'] as $kk => &$vv) {
 
-                            <span  class="text-<?=$nclass?>"><?=$cp1?></span>
-                            из
-                            <span  class="text-primary"><?=$cp2?></span>
-                            |
-                            <?=$ostalos?>
-                            <span  class="text-<?=$nclass?>">
-                                <?=$cp3?> Р
-                            </span>
-                        </p>
-                    </div>
-                </div>
-        <?php endforeach; ?>
-        </div>
+                foreach ($months as $mk => $mv) {
+                    if (!array_key_exists($mv, $vv)) {
+                        $vv[$mv] = 0;
+                    }
+                }
+            }
+        }
+        foreach($na as $k => &$v){ foreach($v['data'] as $kk => &$vv) { ksort($vv); } }
+        // почти конец, осталось теперь объеденить массивы с годами в 1 массив
+        $nac = $na;
+        foreach($nac as $k => &$v){
+            $tmp = [];
+            foreach($v['data'] as $kk => &$vv) {
+
+                foreach ($vv as $kkk => $vvv) {
+                    $tmp[] = $vvv;
+                }
+                //unset($nac[$kk]);
+            }
+            $v['data'] = $tmp;
+        }
+        //echo Debug::d(count($nac),'count($na)');
+        //echo Debug::d($na,'$na');
+        //echo Debug::d($nac,'$nac',1); //die;
+        // наконец-то ! создаем массив $series;
+        $series = $series2 = [];
+        foreach($nac as $k => &$v){
+            $series[] = &$v;
+            //echo Debug::d($v,$k. ' current');
+        }//die;
+        // добавить среднее и кусок серии с общими цифрами!
+        $series2[] = $avg;
+        $series2[] = $series_pie_1;
+        //echo Debug::d($series,'series');
+
+        echo Highcharts::widget([
+            'scripts' => [
+                'modules/exporting',
+                'themes/grid-light',
+            ],
+            'options' => [
+                'chart' => [
+                    'plotBackgroundColor' => null,
+                    'plotBorderWidth' => null,
+                    'plotShadow' => false,
+                    'type' => 'pie',
+                ],
+                'title' => [
+                    'text' => 'Общая сводка ресурсов',
+                ],
+                'xAxis' => [
+                    'categories' => ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь' , 'Октябрь', 'Ноябрь', 'Декабрь'],
+                ],
+                'labels' => [
+                    'items' => [
+                        $labels1,
+                    ]
+                ],
+                'tooltip' => [
+                    'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>',
+                ],
+                'plotOptions' => [
+                    'pie' => [
+                        'allowPointSelect' => true,
+                        'cursor' => 'pointer',
+                        'dataLabels' => [
+                            'enabled' => true,
+                            'format' => '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        ],
+                        //'enableMouseTracking' => false
+                    ]
+                ],
+                'series' => $series2,
+            ]
+        ]);
+
+        echo Highcharts::widget([
+            'scripts' => [
+                'modules/exporting',
+                'themes/grid-light',
+            ],
+            'options' => [
+                'chart' => [
+                    //'type' => 'line'
+                    'type' => 'column'
+                ],
+                'title' => [
+                    'text' => 'Комбинированный график хождения денежных потоков',
+                ],
+                'xAxis' => [
+                    'categories' => ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь' , 'Октябрь', 'Ноябрь', 'Декабрь'],
+                ],
+                'labels' => [
+                    'items' => [
+                            // показать labal!
+                            //$labels1,
+                    ]
+                ],
+                'plotOptions' => [
+                    'column' => [
+                        'dataLabels' => [
+                            'enabled' => true
+                        ],
+                        //'enableMouseTracking' => false
+                    ]
+                ],
+                'series' => $series,
+            ]
+        ]);
+
+        ?>
+
     </div>
 
 </div>
+
+<?php
+
+$js1 = <<<JS
+
+
+JS;
+
+$this->registerJs($js1);
+?>

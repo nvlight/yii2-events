@@ -11,6 +11,7 @@ namespace app\controllers;
 use yii\web\Controller;
 use app\components\AuthLib;
 use yii\db\Query;
+use app\components\Debug;
 
 class GraphicController extends Controller
 {
@@ -19,30 +20,47 @@ class GraphicController extends Controller
 
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-        //$q = Category::find()->select(['name'])->where(['>','id',1])->with('event')->all();
+        // получим тут общую сумму по 4-м типам для текущего пользователя
         $q = (new Query)
-            ->select(['category.name'
-                ," @p11 := (select abs(SUM(event.summ)) from event WHERE event.i_cat = category.id and event.type = 1) as 'p11'"
-                ," @p12 := (select abs(SUM(event.summ)) from event WHERE event.i_cat = category.id and event.type = 2) as 'p12'"
-                ," @p1 := (abs(@p11 - @p12) + 0) as 'p1' "
-                , "category.`limit` as 'p2'"
+            ->select([
+                'event.type tp, sum(event.summ) sm, type.name nm, type.color cl'
             ])
-            ->from('category')->where(['i_user' => $_SESSION['user']['id']])
+            ->from('event')->where(['event.type' => [1,2,3,4], 'event.i_user' => $_SESSION['user']['id']])
+            ->leftJoin('type','type.id=event.type')
+            ->groupBy('tp')
+            ->orderBy('tp')
+            ->indexBy('tp')
             ->all();
-        //echo Debug::d($q);
-
-        // большая часть, написанная выше, сделано напросно, т.к. мы будем считать только расходы, а не их разность
-        // получим здесь $remains - $all_rashod...
+        //echo Debug::d($q); die;
+        $ob_rs = $q;
         $remains = $_SESSION['user']['remains'];
-        $all_rashod = 0;
-        foreach ($q as $qk => $qv) { $all_rashod += $qv['p12']; } //echo $qv['p12'] . "</br>"; }
-        $diff_main = $remains - $all_rashod;
 
-        // получили тут массив из: разность расходов с доходами и остаток
-        $catPlans = $q;
+        $q_get_year_arrays = (new Query())
+            ->select('DISTINCT year(dtr) year')
+            ->from('event')
+            ->orderBy('year')
+            ->all();
+        $years = [];
+        if ($q_get_year_arrays){
+            foreach($q_get_year_arrays as $k => $v){
+                $years[] = $v['year'];
+            }
+        }
+        //echo Debug::d($years,'$years');
+
+        $q_get_years_with_months = (new Query())
+            ->select('year(event.dtr) dtr,month(event.dtr) mnth, monthname(dtr) mnthnm, event.type tp, sum(event.summ) sm, type.name nm, type.color cl')
+            ->from('event')
+            ->where(['event.type' => [1,2,3,4]])
+            ->leftJoin('type','type.id=event.type')
+            ->groupBy('mnth,tp')
+            ->orderBy('dtr,mnth,tp')
+            ->all();
+        //echo Debug::d($q_get_years_with_months,'$q_get_years_with_months');
 
         $this->layout = '_main';
-        return $this->render('index',compact('catPlans','remains','diff_main'));
+        return $this->render('index',
+            compact('ob_rs','years','remains','q_get_years_with_months'));
     }
 
 }
