@@ -8,7 +8,7 @@
 
 namespace app\models;
 
-
+use yii\db\Query;
 use yii\base\Model;
 
 class Graphic extends Model
@@ -96,4 +96,46 @@ class Graphic extends Model
         return $series;
     }
 
+    //
+    public function getQueryRs(){
+
+        // получим тут общую сумму по 4-м типам для текущего пользователя
+        $q = (new Query)
+            ->select([
+                'event.type tp, sum(event.summ) sm, type.name nm, type.color cl'
+            ])
+            ->from('event')->where(['event.type' => [1,2,3,4], 'event.i_user' => $_SESSION['user']['id']])
+            ->leftJoin('type','type.id=event.type')
+            ->groupBy('tp')
+            ->orderBy('tp')
+            ->indexBy('tp')
+            ->all();
+        //echo Debug::d($q); die;
+        $ob_rs = $q;
+
+        $q_get_year_arrays = (new Query())
+            ->select('DISTINCT year(dtr) year')
+            ->from('event')
+            ->orderBy('year')
+            ->all();
+        $years = [];
+        if ($q_get_year_arrays){
+            foreach($q_get_year_arrays as $k => $v){
+                $years[] = $v['year'];
+            }
+        }
+        //echo Debug::d($years,'$years');
+
+        $q_get_years_with_months = (new Query())
+            ->select('year(event.dtr) dtr,month(event.dtr) mnth, monthname(dtr) mnthnm, event.type tp, sum(event.summ) sm, type.name nm, type.color cl')
+            ->from('event')
+            ->where(['event.type' => [1,2,3,4]])
+            ->leftJoin('type','type.id=event.type')
+            ->groupBy('mnth,tp')
+            ->orderBy('dtr,mnth,tp')
+            ->all();
+        //echo Debug::d($q_get_years_with_months,'$q_get_years_with_months');
+
+        return [$ob_rs, $q_get_years_with_months, $years];
+    }
 }

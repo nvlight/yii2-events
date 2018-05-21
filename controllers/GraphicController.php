@@ -17,56 +17,26 @@ use app\models\Graphic;
 class GraphicController extends Controller
 {
     //
-    public function actionIndex(){
+    public function actionIndex($curr_year=2018){
 
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-        // получим тут общую сумму по 4-м типам для текущего пользователя
-        $q = (new Query)
-            ->select([
-                'event.type tp, sum(event.summ) sm, type.name nm, type.color cl'
-            ])
-            ->from('event')->where(['event.type' => [1,2,3,4], 'event.i_user' => $_SESSION['user']['id']])
-            ->leftJoin('type','type.id=event.type')
-            ->groupBy('tp')
-            ->orderBy('tp')
-            ->indexBy('tp')
-            ->all();
-        //echo Debug::d($q); die;
-        $ob_rs = $q;
         $remains = $_SESSION['user']['remains'];
 
-        $q_get_year_arrays = (new Query())
-            ->select('DISTINCT year(dtr) year')
-            ->from('event')
-            ->orderBy('year')
-            ->all();
-        $years = [];
-        if ($q_get_year_arrays){
-            foreach($q_get_year_arrays as $k => $v){
-                $years[] = $v['year'];
-            }
-        }
-        //echo Debug::d($years,'$years');
-
-        $q_get_years_with_months = (new Query())
-            ->select('year(event.dtr) dtr,month(event.dtr) mnth, monthname(dtr) mnthnm, event.type tp, sum(event.summ) sm, type.name nm, type.color cl')
-            ->from('event')
-            ->where(['event.type' => [1,2,3,4]])
-            ->leftJoin('type','type.id=event.type')
-            ->groupBy('mnth,tp')
-            ->orderBy('dtr,mnth,tp')
-            ->all();
-        //echo Debug::d($q_get_years_with_months,'$q_get_years_with_months');
-
         $gr = new Graphic();
+        list($ob_rs, $q_get_years_with_months, $years) = $gr->getQueryRs();
+
         $pie_data = $gr->getPieData($ob_rs);
-        $year = [2018];
+        $year = [$curr_year];
+        if (array_key_exists('year',$_POST) && in_array($_POST['year'],$years) ){
+            $year = [$_POST['year']];
+        }
+        //echo Debug::d($year,'year');
         $series = $gr->getSvodData($q_get_years_with_months,$year);
 
         $this->layout = '_main';
         return $this->render('index',
-            compact('ob_rs','years','remains','series','pie_data'));
+            compact('years','remains','series','pie_data','year'));
     }
 
 }

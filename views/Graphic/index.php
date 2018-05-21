@@ -76,6 +76,45 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
             ]
         ]);
 
+        // покажем тут годы, чтобы можно было их выбирать
+
+        $form = \yii\widgets\ActiveForm::begin([
+            'method'=>'post',
+            //'action' => ['/site/add-event'],
+            'options' => [
+                'class' => 'classGraphicYear',
+                'id' => 'idGraphicYear'
+            ]
+        ]);
+        ?>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <?php
+                    //echo Debug::d($_POST,'$_POST');
+                    //echo Debug::d($years,'$years');
+                    $nw = []; foreach($years as $k => $v) { $nw[$v] = $v; }
+                    echo Html::label('Выберите год','iyear',['class' => 'control-label']);
+                    ?>
+                    <div class="form-group">
+                        <?php
+                            echo Html::dropDownList('year',[],$nw,['class' => 'form-control',
+                                'options' => [ $year[0] => ['Selected' => true], ],
+                                'prompt' => 'Выберите год',
+                                'id' => 'iyear',
+                            ]);
+                        ?>
+                    </div>
+                </div>
+                <?php
+                    echo Html::submitButton('изменить',['class' => 'btn btn-primary']);
+                ?>
+            </div>
+        </div>
+
+        <?php
+        \yii\widgets\ActiveForm::end();
+
         // график с месяцами, разделенными по типам
         echo Highcharts::widget([
             'scripts' => [
