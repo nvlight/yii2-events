@@ -169,7 +169,7 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                     'text' => 'Сумма ресурсов по типам'
                 ],
                 'tooltip' => [
-                    'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
+                    'pointFormat' => '{series.name}: <b>{point.y}</b>'
                 ],
                 'plotOptions' => [
                     'pie' => [
@@ -177,7 +177,7 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                         'cursor' => 'pointer',
                         'dataLabels' => [
                             'enabled' => true,
-                            'format' => '<b>{point.name}</b>: {point.percentage:.1f} %',
+                            'format' => '<b>{point.name}</b>: {point.y}',
                             'style' => [
                                 'color' => new JsExpression('Highcharts.theme && Highcharts.theme.contrastTextColor') || 'black',
                             ]
