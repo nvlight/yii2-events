@@ -135,7 +135,6 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                 foreach ($vv as $kkk => $vvv) {
                     $tmp[] = $vvv;
                 }
-                //unset($nac[$kk]);
             }
             $v['data'] = $tmp;
         }
@@ -153,6 +152,7 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
         $series2[] = $series_pie_1;
         //echo Debug::d($series,'series');
 
+        // общий график со сводной по типам
         echo Highcharts::widget([
             'scripts' => [
                 'modules/exporting',
@@ -163,21 +163,13 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                     'plotBackgroundColor' => null,
                     'plotBorderWidth' => null,
                     'plotShadow' => false,
-                    'type' => 'pie',
+                    'type' => 'pie'
                 ],
                 'title' => [
-                    'text' => 'Общая сводка ресурсов',
-                ],
-                'xAxis' => [
-                    'categories' => ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь' , 'Октябрь', 'Ноябрь', 'Декабрь'],
-                ],
-                'labels' => [
-                    'items' => [
-                        $labels1,
-                    ]
+                    'text' => 'Сумма ресурсов по типам'
                 ],
                 'tooltip' => [
-                    'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>',
+                    'pointFormat' => '{series.name}: <b>{point.percentage:.1f}%</b>'
                 ],
                 'plotOptions' => [
                     'pie' => [
@@ -186,14 +178,85 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                         'dataLabels' => [
                             'enabled' => true,
                             'format' => '<b>{point.name}</b>: {point.percentage:.1f} %',
-                        ],
-                        //'enableMouseTracking' => false
+                            'style' => [
+                                'color' => new JsExpression('Highcharts.theme && Highcharts.theme.contrastTextColor') || 'black',
+                            ]
+                        ]
                     ]
                 ],
-                'series' => $series2,
+                'series' => [[
+                    'name' => 'Сумма',
+                    'colorByPoint' => true,
+//                    'data' => [
+//                        [
+//                            'name' => 'Chrome',
+//                            'y' => 61.41,
+//                            'sliced' => true,
+//                            'selected' => true
+//                        ], [
+//                            'name' => 'Internet Explorer',
+//                            'y' => 11.84
+//                        ], [
+//                            'name' => 'Firefox',
+//                            'y' => 10.85
+//                        ], [
+//                            'name' => 'Edge',
+//                            'y' => 4.67
+//                        ], [
+//                            'name' => 'Safari',
+//                            'y' => 4.18
+//                        ], [
+//                            'name' => 'Sogou Explorer',
+//                            'y' => 1.64
+//                        ], [
+//                            'name' => 'Opera',
+//                            'y' => 1.6
+//                        ], [
+//                            'name' => 'QQ',
+//                            'y' => 1.2
+//                        ], [
+//                            'name' => 'Other',
+//                            'y' => 2.61
+//                        ]
+//                    ]
+                    'data' => $pie_data,
+                ]]
             ]
         ]);
 
+//        echo Highcharts::widget([
+//            'scripts' => [
+//                'modules/exporting',
+//                'themes/grid-light',
+//            ],
+//            'options' => [
+//                'chart' => [
+//                    'type' => 'pie',
+//                ],
+//                'title' => [
+//                    'text' => 'Общая сводка ресурсов',
+//                ],
+//                'xAxis' => [
+//                    'categories' => ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь' , 'Октябрь', 'Ноябрь', 'Декабрь'],
+//                ],
+//                'labels' => [
+//                    'items' => [
+//                        $labels1,
+//                    ]
+//                ],
+//                'plotOptions' => [
+//                    'pie' => [
+//                        'allowPointSelect' => true,
+//                        'cursor' => 'pointer',
+//                        'dataLabels' => [
+//                            'enabled' => true,
+//                        ],
+//                    ]
+//                ],
+//                'series' => $series2,
+//            ]
+//        ]);
+        // график с месяцами, разделенными по типам
         echo Highcharts::widget([
             'scripts' => [
                 'modules/exporting',
@@ -201,7 +264,6 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
             ],
             'options' => [
                 'chart' => [
-                    //'type' => 'line'
                     'type' => 'column'
                 ],
                 'title' => [
@@ -210,18 +272,11 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                 'xAxis' => [
                     'categories' => ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь' , 'Октябрь', 'Ноябрь', 'Декабрь'],
                 ],
-                'labels' => [
-                    'items' => [
-                            // показать labal!
-                            //$labels1,
-                    ]
-                ],
                 'plotOptions' => [
                     'column' => [
                         'dataLabels' => [
                             'enabled' => true
                         ],
-                        //'enableMouseTracking' => false
                     ]
                 ],
                 'series' => $series,
