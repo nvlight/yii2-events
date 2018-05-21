@@ -12,6 +12,7 @@ use yii\web\Controller;
 use app\components\AuthLib;
 use yii\db\Query;
 use app\components\Debug;
+use app\models\Graphic;
 
 class GraphicController extends Controller
 {
@@ -58,9 +59,14 @@ class GraphicController extends Controller
             ->all();
         //echo Debug::d($q_get_years_with_months,'$q_get_years_with_months');
 
+        $gr = new Graphic();
+        $pie_data = $gr->getPieData($ob_rs);
+        $year = [2018];
+        $series = $gr->getSvodData($q_get_years_with_months,$year);
+
         $this->layout = '_main';
         return $this->render('index',
-            compact('ob_rs','years','remains','q_get_years_with_months'));
+            compact('ob_rs','years','remains','series','pie_data'));
     }
 
 }
