@@ -59,46 +59,11 @@ class Event extends ActiveRecord
         return $this->hasOne(Type::className(), ['id' => 'type']);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public static function getHistory($sortcol='dtr',$sort='desc') {
-        switch ($sortcol){
-            case 'id'    : $sortcol = 'id'; break;
-            case 'i_cat' : $sortcol = 'i_cat'; break;
-            case 'desc'  : $sortcol = 'desc'; break;
-            case 'summ'  : $sortcol = 'summ'; break;
-            case 'dtr'   : $sortcol = 'dtr'; break;
-            case 'type'  : $sortcol = 'type'; break;
-            default: { echo 'vi doigralis!'; die;  }
-        }
-        switch ($sort){
-            case 'desc': { $sort = 'asc';  $rsort2 = [$sortcol => SORT_DESC, 'id' => SORT_DESC]; break; }
-            default:     { $sort = 'desc'; $rsort2 = [$sortcol =>  SORT_ASC, 'id' => SORT_DESC]; }
-        }
-        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-            ->with('category')
-            ->with('types')
-            ->orderBy($rsort2);
-        //echo Debug::d($query,'query'); die;
-        $q_counts = Yii::$app->params['history_post_count'];
-        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-            'pageSizeParam' => false, 'forcePageParam' => false]);
-        //echo Debug::d($pages,'pages'.$pages->offset); die;
-        $events = $query->offset($pages->offset)
-            ->limit($pages->limit)
-            ->all();
-        $ev2 = Event::find()->where(['i_user' => $_SESSION['user']['id'], ])->with('category');
-        // events','pages','sort','ev2'
-        return [$events, $pages, $sort, $ev2];
-    }
-
     /*
      *
      *
      * */
     public static function getEventRowsStrByArray($id,$desc,$summ,$dt,$cl1,$cl2,$cat_name){
-        $dt = Yii::$app->formatter->asTime($dt, 'dd.MM.yyyy');
         $trh = <<<TRH
 <tr class="actionId_{$id}">
                                 <td>{$id}</td>

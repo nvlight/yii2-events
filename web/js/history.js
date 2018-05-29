@@ -112,7 +112,7 @@ $('.changeSubmitButton').on('click', function (e) {
             $('#modalEventEdit').modal('hide');
             if (np['success'] === 'yes') {
                 var c = $('.actionId_' + np['item']['id']);
-                c.find('td[class=item_cat]').text(np['item']['cat']);
+                c.find('td[class=item_cat]').text(np['item']['category']['name']);
                 c.find('td[class=item_summ]').text(np['item']['summ']);
                 c.find('td[class=item_dtr]').text(np['item']['dtr']);
                 c.find('td[class=item_desc]').text(np['item']['desc']);
@@ -237,84 +237,6 @@ $('.doFilter').on('click', function () {
     }
     var new_path = window.document.location.origin + '/event/simple-filter?' + http_build;
     window.location.href = new_path;
-
-    // console.log( params2 );
-    // var params = {};
-    // // 1
-    // params['Event'] = [];
-    // params['Event']['type'] = [];
-    // var cd = $('.class-radioCheckBox').find('label input');
-    // var tc = []; var i = 0;
-    // $.each(cd, function (index, value) {
-    //     if ($(this).is(':checked')) {
-    //         tc[i] = $(this).val();
-    //         i++;
-    //     }
-    // });
-    // if (tc.length) {
-    //     params['Event']['type'] = tc;
-    // }
-    // // 2
-    // params['Event']['i_cat'] = [];
-    // var c = $('.class-catsCheckBox').find('label input');
-    // var rc = []; var i = 0;
-    // $.each(c, function (index, value) {
-    //     if ($(this).is(':checked')) {
-    //         rc[i] = $(this).val();
-    //         i++;
-    //     }
-    // });
-    // if (rc.length) {
-    //     params['Event']['i_cat'] = rc;
-    // }
-    //
-    // //3
-    // var c1 = $('#mainfilter_dtrange1').val();
-    // var c2 = $('#mainfilter_dtrange2').val();
-    // params['range1'] = c1;
-    // params['range2'] = c2;
-    // var zs = $("input[name='zero_summ']").prop("checked");
-    // if (zs){
-    //     params['zero_summ'] = 'yes';
-    // }
-    //
-    // console.log(params);
-    // console.log('doFilter: starting...');
-    // $.ajax({
-    //     url: '/event/simple-filter',
-    //     type: 'GET',
-    //     data: params2,
-    //     success: function (res, status) {
-    //         console.log('status: '+status);
-    //         var rs = res;
-    //         if (rs['success'] === 'yes') {
-    //             if (rs['rs'].length) {
-    //                 $('table.gg-history > tbody tr').remove();
-    //                 $('ul.pagination').remove();
-    //                 $("table.gg-history").after(rs['pages']);
-    //                 for (var i = 0; i < rs['rs'].length; i++) {
-    //                     $('table.gg-history').append(rs['rs'][i]);
-    //                 }
-    //                 var trs_count = rs['trs'].length;
-    //                 for (var i = 0; i < trs_count; i++) {
-    //                     $('table.gg-history').append(rs['trs'][i]);
-    //                     //console.log(rs['rs'][i]);
-    //                 }
-    //             }
-    //         } else {
-    //             console.log('успешно, не нашли');
-    //         }
-    //     }
-    //     , error: function (res) {
-    //         alert('we got error --- ' + res);
-    //     }
-    //     , beforeSend: function (e) {
-    //     }
-    //     , complete: function () {
-    //         $('#modalSimpleFilter').modal('hide');
-    //     }
-    // });
-
 });
 
 //
@@ -364,28 +286,3 @@ if (!$(this).parent().find('input').prop("checked")){
     $('#simpleFilterModal_radioCheckBox2').find('input').prop("checked", false);
 }
 });
-
-//$('#modalSimpleFilter').modal('show');
-
-// <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
-//     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js1"></script>
-//     <script>
-//     google.charts.load("current", {packages:["corechart"]});
-// google.charts.setOnLoadCallback(drawChart);
-// function drawChart() {
-//     var data = google.visualization.arrayToDataTable([
-//         ['Task', 'Hours per Day'],
-//         ['Машина',    5],
-//         ['Еда',      2],
-//         ['Дом',    3]
-//     ]);
-//
-//     var options = {
-//         title: 'Диаграмма состояния',
-//         pieHole: 0.4,
-//     };
-//
-//     var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
-//     chart.draw(data, options);
-// }
-// </script>

@@ -17,6 +17,7 @@ use DateTime;
 use yii\web\HttpException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\data\Sort;
 
 class EventController extends \yii\web\Controller
 {
@@ -39,15 +40,151 @@ class EventController extends \yii\web\Controller
      *
      *
      **/
-    public function actionHistory($sortcol='dtr',$sort='desc'){
+    public function actionHistory(){
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
+        //
+        $sort = new Sort([
+            'attributes' => [
+                'id' => [
+                    'asc' => ['id' => SORT_ASC, ],
+                    'desc' => ['id' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => '#',
+                ],
+                'i_cat' => [
+                    'asc' => ['id' => SORT_ASC, ],
+                    'desc' => ['id' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Категория',
+                ],
+                'desc' => [
+                    'asc' => ['desc' => SORT_ASC, ],
+                    'desc' => ['desc' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Описание',
+                ],
+                'summ' => [
+                    'asc' => ['summ' => SORT_ASC, ],
+                    'desc' => ['summ' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Сумма',
+                ],
+                'dtr' => [
+                    'asc' => ['dtr' => SORT_ASC, ],
+                    'desc' => ['dtr' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Дата',
+                ],
+                'type' => [
+                    'asc' => ['type' => SORT_ASC, ],
+                    'desc' => ['type' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Тип',
+                ],
+            ],
+            'defaultOrder' => [
+                'dtr' => SORT_DESC
+            ]
+        ]);
+        //echo Debug::d($sort,'sort');
+        //
+        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+            ->with('category')
+            ->with('types')
+            ->orderBy($sort->orders);
+        //echo Debug::d($query,'query'); die;
+        $q_counts = Yii::$app->params['history_post_count'];
+        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
+            'pageSizeParam' => false, 'forcePageParam' => false]);
+        //echo Debug::d($pages,'pages'.$pages->offset); die;
+        $events = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+
         $this->layout = '_main';
-        $getEvents = Event::getHistory($sortcol,$sort);
-        //echo Debug::d($getEvents,'getEvents',1); die;
-        return $this->render('history',
-            ['events' => $getEvents[0],'pages' => $getEvents[1],'sort' => $getEvents[2],'ev2' => $getEvents[3] ]
+        return $this->render('history', [
+                'events' => $events,
+                'pages' => $pages,
+                'sort' => $sort,
+            ]
+        );
+    }
+
+    /**
+     *
+     *
+     **/
+    public function actionHistory2(){
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        //
+        $sort = new Sort([
+            'attributes' => [
+                'id' => [
+                    'asc' => ['id' => SORT_ASC, ],
+                    'desc' => ['id' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => '#',
+                ],
+                'i_cat' => [
+                    'asc' => ['id' => SORT_ASC, ],
+                    'desc' => ['id' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Категория',
+                ],
+                'desc' => [
+                    'asc' => ['desc' => SORT_ASC, ],
+                    'desc' => ['desc' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Описание',
+                ],
+                'summ' => [
+                    'asc' => ['summ' => SORT_ASC, ],
+                    'desc' => ['summ' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Сумма',
+                ],
+                'dtr' => [
+                    'asc' => ['dtr' => SORT_ASC, ],
+                    'desc' => ['dtr' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Дата',
+                ],
+                'type' => [
+                    'asc' => ['type' => SORT_ASC, ],
+                    'desc' => ['type' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Тип',
+                ],
+            ],
+            'defaultOrder' => [
+                'dtr' => SORT_DESC
+            ]
+        ]);
+        //echo Debug::d($sort,'sort');
+        //
+        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+            ->with('category')
+            ->with('types')
+            ->orderBy($sort->orders);
+        //echo Debug::d($query,'query'); die;
+        $q_counts = Yii::$app->params['history_post_count'];
+        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
+            'pageSizeParam' => false, 'forcePageParam' => false]);
+        //echo Debug::d($pages,'pages'.$pages->offset); die;
+        $events = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+
+        $this->layout = '_main';
+        return $this->render('history2', [
+                'events' => $events,
+                'pages' => $pages,
+                'sort' => $sort,
+            ]
         );
     }
 
@@ -62,7 +199,9 @@ class EventController extends \yii\web\Controller
         if (Yii::$app->request->method === 'GET')
         {
             $rs = Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']])
-                ->with('category')->with('types')->asArray()->one();
+                ->with('category')->with('types')
+                //->asArray()
+                ->one();
             if (!$rs) throw new HttpException(404 ,'События с таким ID не найдено');
 
             $this->layout = '_main';
@@ -189,9 +328,7 @@ class EventController extends \yii\web\Controller
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         //
         $model = new Event();
-        if ((Yii::$app->request->isAjax)
-            && $model->load(Yii::$app->request->post())
-            )
+        if ((Yii::$app->request->isAjax) && $model->load(Yii::$app->request->post()) )
         {
             $ev = $model; $ev->i_user = $_SESSION['user']['id'];
             if ( !$ev->summ) $ev->summ = 0;
@@ -199,15 +336,13 @@ class EventController extends \yii\web\Controller
                 $json = ['success' => 'no', 'message' => 'validate error!', 'error' => $model->errors];
                 die(json_encode($json));
             }
-            $ev->dtr = \Yii::$app->formatter->asTime($ev->dtr, 'yyyy-MM-dd'); # 14:09
             $rs = $ev->insert();
             if (!$rs) {
                 $json = ['success' => 'no', 'message' => 'При добавлении события произошла ошибка!', 'err' => $rs];
                 die(json_encode($json));
             }
-            $mb_dt = mb_substr($ev->dtr,0,10);
             $trh = Event::getEventRowsStrByArray($ev->id,$ev->desc,$ev->summ,
-                $mb_dt, $ev->types['name'], $ev->types['color'], $ev['category']->name);
+                $ev->dtr, $ev->types['name'], $ev->types['color'], $ev['category']->name);
 
             $json = ['success' => 'yes', 'message' => 'Запись успешно добавлена!','trh' => $trh];
             die(json_encode($json));
@@ -616,17 +751,6 @@ class EventController extends \yii\web\Controller
 
             $event_range1 = Yii::$app->request->get('range1');
             $event_range2 = Yii::$app->request->get('range2');
-            // validate date and set default values
-            try {
-                Yii::$app->formatter->asDatetime($event_range1, "d.m.Y");
-            }catch (\Exception $e){
-                $event_range1 = date('d-m-Y');
-            }
-            try {
-                Yii::$app->formatter->asDatetime($event_range2, "d.m.Y");
-            }catch (\Exception $e){
-                $event_range2 = date('d-m-Y');
-            }
 
             $evr1 = \Yii::$app->formatter->asTime($event_range1, Yii::$app->formatter->dateFormat);
             $evr2 = \Yii::$app->formatter->asTime($event_range2, Yii::$app->formatter->dateFormat);

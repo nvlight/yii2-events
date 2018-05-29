@@ -9,6 +9,9 @@ use app\components\Debug;
 use app\models\Type;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\data\ActiveDataProvider;
+use yii\widgets\ListView;
+use yii\grid\GridView;
 
 $css1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css";
 $js1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js";
@@ -76,18 +79,18 @@ $type = new Type();
                 <div class="table-cover">
                     <?php
                         $abs_url = Url::toRoute('event/history', true);
-                        $rsort = '&sort='.$sort;
+
                     ?>
                     <div class="table-responsive">
                     <table class="table table-striped table-hover  gg-history">
                         <thead>
                         <tr>
-                            <th><a href="<?=$abs_url.'?sortColumn=id'.$rsort?>">#</a></th>
-                            <th><a href="<?=$abs_url.'?sortColumn=i_cat'.$rsort?>">Категория</a></th>
-                            <th><a href="<?=$abs_url.'?sortColumn=desc'.$rsort?>">Описание</a></th>
-                            <th><a href="<?=$abs_url.'?sortColumn=summ'.$rsort?>">Сумма</a></th>
-                            <th><a href="<?=$abs_url.'?sortColumn=dtr'.$rsort?>">Дата</a></th>
-                            <th><a href="<?=$abs_url.'?sortColumn=type'.$rsort?>">Тип</a></th>
+                            <th><?=$sort->link('id')?></th>
+                            <th><?=$sort->link('i_cat')?></th>
+                            <th><?=$sort->link('desc')?></th>
+                            <th><?=$sort->link('summ')?></th>
+                            <th><?=$sort->link('dtr')?></th>
+                            <th><?=$sort->link('type')?></th>
                             <th>Действия</th>
                         </tr>
                         </thead>

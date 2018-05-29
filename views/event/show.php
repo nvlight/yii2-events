@@ -16,9 +16,9 @@ $this->registerMetaTag(['name' => 'description', 'content' => 'Приложен�
 $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Show event page'], 'keywords');
 
 
-// echo Debug::d($rs,'rs');
-$rs['catname'] = $rs['category']['name'];
-$rs['typename'] = $rs['types']['name'];
+//echo Debug::d($rs,'rs');
+//$rs['catname'] = $rs['category']['name'];
+//$rs['typename'] = $rs['types']['name'];
 
 ?>
 
@@ -53,7 +53,8 @@ $rs['typename'] = $rs['types']['name'];
             ],
             [
                 'label' => 'Категория',
-                'attribute' => 'catname',
+                'attribute' => 'i_cat',
+                'value' => $rs->category->name
             ],
             [
                 'label' => 'Описание',
@@ -65,7 +66,8 @@ $rs['typename'] = $rs['types']['name'];
             ],
             [
                 'label' => 'Тип',
-                'attribute' => 'typename',
+                'attribute' => 'type',
+                'value' => $rs->types->name
             ],
             [
                 'label' => 'Дата',
