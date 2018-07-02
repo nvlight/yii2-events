@@ -15,44 +15,49 @@ use kartik\date\DatePicker;
 
 <div class="user-form">
 
-    <?php
+    <div class="row">
+        <div class="col-sm-6">
+            <?php
 
-    ?>
+            ?>
 
-    <?php $form = ActiveForm::begin(); ?>
+            <?php $form = ActiveForm::begin(); ?>
 
-    <?= $form->field($model, 'i_cat')->dropDownList(
-        Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-        ['id' => 'changeEventModal_catId', ]
-    )->label('Категория'); ?>
+            <?= $form->field($model, 'i_cat')->dropDownList(
+                Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                ['id' => 'changeEventModal_catId', 'prompt' => 'Выберите категорию']
+            )->label('Категория'); ?>
 
-    <?= $form->field($model, 'desc')->textInput(['maxlength' => true]) ?>
-    <?= $form->field($model, 'summ')->textInput() ?>
+            <?= $form->field($model, 'desc')->textInput(['maxlength' => true]) ?>
+            <?= $form->field($model, 'summ')->textInput() ?>
 
-    <?= $form->field($model, 'type')->dropDownList(
-        Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-        [['id' => 'changeEventModal_typeId',] ]
-        )->label('Тип события')
-    ?>
+            <?= $form->field($model, 'type')->dropDownList(
+                Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                [ 'id' => 'changeEventModal_typeId', 'prompt'=>'Выберите тип события' ]
+            )->label('Тип события')
+            ?>
 
-    <?php
-    echo $form->field($model, 'dtr')->widget(DatePicker::className(),[
-        'language' => 'ru',
-        'value' =>  Yii::$app->formatter->asDate(date('Y-m-d')),
-        'options' => ['placeholder' => 'выберите дату', 'id' => 'updateEvent_datePicker'],
-        'pluginOptions' => [
-            'autoclose'=>true,
-            'todayHighlight' => true,
-            'format' => 'yyyy-mm-dd',
-        ]
-    ]);
-    ?>
+            <?php
+            echo $form->field($model, 'dtr')->widget(DatePicker::className(),[
+                'language' => 'ru',
+                'value' =>  Yii::$app->formatter->asDate(date('Y-m-d')),
+                'options' => ['placeholder' => 'выберите дату', 'id' => 'updateEvent_datePicker'],
+                'pluginOptions' => [
+                    'autoclose'=>true,
+                    'todayHighlight' => true,
+                    'format' => 'yyyy-mm-dd',
+                ]
+            ]);
+            ?>
 
-    <div class="form-group">
-        <?= Html::submitButton( (\Yii::$app->controller->action->id == 'create') ? 'Создать' : 'Обновить',
-            ['class' => 'btn btn-success']) ?>
+            <div class="form-group">
+                <?= Html::submitButton( (\Yii::$app->controller->action->id == 'create') ? 'Создать' : 'Обновить',
+                    ['class' => 'btn btn-success']) ?>
+            </div>
+
+            <?php ActiveForm::end(); ?>
+        </div>
     </div>
 
-    <?php ActiveForm::end(); ?>
 
 </div>

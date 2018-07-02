@@ -54,78 +54,78 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         //        echo Debug::d($userHost . $userIP);
         ?>
         <div class="page-content">
-            <div class="row">
-                <div class="col-md-12">
 
-                    <form class="form-inline mb10">
-                        <div class="form-group">
-                            <label for="new_remains">Общий лимит в рублях</label>
-                            <input type="text" name="remains" class="form-control user_limit" id="new_remains" placeholder="remains"  value="<?=html::encode($remains)?>">
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-default" id="chRemains">
-                        <span class="spinRefresh">
-                            <i class="fa fa-refresh"></i>
-                        </span>
-                                <span class="spinPreload">
-                            <i class="fa fa-spinner fa-spin"></i>
-                        </span>
-                                Изменить
-                            </button>
-                            <nosript class="hidden">
-                                <?= Html::submitButton( '', ['class' => 'input-group-addon fa fa-refresh']) ?>
-                            </nosript>
-                        </div>
-                    </form>
 
+            <form class="form-inline mb10">
+                <div class="form-group">
+                    <label for="new_remains">Общий лимит в рублях</label>
+                    <input type="text" name="remains" class="form-control user_limit" id="new_remains" placeholder="remains"  value="<?=html::encode($remains)?>">
                 </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-default" id="chRemains">
+                <span class="spinRefresh">
+                    <i class="fa fa-refresh"></i>
+                </span>
+                        <span class="spinPreload">
+                    <i class="fa fa-spinner fa-spin"></i>
+                </span>
+                        Изменить
+                    </button>
+                    <nosript class="hidden">
+                        <?= Html::submitButton( '', ['class' => 'input-group-addon fa fa-refresh']) ?>
+                    </nosript>
+                </div>
+            </form>
+
+
+            <?php
+                //
+                $green_char_codes = ['USD','EUR','CNY','GBP','KRW'];
+                //echo Debug::d($courses,'$courses');
+            ?>
+            <h4>Последнее время обновления: <?= Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd')?></h4>
+            <h4>Количество записей: <?= count($courses['rs']['Valute'])?></h4>
+            <div class="mb10">
+                <?=Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <?php
-                        //echo Debug::d($courses,'$courses');
-                    ?>
-                    <h4>Timestamp: <?= Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd H:i:s')?></h4>
-                    <h5>Count: <?= count($courses['rs']['Valute'])?></h5>
-                    <div class="mb10">
-                        <?=Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
-                    </div>
-                    <?php if ($courses['success'] === 'yes'): ?>
-                        <table class="table gg-billing">
-                            <thead>
+            <?php if ($courses['success'] === 'yes'): ?>
+                <div class="table-responsive">
+                    <table class="table gg-billing">
+                    <thead>
+                        <tr>
+                            <td>NumCode</td>
+                            <td>CharCode</td>
+                            <td>Name</td>
+                            <td>Value</td>
+                            <td>Previous</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($courses['rs']['Valute'] as $k => $v): ?>
+                            <?php if (in_array($k, $green_char_codes)): ?>
                                 <tr>
-                                    <td>NumCode</td>
-                                    <td>CharCode</td>
-                                    <td>Name</td>
-                                    <td>Value</td>
-                                    <td>Previous</td>
+                                    <td><?=$v['NumCode']?></td>
+                                    <td><?=$v['CharCode']?></td>
+                                    <td><?=$v['Name']?></td>
+                                    <td><?=$v['Value']/$v['Nominal']?></td>
+                                    <td><?=$v['Previous']/$v['Nominal']?></td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach($courses['rs']['Valute'] as $k => $v): ?>
-                                    <tr>
-                                        <td><?=$v['NumCode']?></td>
-                                        <td><?=$v['CharCode']?></td>
-                                        <td><?=$v['Name']?></td>
-                                        <td><?=$v['Value']/$v['Nominal']?></td>
-                                        <td><?=$v['Previous']/$v['Nominal']?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <?php ?>
-                        <?php ?>
-                        <?php ?>
-                    <?php endif; ?>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </tbody>
+                    </table>
                 </div>
-            </div>
+                <?php ?>
+                <?php ?>
+                <?php ?>
+            <?php endif; ?>
+
         </div>
     </div>
 
 <?php
 
 $js1 = <<<JS
-
 
 /* */
 $('.user_limit').keydown(function (event) {

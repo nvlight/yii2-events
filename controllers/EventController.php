@@ -40,82 +40,6 @@ class EventController extends \yii\web\Controller
      *
      *
      **/
-    public function actionHistory(){
-        //
-        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
-
-        //
-        $sort = new Sort([
-            'attributes' => [
-                'id' => [
-                    'asc' => ['id' => SORT_ASC, ],
-                    'desc' => ['id' => SORT_DESC, ],
-                    'default' => SORT_DESC,
-                    'label' => '#',
-                ],
-                'i_cat' => [
-                    'asc' => ['id' => SORT_ASC, ],
-                    'desc' => ['id' => SORT_DESC, ],
-                    'default' => SORT_DESC,
-                    'label' => 'Категория',
-                ],
-                'desc' => [
-                    'asc' => ['desc' => SORT_ASC, ],
-                    'desc' => ['desc' => SORT_DESC, ],
-                    'default' => SORT_DESC,
-                    'label' => 'Описание',
-                ],
-                'summ' => [
-                    'asc' => ['summ' => SORT_ASC, ],
-                    'desc' => ['summ' => SORT_DESC, ],
-                    'default' => SORT_DESC,
-                    'label' => 'Сумма',
-                ],
-                'dtr' => [
-                    'asc' => ['dtr' => SORT_ASC, ],
-                    'desc' => ['dtr' => SORT_DESC, ],
-                    'default' => SORT_DESC,
-                    'label' => 'Дата',
-                ],
-                'type' => [
-                    'asc' => ['type' => SORT_ASC, ],
-                    'desc' => ['type' => SORT_DESC, ],
-                    'default' => SORT_DESC,
-                    'label' => 'Тип',
-                ],
-            ],
-            'defaultOrder' => [
-                'dtr' => SORT_DESC
-            ]
-        ]);
-        //echo Debug::d($sort,'sort');
-        //
-        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
-            ->with('category')
-            ->with('types')
-            ->orderBy($sort->orders);
-        //echo Debug::d($query,'query'); die;
-        $q_counts = Yii::$app->params['history_post_count'];
-        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
-            'pageSizeParam' => false, 'forcePageParam' => false]);
-        //echo Debug::d($pages,'pages'.$pages->offset); die;
-        $events = $query->offset($pages->offset)
-            ->limit($pages->limit)
-            ->all();
-
-        $this->layout = '_main';
-        return $this->render('history', [
-                'events' => $events,
-                'pages' => $pages,
-                'sort' => $sort,
-            ]
-        );
-    }
-
-    /**
-     *
-     *
-     **/
     public function actionHistory2(){
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
@@ -188,11 +112,87 @@ class EventController extends \yii\web\Controller
         );
     }
 
+    /**
+     *
+     *
+     **/
+    public function actionHistory(){
+        //
+        if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
+
+        //
+        $sort = new Sort([
+            'attributes' => [
+                'id' => [
+                    'asc' => ['id' => SORT_ASC, ],
+                    'desc' => ['id' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => '#',
+                ],
+                'i_cat' => [
+                    'asc' => ['i_cat' => SORT_ASC, ],
+                    'desc' => ['i_cat' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Категория',
+                ],
+                'desc' => [
+                    'asc' => ['desc' => SORT_ASC, ],
+                    'desc' => ['desc' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Описание',
+                ],
+                'summ' => [
+                    'asc' => ['summ' => SORT_ASC, ],
+                    'desc' => ['summ' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Сумма',
+                ],
+                'dtr' => [
+                    'asc' => ['dtr' => SORT_ASC, ],
+                    'desc' => ['dtr' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Дата',
+                ],
+                'type' => [
+                    'asc' => ['type' => SORT_ASC, ],
+                    'desc' => ['type' => SORT_DESC, ],
+                    'default' => SORT_DESC,
+                    'label' => 'Тип',
+                ],
+            ],
+            'defaultOrder' => [
+                'dtr' => SORT_DESC
+            ]
+        ]);
+        //echo Debug::d($sort,'sort');
+        //
+        $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
+            ->with('category')
+            ->with('types')
+            ->orderBy($sort->orders);
+        //echo Debug::d($query,'query'); die;
+        $q_counts = Yii::$app->params['history_post_count'];
+        $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
+            'pageSizeParam' => false, 'forcePageParam' => false]);
+        //echo Debug::d($pages,'pages'.$pages->offset); die;
+        $events = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
+
+        $this->layout = '_main';
+        return $this->render('history', [
+                'events' => $events,
+                'pages' => $pages,
+                'sort' => $sort,
+            ]
+        );
+    }
+
     /*
-     * Without JS - show
+     * Without JS - view
      *
      * */
-    public function actionShow($id){
+    public function actionView($id){
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
@@ -205,7 +205,7 @@ class EventController extends \yii\web\Controller
             if (!$rs) throw new HttpException(404 ,'События с таким ID не найдено');
 
             $this->layout = '_main';
-            return $this->render('show', compact('rs'));
+            return $this->render('view', compact('rs'));
         }
     }
 
@@ -213,7 +213,7 @@ class EventController extends \yii\web\Controller
      * Without JS - upd
      *
      * */
-    public function actionUpd($id){
+    public function actionUpdate($id){
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
@@ -233,7 +233,7 @@ class EventController extends \yii\web\Controller
                 $model->i_user = $_SESSION['user']['id'];
                 //
                 if ( $model->validate() && $model->save() ){
-                    return $this->redirect(['show', 'id' => $model->id]);
+                    return $this->redirect(['view', 'id' => $model->id]);
                 }
             }
             //
@@ -258,8 +258,8 @@ class EventController extends \yii\web\Controller
         $this->layout = '_main';
         if ($model->load(Yii::$app->request->post())) {
             $model->i_user = $_SESSION['user']['id'];
-            if ( $model->validate() &&  $model->save()){
-                return $this->redirect(['show', 'id' => $model->id]);
+            if ( $model->validate() &&  $model->save(false)){
+                return $this->redirect(['view', 'id' => $model->id]);
             }
             return $this->render('update',  [
                 'model' => $model,
@@ -275,19 +275,16 @@ class EventController extends \yii\web\Controller
      * Without JS - del
      *
      **/
-    public function actionDel(){
+    public function actionDelete(){
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
-        if (Yii::$app->request->method === 'GET'){
-            $id = Yii::$app->request->get('id'); $rs = null;
-            //echo $id; die;
-            if ( preg_match("#^[1-9]\d{0,7}$#", $id) &&
-                Event::find()->where(['id' => $id, 'i_user' => $_SESSION['user']['id']]))
-            {
-                $res = Event::findOne(['id' => $id, 'i_user' => $_SESSION['user']['id']]);
-                $rs = $res->delete();
-                if ($rs) {
+        if (Yii::$app->request->method === 'POST' || Yii::$app->request->method === 'GET'){
+            $id = Yii::$app->request->get('id');
+            $res = Event::findOne(['id' => $id, 'i_user' => $_SESSION['user']['id']]);
+            //echo Debug::d($res,'res');
+            if ($res){
+                if ($res->delete()) {
                     Yii::$app->session->setFlash('delEvent','Запись удалена!');
                 }
             }else{
@@ -353,7 +350,7 @@ class EventController extends \yii\web\Controller
      *
      *
      **/
-    public function actionDelete(){
+    public function actionDelete2(){
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
         //
@@ -373,7 +370,7 @@ class EventController extends \yii\web\Controller
      *
      *
      **/
-    public function actionUpdate()
+    public function actionUpdate2()
     {
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }

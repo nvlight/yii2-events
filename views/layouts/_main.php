@@ -271,7 +271,13 @@ return false;
 
 
 JS;
+$css = <<<CSS
+body{
+    opacity: 1;
+}
+CSS;
 
+//$this->registerCss($css);
 $this->registerJs($js1);
 ?>
 

@@ -27,6 +27,16 @@ AppAssetEvents::register($this);
 
 <?php $this->endBody() ?>
 
+<?php
+$css = <<<CSS
+body{
+    opacity: 1;
+}
+CSS;
+
+//$this->registerCss($css);
+?>
+
 </body>
 </html>
 <?php $this->endPage() ?>

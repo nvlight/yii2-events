@@ -5,6 +5,9 @@ body{
 	font-family: tahoma,verdana,sans-serif;	
 }
 
+/*body { opacity: 0; overflow-x: hidden; }*/
+/*html { background-color: #fff; }*/
+
 .invid {
 	border: 1px solid #000;
 }
@@ -410,7 +413,7 @@ body > nav.navbar {
 
 .for-flash1{
 	padding: 10px 13px;
-	margin: 15px -15px;
+	/*margin: 15px -15px;*/
 }
 
 .gg-billing{

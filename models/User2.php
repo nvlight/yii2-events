@@ -48,6 +48,7 @@ class User2 extends ActiveRecord implements IdentityInterface
     public function getAuthKey()
     {
         return $this->auth_key;
+        //return $this->upass;
     }
 
     /**
@@ -64,6 +65,7 @@ class User2 extends ActiveRecord implements IdentityInterface
         if (parent::beforeSave($insert)) {
             if ($this->isNewRecord) {
                 $this->auth_key = \Yii::$app->security->generateRandomString();
+                //$this->upass = \Yii::$app->security->generateRandomString();
             }
             return true;
         }
@@ -73,13 +75,13 @@ class User2 extends ActiveRecord implements IdentityInterface
 
     public static function findByUsername($username)
     {
-        return User2::findOne(['username' => $username]);
+        return User2::findOne(['uname' => $username]);
     }
 
 
     public function validatePassword($password)
     {
-        return \Yii::$app->security->validatePassword($password,$this->password);
+        return \Yii::$app->security->validatePassword($password,$this->upass);
         //return $this->password === $password;
     }
 }

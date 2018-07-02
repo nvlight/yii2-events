@@ -13,7 +13,7 @@ $this->title = 'Events | ';
 if (\Yii::$app->controller->action->id == 'create') {
     $this->title .= 'Создание';
 }else{
-    $this->title .= 'Обновление';;
+    $this->title .= 'Обновление';
 }
 $this->title .= ' события';
 

@@ -13,7 +13,7 @@ use app\components\Debug;
 $this->title = 'Events | Просмотр события';
 
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
-$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Show event page'], 'keywords');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, View event page'], 'keywords');
 
 
 //echo Debug::d($rs,'rs');
@@ -30,8 +30,8 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <?= Html::a('Создать', ['event/create'], ['class' => 'btn btn-success']) ?>
     </p>
     <p>
-        <?= Html::a('Обновить', ['event/upd', 'id' => $rs['id'] ], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Удалить', ['event/del', 'id' => $rs['id'],], [
+        <?= Html::a('Обновить', ['event/update', 'id' => $rs['id'] ], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Удалить', ['event/delete', 'id' => $rs['id'],], [
             'class' => 'btn btn-danger',
             'data' => [
                 'confirm' => 'Вы действительно хотите удалить запись?',

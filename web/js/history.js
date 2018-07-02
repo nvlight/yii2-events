@@ -104,7 +104,7 @@ $('.changeSubmitButton').on('click', function (e) {
     params['event-date'] = $('#changeEventModal_datePicker').val();
     params['event-typeid'] = $('#changeEventModal_typeId option:selected').val();
     $.ajax({
-        url: '/event/update',
+        url: '/event/update2',
         type: 'POST',
         data: params,
         success: function (res) {
@@ -251,20 +251,24 @@ $.ajax({
         //console.log(res);
         var np = $.parseJSON(res);
         $('#modalAddPost').modal('hide');
+        $('form.addEvent').trigger( 'reset' );
         if (np['success'] === 'yes'){
-            $('form.addEvent').trigger( 'reset' );
-        }else{
-            console.log('Произошла ошибка');
+            window.location.reload();
         }
-        $('table.gg-history').prepend(np['trh']);
+        // adding new item, but no
+        //$('table.gg-history').prepend(np['trh']);
     },
     error: function(res){
         console.log(res);
+        $('#modalAddPost').modal('hide');
+        $('form.addEvent').trigger( 'reset' );
     }
 });
 
 return false;
 });
+
+//$('#modalAddPost').modal();
 
 // check and unckeck all
 // stage 1

@@ -1,25 +1,25 @@
 <?php
-use yii\widgets\LinkPager;
-use kartik\date\DatePicker;
+/**
+ * Created by PhpStorm.
+ * User: lght
+ * Date: 27.05.2018
+ * Time: 23:13
+ */
+
+use yii\helpers\Html;
+use yii\data\ActiveDataProvider;
+use yii\grid\GridView;
+use yii\widgets\ListView;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
+use kartik\date\DatePicker;
+use app\models\Type;
 use app\models\Category;
 use app\models\Event;
-use yii\helpers\ArrayHelper;
-use app\components\Debug;
-use app\models\Type;
-use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\data\ActiveDataProvider;
-use yii\widgets\ListView;
-use yii\grid\GridView;
 
-$css1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css";
-$js1 = "https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js";
-$this->registerCssFile('@web/css/bootstrap-select.min.css');
-
-$this->title = 'Events | История';
+$this->title = 'Events | История (new)';
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
-$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page history'], 'keywords');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page history (new)'], 'keywords');
 
 $event = new Event();
 $category = new Category();
@@ -27,7 +27,9 @@ $type = new Type();
 
 ?>
 
-<div class="bill-inset">
+
+<div class="page-content">
+
     <div class="page-caption clearfix">
         <h2 class="pull-left" >Страница истории</h2>
 
@@ -54,109 +56,99 @@ $type = new Type();
         </h4>
     <?php endif; ?>
 
-    <div class="page-content">
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="caption-history clearfix">
-
-                    <h4 class="pull-left">Список событий</h4>
-
-                    <div class="pull-right clearfix ">
-                        <div class="form-inline pull-right " style="">
-                            <input class="form-control" id="searchColumn" placeholder="Сумма" type="text">
-                        </div>
-                        <select id="selectSearchColumn" class="selectpicker pull-right"  title="Параметр">
-                            <option value="1">Категория</option>
-                            <option value="2" selected>Сумма</option>
-                            <option value="3">Дата</option>
-                            <option value="4">Тип</option>
-                            <option value="7">Описание</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="table-cover">
-                    <?php
-                        $abs_url = Url::toRoute('event/history', true);
-
-                    ?>
-                    <div class="table-responsive">
-                    <table class="table table-striped table-hover  gg-history">
-                        <thead>
-                        <tr>
-                            <th><?=$sort->link('id')?></th>
-                            <th><?=$sort->link('i_cat')?></th>
-                            <th><?=$sort->link('desc')?></th>
-                            <th><?=$sort->link('summ')?></th>
-                            <th><?=$sort->link('dtr')?></th>
-                            <th><?=$sort->link('type')?></th>
-                            <th>Действия</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                                if (count($events)) :
-                                foreach ($events as $ek => $ev):
-                            ?>
-                                <tr class="actionId_<?=$ev->id?>">
-                                    <td class="item_eid"><?=$ev->id?></td>
-                                    <td class="item_cat"><?=$ev['category']->name?></td>
-                                    <td class="item_desc"><?=$ev->desc?></td>
-                                    <td class="item_summ"><?=$ev->summ?></td>
-                                    <td class="item_dtr"><?=$ev->dtr?></td>
-                                    <td class="item_type">
-                                        <span class="dg_type_style" style="background-color: #<?=$ev['types']['color']?>;  " >
-                                            <?=$ev->types->name?>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="btn-action" title="Просмотр">
-                                            <a class="evActionView"
-                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/show?id=' . $ev->id])?>"
-                                            >
-                                                <span class="glyphicon glyphicon-eye-open" ></span>
-                                            </a>
-                                        </span>
-                                        <span class="btn-action" title="Редактировать">
-                                            <a class="evActionUpdate"
-                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/upd?id=' . $ev->id])?>"
-                                            >
-                                                <span class="glyphicon glyphicon-pencil" >
-                                                </span>
-                                            </a>
-                                        </span>
-                                        <span class="btn-action" title="Удалить">
-                                            <a class="evActionDelete"
-                                               data-id="<?=$ev->id?>" href="<?=Url::to(['event/del?id=' . $ev->id])?>"
-                                            >
-                                                <span class="glyphicon glyphicon-trash" >
-                                                </span>
-                                            </a>
-                                        </span>
-                                    </td>
-                                </tr>
-
-                            <?php
-                                endforeach;
-                                endif;
-                            ?>
-                        </tbody>
-                    </table>
-                    </div>
-                    <?php                     
-                        echo LinkPager::widget([
-                            'pagination' => $pages,
-                    ]); ?>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="page-hr">
-            <hr>
-        </div>
-
+    <div class="table-responsive">
+        <?php
+        $dataProvider = new ActiveDataProvider([
+            'query' => Event::find()->with('category')->with('types'),
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'dtr' => SORT_DESC
+                ]
+            ]
+        ]);
+        //echo \app\components\Debug::d($dataProvider,'dataProvider');
+    //                                echo ListView::widget([
+    //                                    'dataProvider' => $dataProvider,
+    //                                    'itemView' => '_form',
+    //                                ]);
+        echo GridView::widget([
+            'dataProvider' => $dataProvider,
+            'columns' => [
+                [
+                    'class' => 'yii\grid\SerialColumn', // <-- тут
+                    // тут можно настроить дополнительные свойства
+                ],
+                [
+                    'label' => 'id',
+                    'attribute' => 'id',
+                ],
+                [
+                    'attribute' => 'i_cat',
+                    'format' => 'raw',
+                    'value' => function ($data) {
+                        $catname = $data->category->name;
+                        $countl = 33;
+                        (mb_strlen($catname) > $countl) ? $substrc = mb_substr($catname,0,$countl) . ' ...' : $substrc = $catname;
+                        return <<<DESC
+<span class="desc" >
+    $substrc 
+</span>
+DESC;
+                        return $substrc;
+                    },
+                    'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
+                ],
+                [
+                    'attribute' => 'desc',
+                    'format' => 'raw',
+                    'value' => function ($data) {
+                        $descf = $data->desc;
+                        $countl = 61;
+                        (mb_strlen($descf) > $countl) ? $substrc = mb_substr($descf,0,$countl) . ' ...' : $substrc = $descf;
+                        return <<<DESC
+<span class="desc" >
+    $substrc 
+</span>
+DESC;
+                    },
+                ],
+                [
+                    'attribute' => 'summ',
+                ],
+                [
+                    'attribute' => 'dtr',
+                    'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
+                ],
+                [
+                    //'class' => 'yii\grid\CheckboxColumn',
+                    'label' => 'Тип',
+                    'attribute' => 'type',
+                    'format' => 'raw',
+                    'value' => function ($data) {
+                        $typename = $data->types->name;
+                        $typecolor = $data->types->color;
+                        return <<<STR
+<span class="dg_type_style" style="background-color: #$typecolor; cursor: pointer;" >
+    $typename
+</span>
+STR;
+                    },
+                ],
+                [
+                    'class' => 'yii\grid\CheckboxColumn',
+                    // вы можете настроить дополнительные свойства здесь.
+                ],
+                [
+                    'class' => 'yii\grid\ActionColumn',
+                    // вы можете настроить дополнительные свойства здесь.
+                    'template' => '{view} {update} {delete}',
+                ],
+            ],
+        ]);
+        ?>
     </div>
 </div>
 
@@ -183,43 +175,43 @@ $type = new Type();
 
                     <div class="modal-period mb10">
                         <?php
-                            echo '<label class="control-label">Выберите период</label>';
-                            echo DatePicker::widget([
-                                'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
-                                'name' => 'range1',
-                                'value' => Event::find()->min('dtr'),
-                                'type' => DatePicker::TYPE_RANGE,
-                                'name2' => 'range2',
-                                'value2' => Yii::$app->formatter->asDate(date('Y-m-d')),
-                                'language' => 'ru',
-                                'pluginOptions' => [
-                                    'autoclose'=>true,
-                                    'format' => 'yyyy-mm-dd',
-                                    'todayHighlight' => true,
-                                ],
-                                'options' => [
-                                    'class' => 'ch_zhiv1',
-                                    'id' => 'mainfilter_dtrange1',
+                        echo '<label class="control-label">Выберите период</label>';
+                        echo DatePicker::widget([
+                            'separator' => '<i class="glyphicon glyphicon-resize-horizontal"></i>',
+                            'name' => 'range1',
+                            'value' => Event::find()->min('dtr'),
+                            'type' => DatePicker::TYPE_RANGE,
+                            'name2' => 'range2',
+                            'value2' => Yii::$app->formatter->asDate(date('Y-m-d')),
+                            'language' => 'ru',
+                            'pluginOptions' => [
+                                'autoclose'=>true,
+                                'format' => 'yyyy-mm-dd',
+                                'todayHighlight' => true,
+                            ],
+                            'options' => [
+                                'class' => 'ch_zhiv1',
+                                'id' => 'mainfilter_dtrange1',
 
-                                ],
-                                'options2' => [
-                                    'class' => 'ch_zhiv2',
-                                    'id' => 'mainfilter_dtrange2',
-                                ],
-                            ]);
+                            ],
+                            'options2' => [
+                                'class' => 'ch_zhiv2',
+                                'id' => 'mainfilter_dtrange2',
+                            ],
+                        ]);
                         ?>
                     </div>
 
                     <?php
                     $chechBoxexForTypeFilter = <<<CFCF
-                        <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
-                            <label>
-                                <input type="checkbox" name="" value="">
-                                <i class="fa fa-square-o fa-2x"></i>
-                                <i class="fa fa-check-square-o fa-2x"></i>
-                                <span>Выбрать все типы событий</span>
-                            </label>
-                        </div>
+                    <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
+                        <label>
+                            <input type="checkbox" name="" value="">
+                            <i class="fa fa-square-o fa-2x"></i>
+                            <i class="fa fa-check-square-o fa-2x"></i>
+                            <span>Выбрать все типы событий</span>
+                        </label>
+                    </div>
 CFCF;
                     ?>
 
@@ -240,49 +232,49 @@ CFCF;
                     </div>
 
                     <?php
-                        // получение массива для 2-го параметра чекбоксЛиста
-                        $types = Type::find()->where(['i_user' => $_SESSION['user']['id']])->asArray()->all();
-                        $naa = [];
-                        foreach($types as $ck => $cv){
-                            $naa[$cv['id']] = $cv['name'];
-                        }
+                    // получение массива для 2-го параметра чекбоксЛиста
+                    $types = Type::find()->where(['i_user' => $_SESSION['user']['id']])->asArray()->all();
+                    $naa = [];
+                    foreach($types as $ck => $cv){
+                        $naa[$cv['id']] = $cv['name'];
+                    }
 
-                        echo $form->field($event,'type',[
-                            'template' => "<label for=''>Выберите тип</label>                                             
-                                             $chechBoxexForTypeFilter
-                                           <div>{input}</div>",
-                            'options' => ['class' => 'class-radioCheckBox']
-                        ])->checkboxList(
-                            //[1 => 'Доход', 2 => 'Расход'],
-                            $naa,
-                            [
-                                'item' => function($index, $label, $name, $checked, $value) {
-                                    $ch = '';
-                                    $return = '<label>';
-                                    $return .= '<input type="checkbox" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
-                                    $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .
-                                        '<i class="fa fa-check-square-o fa-2x"></i>' ."\n";
-                                    $return .= '<span>' . ucwords($label) . '</span>' ."\n";
-                                    $return .= '</label>';
+                    echo $form->field($event,'type',[
+                        'template' => "<label for=''>Выберите тип</label>                                             
+                                         $chechBoxexForTypeFilter
+                                       <div>{input}</div>",
+                        'options' => ['class' => 'class-radioCheckBox']
+                    ])->checkboxList(
+                    //[1 => 'Доход', 2 => 'Расход'],
+                        $naa,
+                        [
+                            'item' => function($index, $label, $name, $checked, $value) {
+                                $ch = '';
+                                $return = '<label>';
+                                $return .= '<input type="checkbox" name="' . $name . '" value="' . $value . '" tabindex="3"' . " {$ch} " . ' >'."\n";
+                                $return .= '<i class="fa fa-square-o fa-2x"></i>' ."\n" .
+                                    '<i class="fa fa-check-square-o fa-2x"></i>' ."\n";
+                                $return .= '<span>' . ucwords($label) . '</span>' ."\n";
+                                $return .= '</label>';
 
-                                    return $return;
-                                },
-                                'id' => 'simpleFilterModal_radioCheckBox'
-                            ]
-                        );
+                                return $return;
+                            },
+                            'id' => 'simpleFilterModal_radioCheckBox'
+                        ]
+                    );
                     ?>
                     <?php
-                        $chechBoxexForCatFilter = <<<CFCF
-                        <div class="forSimpleFilter-ckeckAndUncheckAll">
-                            <label>
-                                <input type="checkbox" name="" value="">
-                                <i class="fa fa-square-o fa-2x"></i>
-                                <i class="fa fa-check-square-o fa-2x"></i>
-                                <span>Выбрать все категории</span>
-                            </label>
-                        </div>
+                    $chechBoxexForCatFilter = <<<CFCF
+                    <div class="forSimpleFilter-ckeckAndUncheckAll">
+                        <label>
+                            <input type="checkbox" name="" value="">
+                            <i class="fa fa-square-o fa-2x"></i>
+                            <i class="fa fa-check-square-o fa-2x"></i>
+                            <span>Выбрать все категории</span>
+                        </label>
+                    </div>
 CFCF;
-?>
+                    ?>
                     <?php
                     // получение массива для первого параметра чекбоксЛиста
                     $cats = Category::find()->where(['i_user' => 1])->asArray()->all();
@@ -292,11 +284,11 @@ CFCF;
                     }
                     echo $form->field($event,'i_cat',[
                         'template' => "<label for=''>Выберите категории</label>
-                                            $chechBoxexForCatFilter
-                                        <div>{input}</div>",
+                                        $chechBoxexForCatFilter
+                                    <div>{input}</div>",
                         'options' => ['class' => 'class-catsCheckBox']
                     ])->checkboxList(
-                        //[1 => 'Доход', 2 => 'Расход'],
+                    //[1 => 'Доход', 2 => 'Расход'],
                         $na,
                         [
                             'item' => function($index, $label, $name, $checked, $value) {
@@ -320,7 +312,7 @@ CFCF;
                     <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
                     <button type="button" class="btn btn-primary doFilter">Применить</button>
                 </div>
-                    <?php ActiveForm::end(); ?>
+                <?php ActiveForm::end(); ?>
             </div>
         </div>
     </div>
@@ -397,90 +389,12 @@ CFCF;
     </div>
 </div>
 
-<!-- модальное окно для правки и показа (2 ин 1) события -->
-<div class="modal fade" id="modalEventEdit" tabindex="-1" role="dialog" aria-labelledby="modalEventEditLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="modalEventEditTitle">
-                    Редактирование события
-                </h4>
-            </div>
-            <div class="modal-body">
-                <section class="changeEventModal">
-                    <div class="inner">
-
-                        <?php $form = ActiveForm::begin([
-                            'method'=>'post',
-                            'action' => ['/site/change-event'],
-                            'options' => [
-                                'class' => 'changeEvent',
-                            ]
-                        ]); ?>
-
-                        <input type="hidden" value="" id="evid">
-
-                        <?php
-                            echo $form->field($event, 'i_cat')->dropDownList(
-                                Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-                                ['id' => 'changeEventModal_catId',]
-                            )->label('Категория');
-
-                            echo $form->field($event, 'type')->dropDownList(
-                                Type::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
-                                ['id' => 'changeEventModal_typeId',]
-                            )->label('Тип события');
-
-                            echo $form->field($event, 'dtr', ['options' => ['class' => 'changeEventModal_date']])
-                                ->widget(DatePicker::className(),[
-                                    'language' => 'ru',
-                                    'type' => 2,
-                                    //'value' =>  date('Y-m-d'),
-                                    'value' =>  Yii::$app->formatter->asDate($event->dtr),
-                                    'options' => ['placeholder' => 'выберите дату', 'id' => 'changeEventModal_datePicker'],
-                                    'pluginOptions' => [
-                                        'autoclose'=>true,
-                                        'todayHighlight' => true,
-                                        'format' => 'yyyy-mm-dd',
-                                    ]
-                                ]
-                            );
-
-                        ?>
-
-                        <?= $form->field($event, 'summ')->label('Введите сумму') ?>
-                        <?= $form->field($event, 'desc')->label('Введите описание') ?>
-
-                        <div class="form-group">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
-                            <button type="button" class="btn btn-primary btn-gg2 changeSubmitButton"
-                                    data-dismiss="modal" >
-                                Изменить
-                            </button>
-                            <button type="button" class="btn btn-primary btn-gg2 changeOkButton"
-                                    data-dismiss="modal" >
-                                Ок
-                            </button>
-                            <?php //echo Html::button('Изменить', ['class' => '']) ?>
-                        </div>
-
-                        <?php ActiveForm::end(); ?>
-
-                    </div>
-                </section>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php
 
 $this->registerJsFile("@web/js/history.js",[
-        'depends' => [
-            //\yii\web\JqueryAsset::className()
-            \yii\bootstrap\BootstrapPluginAsset::className()
-         ]
-    ]);
+    'depends' => [
+        //\yii\web\JqueryAsset::className()
+        \yii\bootstrap\BootstrapPluginAsset::className()
+    ]
+]);
 ?>
-

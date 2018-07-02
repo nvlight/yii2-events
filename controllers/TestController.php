@@ -8,14 +8,75 @@ use app\models\ContactForm;
 use app\models\Type;
 use app\models\Event;
 use app\models\User;
+use app\models\User2;
 use Yii;
 use yii\db\Query;
 use PHPExcel;
 use PHPExcel_IOFactory;
 use DateTime;
+use yii\filters\AccessControl;
 
 class TestController extends \yii\web\Controller
 {
+    //
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['r1', 'r2'],
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['r1'],
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['r2'],
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function actionR1(){
+        echo __FUNCTION__;
+
+    }
+    public function actionR2(){
+        echo __FUNCTION__;
+
+    }
+
+    public function actionUserlogin(){
+
+        echo ' user login';
+
+        //$username = 'ivanovich';
+        //$identity = User::findOne(['uname' => $username]);
+        $identity = User2::findIdentity(26);
+        //echo Debug::d($identity,'identity');
+        Yii::$app->user->login($identity);
+        Yii::$app->user->logout();
+
+        // `identity` текущего пользователя. `Null`, если пользователь не аутентифицирован.
+        $identity = Yii::$app->user->identity;
+
+        // ID текущего пользователя. `Null`, если пользователь не аутентифицирован.
+        $id = Yii::$app->user->id;
+
+        // проверка на то, что текущий пользователь гость (не аутентифицирован)
+        $isGuest = Yii::$app->user->isGuest;
+
+        echo Debug::d($identity,'identity',1);
+        echo Debug::d($id,'identity',1);
+        echo Debug::d($isGuest,'identity',1);
+
+
+    }
+
     public function actionIndex()
     {
         $this->layout = '_main';
