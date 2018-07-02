@@ -15,14 +15,12 @@ use yii\helpers\Html;
 use app\components\Debug;
 use yii\widgets\LinkPager;
 use yii\helpers\Url;
-use yii\data\ActiveDataProvider;
-use yii\grid\GridView;
 
 $this->registerCssFile('@web/css/bootstrap-select.min.css');
 
 $this->title = 'Events | Простой фильтр';
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
-$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page filter'], 'keywords');
+$this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Application Events, Page history'], 'keywords');
 
 //echo Debug::d(Yii::$app,'request');
 $controller = Yii::$app->controller->id;
@@ -46,121 +44,110 @@ $action = Yii::$app->controller->action->id;
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-9">
-                    <div class="table-responsive">
-                        <?php
-                        $dataProvider = new ActiveDataProvider([
-                            //'query' => Event::find()->with('category')->with('types'),
-                            'query' => $json['query'],
-                            'pagination' => [
-                                'pageSize' => 20,
-                            ],
-                            'sort' => [
-                                'defaultOrder' => [
-                                    'dtr' => SORT_DESC
-                                ]
-                            ]
-                        ]);
-                        //echo \app\components\Debug::d($dataProvider,'dataProvider');
-                        //                                echo ListView::widget([
-                        //                                    'dataProvider' => $dataProvider,
-                        //                                    'itemView' => '_form',
-                        //                                ]);
-                        echo GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'columns' => [
-                                [
-                                    'class' => 'yii\grid\SerialColumn', // <-- тут
-                                    // тут можно настроить дополнительные свойства
-                                ],
-                                [
-                                    'label' => 'id',
-                                    'attribute' => 'id',
-                                ],
-                                [
-                                    'attribute' => 'i_cat',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $catname = $data->category->name;
-                                        $countl = 15;
-                                        (mb_strlen($catname) > $countl) ? $substrc = mb_substr($catname,0,$countl) . ' ...' : $substrc = $catname;
-                                        return <<<DESC
-<span class="desc" >
-    $substrc 
-</span>
-DESC;
-                                        return $substrc;
-                                    },
-                                    'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
-                                ],
-                                [
-                                    'attribute' => 'desc',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $descf = $data->desc;
-                                        $countl = 33;
-                                        (mb_strlen($descf) > $countl) ? $substrc = mb_substr($descf,0,$countl) . ' ...' : $substrc = $descf;
-                                        return <<<DESC
-<span class="desc" >
-    $substrc 
-</span>
-DESC;
-                                    },
-                                ],
-                                [
-                                    'attribute' => 'summ',
-                                ],
-                                [
-                                    'attribute' => 'dtr',
-                                    'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
-                                ],
-                                [
-                                    //'class' => 'yii\grid\CheckboxColumn',
-                                    'label' => 'Тип',
-                                    'attribute' => 'type',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $typename = $data->types->name;
-                                        $typecolor = $data->types->color;
-                                        return <<<STR
-<span class="dg_type_style" style="background-color: #$typecolor; cursor: pointer;" >
-    $typename
-</span>
-STR;
-                                    },
-                                ],
-                                [
-                                    'class' => 'yii\grid\CheckboxColumn',
-                                    // вы можете настроить дополнительные свойства здесь.
-                                ],
-                                [
-                                    'class' => 'yii\grid\ActionColumn',
-                                    // вы можете настроить дополнительные свойства здесь.
-                                    'template' => '{view} {update} {delete}',
-                                ],
-                            ],
-                        ]);
-
-                        //echo Debug::d($json['trs'],'trs');
-
+                    <div class="table-cover">
+                        <?php if ( isset($json) && is_array($json) && array_key_exists('rs',$json)
+                            && is_array($json['rs']) && (count($json['rs'])) ) :
                         ?>
+                        <div><span>Найдено строк: <?php echo count($json['rs']); ?></span></div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover  gg-history">
+                                <thead>
+                                    <tr>
+                                        <?php
+                                        $abs_url = Url::toRoute($controller .'/' . $action, true);
+                                        $buildHttpQuery = $json['buildHttpQuery'];
+                                        $buildHttpQuery = $abs_url . '?' . $buildHttpQuery;
+                                        $orderBy = $json['orderBy'];
+                                        $sortType = $orderBy[array_keys($orderBy)[0]] === SORT_ASC ? SORT_DESC : SORT_ASC;
+                                        ?>
+                                        <?php //$buildHttpQuery = $controller . '/' . $action . '?' . $buildHttpQuery ?>
+                                        <th><a href="<?=$buildHttpQuery."&sortColumn=id&sortType={$sortType}"?>">#</a></th>
+                                        <th><a href="<?=$buildHttpQuery."&sortColumn=i_cat&sortType={$sortType}"?>">Категория</a></th>
+                                        <th><a href="<?=$buildHttpQuery."&sortColumn=desc&sortType={$sortType}"?>">Описание</a></th>
+                                        <th><a href="<?=$buildHttpQuery."&sortColumn=summ&sortType={$sortType}"?>">Сумма</a></th>
+                                        <th><a href="<?=$buildHttpQuery."&sortColumn=dtr&sortType={$sortType}"?>">Дата</a></th>
+                                        <th><a href="<?=$buildHttpQuery."&sortColumn=type&sortType={$sortType}"?>">Тип</a></th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($json['rs'] as $ek => $ev): ?>
+                                        <tr class="actionId_<?=$ev->id?>">
+                                            <td class="item_eid"><?=$ev->id?></td>
+                                            <td class="item_cat"><?=$ev['category']->name?></td>
+                                            <td class="item_desc"><?=$ev->desc?></td>
+                                            <td class="item_summ"><?=$ev->summ?></td>
+                                            <td class="item_dtr"><?=Yii::$app->formatter->asDate($ev->dtr);?></td>
+                                            <td class="item_type">
+                                                                            <span class="dg_type_style"
+                                                                                  style="background-color: #<?=$ev['types']['color']?>;"
+                                                                            >
+                                                                                <?=$ev->types->name?>
+                                                                            </span>
+                                            </td>
+                                            <td>
+                                                                            <span class="btn-action" title="Просмотр">
+                                                                                <a class="evActionView"
+                                                                                   data-id="<?=$ev->id?>" href="<?=Url::to(['event/show?id=' . $ev->id])?>"
+                                                                                >
+                                                                                    <span class="glyphicon glyphicon-eye-open" ></span>
+                                                                                </a>
+                                                                            </span>
+                                                <span class="btn-action" title="Редактировать">
+                                                                                <a class="evActionUpdate"
+                                                                                   data-id="<?=$ev->id?>" href="<?=Url::to(['event/upd?id=' . $ev->id])?>"
+                                                                                >
+                                                                                    <span class="glyphicon glyphicon-pencil">
+                                                                            </span>
+                                                                                </a>
+                                                                                </span>
+                                                <span class="btn-action" title="Удалить">
+                                                                                <a class="evActionDelete"
+                                                                                   data-id="<?=$ev->id?>" href="<?=Url::to(['event/del?id=' . $ev->id])?>"
+                                                                                >
+                                                                                    <span class="glyphicon glyphicon-trash">
+                                                                                    </span>
+                                                                                </a>
+                                                                            </span>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach;?>
+                                    <?php if (array_key_exists('trs',$json)): ?>
+                                        <?php if (count($json['trs'])): ?>
+                                            <?php foreach($json['trs'] as $tk => $tv): ?>
+                                                <tr>
+                                                    <td colspan='3' class="tar">
+                                                        <?=$tv[0]?>
+                                                    </td>
+                                                    <td><?=$tv[1]?></td>
+                                                    <td colspan='3'>
+                                                        <?=$tv[2]?> - <?=$tv[3]?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                            <?php
+                            //                    echo Debug::d($json['evr'],'evr');
+                            //                    echo Debug::d($json['dt_diff'],'dt_diff');
+                            //                    echo Debug::d($json['trs'],'json_trs');
+                            ?>
+                        </div>
 
-                    </div>
-
-                    <div class="summary">Подсчеты за период от <b><?=$json['trs'][0][2]?></b> до <b><?=$json['trs'][0][3]?></b>.</div>
-
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered">
-                            <tr>
-                                <th>Тип</th>
-                                <th>Сумма</th>
-                            </tr>
-                            <?php foreach($json['trs'] as $k => $v):?>
-                                <tr>
-                                    <td><?=$v[0]?></td>
-                                    <td><?=$v[1]?></td>
-                                </tr>
-                            <?php endforeach;?>
-                        </table>
+                        <?php
+                        //echo 'link pager tut: ';
+                        //echo Debug::d($json['pages']);
+                        if (isset($json) && is_array($json) && array_key_exists('pages',$json)){
+                            echo LinkPager::widget([
+                                'pagination' => $json['pages'],
+                            ]);
+                        }
+                        ?>
+                        <?php else: ?>
+                            <h3>Выберите параметры фильтра</h3>
+                        <?php endif; ?>
                     </div>
                 </div>
 

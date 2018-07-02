@@ -766,10 +766,7 @@ class EventController extends \yii\web\Controller
             }else{
                 $query = $query->andWhere(['>=', 'summ',  0]);
             }
-            $query = $query->orderBy($orderBy) // ['type' => SORT_ASC, 'id' => SORT_ASC]
-                // ->asArray()
-                //->all();
-            ;
+            //$query = $query->orderBy($orderBy);
             //echo Debug::d($query,'in weight');
             $q_counts = 50;
             $q_counts = Yii::$app->params['history_post_search'];
@@ -834,6 +831,7 @@ class EventController extends \yii\web\Controller
                 'cats_checked_all' => $cats_checked_all,
                 'evr1' => $evr1,
                 'evr2' => $evr2,
+                'query' => $query,
             ];
             //die(json_encode($json));
             return $this->render('simplefilter', compact('json'));

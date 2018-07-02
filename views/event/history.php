@@ -202,18 +202,18 @@ STR;
                         ?>
                     </div>
 
-                    <?php
-                    $chechBoxexForTypeFilter = <<<CFCF
-                    <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
-                        <label>
-                            <input type="checkbox" name="" value="">
-                            <i class="fa fa-square-o fa-2x"></i>
-                            <i class="fa fa-check-square-o fa-2x"></i>
-                            <span>Выбрать все типы событий</span>
-                        </label>
-                    </div>
+                        <?php
+                        $chechBoxexForTypeFilter = <<<CFCF
+                        <div class="forSimpleFilter-ckeckAndUncheckAllTypes">
+                            <label>
+                                <input type="checkbox" name="" value="">
+                                <i class="fa fa-square-o fa-2x"></i>
+                                <i class="fa fa-check-square-o fa-2x"></i>
+                                <span>Выбрать все типы событий</span>
+                            </label>
+                        </div>
 CFCF;
-                    ?>
+                        ?>
 
                     <div class="class-radioCheckBox_zerosumm">
                         <label for="">Искать строки с нулевой суммой</label>
