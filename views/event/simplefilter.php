@@ -48,120 +48,127 @@ $action = Yii::$app->controller->action->id;
                 <div class="col-md-9">
                     <div class="table-responsive">
                         <?php
-                        $dataProvider = new ActiveDataProvider([
-                            //'query' => Event::find()->with('category')->with('types'),
-                            'query' => $json['query'],
-                            'pagination' => [
-                                'pageSize' => 20,
-                            ],
-                            'sort' => [
-                                'defaultOrder' => [
-                                    'dtr' => SORT_DESC
-                                ]
-                            ]
-                        ]);
-                        //echo \app\components\Debug::d($dataProvider,'dataProvider');
-                        //                                echo ListView::widget([
-                        //                                    'dataProvider' => $dataProvider,
-                        //                                    'itemView' => '_form',
-                        //                                ]);
-                        echo GridView::widget([
-                            'dataProvider' => $dataProvider,
-                            'columns' => [
-                                [
-                                    'class' => 'yii\grid\SerialColumn', // <-- тут
-                                    // тут можно настроить дополнительные свойства
-                                ],
-                                [
-                                    'label' => 'id',
-                                    'attribute' => 'id',
-                                ],
-                                [
-                                    'attribute' => 'i_cat',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $catname = $data->category->name;
-                                        $countl = 15;
-                                        (mb_strlen($catname) > $countl) ? $substrc = mb_substr($catname,0,$countl) . ' ...' : $substrc = $catname;
-                                        return <<<DESC
-<span class="desc" >
-    $substrc 
-</span>
+                            if ($json['query'] !== null){
+
+                                $dataProvider = new ActiveDataProvider([
+                                    //'query' => Event::find()->with('category')->with('types'),
+                                    'query' => $json['query'],
+                                    'pagination' => [
+                                        'pageSize' => 20,
+                                    ],
+                                    'sort' => [
+                                        'defaultOrder' => [
+                                            'dtr' => SORT_DESC
+                                        ]
+                                    ]
+                                ]);
+                                echo GridView::widget([
+                                    'dataProvider' => $dataProvider,
+                                    'columns' => [
+                                        [
+                                            'class' => 'yii\grid\SerialColumn', // <-- тут
+                                            // тут можно настроить дополнительные свойства
+                                        ],
+                                        [
+                                            'label' => 'id',
+                                            'attribute' => 'id',
+                                        ],
+                                        [
+                                            'attribute' => 'i_cat',
+                                            'format' => 'raw',
+                                            'value' => function ($data) {
+                                                $catname = $data->category->name;
+                                                $countl = 15;
+                                                (mb_strlen($catname) > $countl) ? $substrc = mb_substr($catname,0,$countl) . ' ...' : $substrc = $catname;
+                                                return <<<DESC
+        <span class="desc" >
+            $substrc 
+        </span>
 DESC;
-                                        return $substrc;
-                                    },
-                                    'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
-                                ],
-                                [
-                                    'attribute' => 'desc',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $descf = $data->desc;
-                                        $countl = 33;
-                                        (mb_strlen($descf) > $countl) ? $substrc = mb_substr($descf,0,$countl) . ' ...' : $substrc = $descf;
-                                        return <<<DESC
-<span class="desc" >
-    $substrc 
-</span>
+                                                return $substrc;
+                                            },
+                                            'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
+                                        ],
+                                        [
+                                            'attribute' => 'desc',
+                                            'format' => 'raw',
+                                            'value' => function ($data) {
+                                                $descf = $data->desc;
+                                                $countl = 33;
+                                                (mb_strlen($descf) > $countl) ? $substrc = mb_substr($descf,0,$countl) . ' ...' : $substrc = $descf;
+                                                return <<<DESC
+        <span class="desc" >
+            $substrc 
+        </span>
 DESC;
-                                    },
-                                ],
-                                [
-                                    'attribute' => 'summ',
-                                ],
-                                [
-                                    'attribute' => 'dtr',
-                                    'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
-                                ],
-                                [
-                                    //'class' => 'yii\grid\CheckboxColumn',
-                                    'label' => 'Тип',
-                                    'attribute' => 'type',
-                                    'format' => 'raw',
-                                    'value' => function ($data) {
-                                        $typename = $data->types->name;
-                                        $typecolor = $data->types->color;
-                                        return <<<STR
-<span class="dg_type_style" style="background-color: #$typecolor; cursor: pointer;" >
-    $typename
-</span>
+                                            },
+                                        ],
+                                        [
+                                            'attribute' => 'summ',
+                                        ],
+                                        [
+                                            'attribute' => 'dtr',
+                                            'contentOptions' =>['class' => 'table_class11','style'=>'white-space:nowrap;'],
+                                        ],
+                                        [
+                                            //'class' => 'yii\grid\CheckboxColumn',
+                                            'label' => 'Тип',
+                                            'attribute' => 'type',
+                                            'format' => 'raw',
+                                            'value' => function ($data) {
+                                                $typename = $data->types->name;
+                                                $typecolor = $data->types->color;
+                                                return <<<STR
+        <span class="dg_type_style" style="background-color: #$typecolor; cursor: pointer;" >
+            $typename
+        </span>
 STR;
-                                    },
-                                ],
-                                [
-                                    'class' => 'yii\grid\CheckboxColumn',
-                                    // вы можете настроить дополнительные свойства здесь.
-                                ],
-                                [
-                                    'class' => 'yii\grid\ActionColumn',
-                                    // вы можете настроить дополнительные свойства здесь.
-                                    'template' => '{view} {update} {delete}',
-                                ],
-                            ],
-                        ]);
+                                            },
+                                        ],
+                                        [
+                                            'class' => 'yii\grid\CheckboxColumn',
+                                            // вы можете настроить дополнительные свойства здесь.
+                                        ],
+                                        [
+                                            'class' => 'yii\grid\ActionColumn',
+                                            // вы можете настроить дополнительные свойства здесь.
+                                            'template' => '{view} {update} {delete}',
+                                        ],
+                                    ],
+                                ]);
 
-                        //echo Debug::d($json['trs'],'trs');
-
+                                //echo Debug::d($json['trs'],'trs');
+                            }else{
+                                ?>
+                                    <div class="summary">Ничего не найдено</div>
+                                <?php
+                            }
                         ?>
 
                     </div>
 
-                    <div class="summary">Подсчеты за период от <b><?=$json['trs'][0][2]?></b> до <b><?=$json['trs'][0][3]?></b>.</div>
+                    <?php if( isset($json) &&
+                        is_array($json)
+                        && array_key_exists('trs', $json) && is_array($json['trs'])
+                        && count($json['trs']) ): ?>
+                        <div class="summary">Подсчеты за период от <b><?=$json['trs'][0][2]?></b> до <b><?=$json['trs'][0][3]?></b>.</div>
 
-                    <div class="table-responsive">
-                        <table class="table table-striped table-bordered">
-                            <tr>
-                                <th>Тип</th>
-                                <th>Сумма</th>
-                            </tr>
-                            <?php foreach($json['trs'] as $k => $v):?>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
                                 <tr>
-                                    <td><?=$v[0]?></td>
-                                    <td><?=$v[1]?></td>
+                                    <th>Тип</th>
+                                    <th>Сумма</th>
                                 </tr>
-                            <?php endforeach;?>
-                        </table>
-                    </div>
+                                <?php foreach($json['trs'] as $k => $v):?>
+                                    <tr>
+                                        <td><?=$v[0]?></td>
+                                        <td><?=$v[1]?></td>
+                                    </tr>
+                                <?php endforeach;?>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+
                 </div>
 
 

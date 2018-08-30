@@ -16,6 +16,7 @@ use kartik\date\DatePicker;
 use app\models\Type;
 use app\models\Category;
 use app\models\Event;
+use mihaildev\ckeditor\CKEditor;
 
 $this->title = 'Events | История (new)';
 $this->registerMetaTag(['name' => 'description', 'content' => 'Приложение Events. Приложение позволяет сохранять события и производить поиск по ним.'], 'description');
@@ -58,22 +59,7 @@ $type = new Type();
 
     <div class="table-responsive">
         <?php
-        $dataProvider = new ActiveDataProvider([
-            'query' => Event::find()->with('category')->with('types'),
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-            'sort' => [
-                'defaultOrder' => [
-                    'dtr' => SORT_DESC
-                ]
-            ]
-        ]);
-        //echo \app\components\Debug::d($dataProvider,'dataProvider');
-    //                                echo ListView::widget([
-    //                                    'dataProvider' => $dataProvider,
-    //                                    'itemView' => '_form',
-    //                                ]);
+
         echo GridView::widget([
             'dataProvider' => $dataProvider,
             'columns' => [
@@ -90,7 +76,7 @@ $type = new Type();
                     'format' => 'raw',
                     'value' => function ($data) {
                         $catname = $data->category->name;
-                        $countl = 33;
+                        $countl = 20;
                         (mb_strlen($catname) > $countl) ? $substrc = mb_substr($catname,0,$countl) . ' ...' : $substrc = $catname;
                         return <<<DESC
 <span class="desc" >
@@ -372,7 +358,8 @@ CFCF;
                         ?>
 
                         <?= $form->field($event, 'summ')->label('Введите сумму') ?>
-                        <?= $form->field($event, 'desc')->label('Введите описание') ?>
+                        <?php //echo $form->field($event, 'desc')->label('Введите описание') ?>
+                        <?php echo $form->field($event, 'desc')->widget(CKEditor::className()) ?>
 
                         <div class="form-group">
                             <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>

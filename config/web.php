@@ -76,6 +76,10 @@ $config = [
             'class' => 'app\modules\admiration\module',
             'layout' => 'main'
         ],
+        'str' => [
+            'class' => 'app\modules\str\module',
+            'layout' => 'main'
+        ],
 
     ],
     'params' => $params,

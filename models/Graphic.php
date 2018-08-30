@@ -129,7 +129,7 @@ class Graphic extends Model
         $q_get_years_with_months = (new Query())
             ->select('year(event.dtr) dtr,month(event.dtr) mnth, monthname(dtr) mnthnm, event.type tp, sum(event.summ) sm, type.name nm, type.color cl')
             ->from('event')
-            ->where(['event.type' => [1,2,3,4]])
+            ->where(['event.type' => [1,2,3,4], 'event.i_user' => $_SESSION['user']['id']])
             ->leftJoin('type','type.id=event.type')
             ->groupBy('mnth,tp')
             ->orderBy('dtr,mnth,tp')

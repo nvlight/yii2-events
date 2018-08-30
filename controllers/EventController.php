@@ -18,6 +18,7 @@ use yii\web\HttpException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\data\Sort;
+use yii\data\ActiveDataProvider;
 
 class EventController extends \yii\web\Controller
 {
@@ -179,11 +180,27 @@ class EventController extends \yii\web\Controller
             ->limit($pages->limit)
             ->all();
 
+
+        //data provider
+        $dataProvider = new ActiveDataProvider([
+            'query' => Event::find()->where(['i_user' => $_SESSION['user']['id']])->with('category')->with('types'),
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+            'sort' => [
+                'defaultOrder' => [
+                    'dtr' => SORT_DESC
+                ]
+            ]
+        ]);
+
         $this->layout = '_main';
         return $this->render('history', [
                 'events' => $events,
                 'pages' => $pages,
                 'sort' => $sort,
+                'dataProvider' => $dataProvider,
+
             ]
         );
     }
@@ -686,7 +703,7 @@ class EventController extends \yii\web\Controller
                     $json = ['success' => 'no', 'message' => 'Недостаточно входных параметров1','rs' => $_GET ];
                     die(json_encode($json));
                 }elseif(Yii::$app->request->isGet){
-                    $json = ['success' => 'no', 'message' => 'Недостаточно входных параметров2','rs' => [] ];
+                    $json = ['success' => 'no', 'message' => 'Недостаточно входных параметров2','rs' => [], 'query' => null ];
                     return $this->render('simplefilter', compact('json'));
                 }
                 //$json = ['success' => 'no', 'message' => 'Ошибка-1','rs' => [] ];

@@ -57,6 +57,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                 'value' => $rs->category->name
             ],
             [
+                'format' => 'raw',
                 'label' => 'Описание',
                 'attribute' => 'desc',
             ],

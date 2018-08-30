@@ -7,6 +7,7 @@ use app\models\Type;
 use yii\helpers\ArrayHelper;
 use app\models\Event;
 use kartik\date\DatePicker;
+use mihaildev\ckeditor\CKEditor;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\User */
@@ -28,7 +29,8 @@ use kartik\date\DatePicker;
                 ['id' => 'changeEventModal_catId', 'prompt' => 'Выберите категорию']
             )->label('Категория'); ?>
 
-            <?= $form->field($model, 'desc')->textInput(['maxlength' => true]) ?>
+            <?php // echo  $form->field($model, 'desc')->textInput(['maxlength' => true]) ?>
+            <?php echo $form->field($model, 'desc')->widget(CKEditor::className()) ?>
             <?= $form->field($model, 'summ')->textInput() ?>
 
             <?= $form->field($model, 'type')->dropDownList(

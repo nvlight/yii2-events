@@ -50,6 +50,11 @@ if (array_key_exists('1',$rr)) {
     //echo Debug::d(Yii::$app->db);
 ?>
 
+    <div id="hellopreloader">
+        <div id="hellopreloader_preload" style="display: block;position: fixed;z-index: 999;top: 0;left: 0;right: 0; bottom: 0; width: 100%;height: 100%;background: #3B4453 url(/img/three-dots.svg) center center no-repeat;background-size:41px;">
+        </div>
+    </div>
+
     <nav class="navbar navbar-default visible-sm visible-xs">
         <div class="container-fluid">
             <!-- Brand и toggle сгруппированы для лучшего отображения на мобильных дисплеях -->
@@ -269,6 +274,7 @@ $("html, body").animate({ scrollTop: 0 }, 0);
 return false;
 });
 
+$('#hellopreloader_preload').delay(150).fadeOut('slow');
 
 JS;
 $css = <<<CSS

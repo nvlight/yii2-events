@@ -112,7 +112,7 @@ TRH;
             [['i_user', 'i_cat', 'summ', 'type'], 'integer'],
 //            [['dtr'], 'string', 'length' => [8]],
             [['dtr'], 'date'],
-            [['desc'], 'string', 'max' => 101],
+            [['desc'], 'string', 'max' => 65535],
             [['note'], 'string', 'max' => 55],
         ];
     }
