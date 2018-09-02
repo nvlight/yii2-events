@@ -332,8 +332,17 @@ CFCF;
 
                         <?php
 
+                        $old_cats = Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])
+                            ->indexBy('id')
+                            ->column();
+                        $new_cats = Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])
+                            ->indexBy('id')
+                            ->orderBy(['id' => SORT_DESC])
+                            //->asArray()->all();
+                            ->column();
+                        //echo \app\components\Debug::d($new_cats,'new_cats');
                         echo $form->field($event, 'i_cat')->dropDownList(
-                            Category::find()->select(['name','id'])->where(['i_user' => $_SESSION['user']['id']])->indexBy('id')->column(),
+                            $new_cats,
                             ['id' => 'addEvent_catsId', 'prompt' => 'Выберите категорию']
                         )->label('Категория');
 
