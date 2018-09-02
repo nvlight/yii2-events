@@ -56,6 +56,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
         <div class="page-content">
 
 
+
             <form class="form-inline mb10">
                 <div class="form-group">
                     <label for="new_remains">Общий лимит в рублях</label>
@@ -80,24 +81,41 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
             <?php
                 //
-                $green_char_codes = ['USD','EUR','CNY','GBP','KRW'];
+                $green_char_codes = ['USD','EUR','CNY','GBP','KRW', 'RUB', 'RUR'];
                 //echo Debug::d($courses,'$courses');
+
+                // # дальнейши код был использован для тестирования функционала выборки
+                // курса валют, уже не требуется...
+                //if (isset($new_couser_valute)){
+                //    $courses['rs'] = $new_couser_valute;
+                //    $courses['success'] = 'yes';
+                //}
+                //echo Debug::d($new_couser_valute,'$new_couser_valute');
+                // die;
             ?>
-            <h4>Последнее время обновления: <?= Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd')?></h4>
-            <h4>Количество записей: <?= count($courses['rs']['Valute'])?></h4>
+            <h5 class="de_h4h5_fz">Время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd')?></h5>
+            <h5 class="de_h4h5_fz">Предыдущее время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['PreviousDate'],'Y-MM-dd')?></h5>
+            <h5 class="de_h4h5_fz">Количество записей: <?= count($courses['rs']['Valute'])?></h5>
             <div class="mb10">
-                <?=Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
+                <?php //echo Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
             </div>
             <?php if ($courses['success'] === 'yes'): ?>
                 <div class="table-responsive">
                     <table class="table gg-billing">
                     <thead>
                         <tr>
-                            <td>NumCode</td>
-                            <td>CharCode</td>
-                            <td>Name</td>
-                            <td>Value</td>
-                            <td>Previous</td>
+                            <!--
+                                <td>NumCode</td>
+                                <td>CharCode</td>
+                                <td>Name</td>
+                                <td>Value</td>
+                                <td>Previous</td>
+                            -->
+                            <td>Код</td>
+                            <td>Симв.код</td>
+                            <td>Имя</td>
+                            <td>Тек.значение</td>
+                            <td>Пред.значение</td>
                         </tr>
                     </thead>
                     <tbody>

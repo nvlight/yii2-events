@@ -66,4 +66,30 @@ class Billing extends Model
         }
         return;
     }
+
+    //
+    public static function getCoursesI(){
+
+        $url = 'https://www.cbr-xml-daily.ru/daily_json.js';
+        $nd = @file_get_contents($url);
+        //$nd = null;
+
+        $filename = './courses.json';
+        if (!$nd) {
+            $nd = file_get_contents($filename);
+        }else{
+            // # обновить courses.json, если у нас вариант новее, чем был
+
+            //echo sha1($nd) . "<br>";
+            //echo sha1(file_get_contents($filename)) . "<br>";
+            if (sha1($nd) !== sha1(file_get_contents($filename))){
+                if (@file_put_contents($filename, $nd))
+                    Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
+            }
+        }
+
+        $new_couser_valute = json_decode($nd,1);
+
+        return ['rs' => $new_couser_valute, 'success' => 'yes'];
+    }
 }

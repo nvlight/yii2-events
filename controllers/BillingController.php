@@ -30,14 +30,16 @@ class BillingController extends \yii\web\Controller
             }
         }
         $remains = User::findOne(['id' => $uid])->remains;
-        $courses = Billing::getCourses();
+
+        //$courses = Billing::getCourses();
+        $courses = Billing::getCoursesI();
 
         $this->layout = '_main';
         return $this->render('index', compact('remains', 'courses'));
     }
 
     //
-    public function actionUpdateCourses(){
+    public function actionUpdateCourses_________1144511(){
         (new Billing())->updateCourses();
         return $this->redirect(['billing/index']);
     }
@@ -65,5 +67,35 @@ class BillingController extends \yii\web\Controller
             }
             die(json_encode($json));
         }
+    }
+
+    public function actionKv________112233(){
+
+        $url = 'https://www.cbr-xml-daily.ru/daily_json.js';
+        $nd = @file_get_contents($url);
+        //$nd = null;
+
+        $filename = './courses.json';
+        if (!$nd) {
+            $nd = file_get_contents($filename);
+        }else{
+            // # обновить courses.json, если у нас вариант новее, чем был
+
+            //echo sha1($nd) . "<br>";
+            //echo sha1(file_get_contents($filename)) . "<br>";
+            if (sha1($nd) !== sha1(file_get_contents($filename))){
+              if (@file_put_contents($filename, $nd))
+                Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
+            }
+        }
+
+        $new_couser_valute = json_decode($nd,1);
+
+        $this->layout = '_main';
+        return $this->render('index',
+            ['new_couser_valute' => $new_couser_valute,
+                'remains' => 333
+            ]
+        );
     }
 }
