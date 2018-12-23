@@ -80,26 +80,37 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
 
             <?php
-                //
-                $green_char_codes = ['USD','EUR','CNY','GBP','KRW', 'RUB', 'RUR'];
-                //echo Debug::d($courses,'$courses');
+            //
+            $green_char_codes = ['USD','EUR','CNY','GBP','KRW', 'RUB', 'RUR'];
+            //echo Debug::d($courses,'$courses');
 
-                // # дальнейши код был использован для тестирования функционала выборки
-                // курса валют, уже не требуется...
-                //if (isset($new_couser_valute)){
-                //    $courses['rs'] = $new_couser_valute;
-                //    $courses['success'] = 'yes';
-                //}
-                //echo Debug::d($new_couser_valute,'$new_couser_valute');
-                // die;
+            // # дальнейши код был использован для тестирования функционала выборки
+            // курса валют, уже не требуется...
+            //if (isset($new_couser_valute)){
+            //    $courses['rs'] = $new_couser_valute;
+            //    $courses['success'] = 'yes';
+            //}
+            //echo Debug::d($new_couser_valute,'$new_couser_valute');
+            // die;
+            // $bar = $foo ?? 'default'; echo $bar;
+            // echo "\u{1F602}"; // выводит смайлик it works!
+
+
             ?>
-            <h5 class="de_h4h5_fz">Время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd')?></h5>
-            <h5 class="de_h4h5_fz">Предыдущее время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['PreviousDate'],'Y-MM-dd')?></h5>
-            <h5 class="de_h4h5_fz">Количество записей: <?= count($courses['rs']['Valute'])?></h5>
-            <div class="mb10">
-                <?php //echo Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
-            </div>
+
+
             <?php if ($courses['success'] === 'yes'): ?>
+                <?php
+                    $courses2 = $courses['rs'];
+                    unset($courses2['Valute']);
+                    //echo Debug::d($courses2,'$new_couser_valute'); die;
+                ?>
+                <h5 class="de_h4h5_fz">Время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd')?></h5>
+                <h5 class="de_h4h5_fz">Предыдущее время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['PreviousDate'],'Y-MM-dd')?></h5>
+                <h5 class="de_h4h5_fz">Количество записей: <?= count($courses['rs']['Valute'])?></h5>
+                <div class="mb10">
+                    <?php //echo Html::a('Обновить курсы валют',['billing/update-courses'],['class' => 'btn btn-success'])?>
+                </div>
                 <div class="table-responsive">
                     <table class="table gg-billing">
                     <thead>
@@ -144,6 +155,31 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 <?php
 
 $js1 = <<<JS
+
+setTimeout(function () {
+   console.log('set_time_out - start');
+   
+   $.ajax({
+      url: '/billing/courses-update',
+      type: 'GET',
+      data: {},
+      success: function(res,status) {
+        var rs = $.parseJSON(res);
+        if (rs['success'] === 'yes'){
+            console.log('success');
+        }        
+      }
+      ,error: function(res) {
+        alert('we got error --- ' + res);
+      }
+      ,beforeSend: function(e) {
+      }
+      ,complete: function() {
+      }
+    });
+   
+   console.log('set_time_out - end');
+}, 3000);  
 
 /* */
 $('.user_limit').keydown(function (event) {

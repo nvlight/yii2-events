@@ -24,15 +24,20 @@ class GraphicController extends Controller
         $remains = $_SESSION['user']['remains'];
 
         $gr = new Graphic();
-        list($ob_rs, $q_get_years_with_months, $years) = $gr->getQueryRs();
+        //
+        $years = $gr->getYears();
+        $year = $curr_year;
+        if (array_key_exists('year',$_POST) && in_array($_POST['year'],$years) ){
+            $year = intval($_POST['year']);
+        }
+        //echo Debug::d($year,'year'); die;
+
+        list($ob_rs, $q_get_years_with_months) = $gr->getQueryRs($year);
 
         $pie_data = $gr->getPieData($ob_rs);
-        $year = [$curr_year];
-        if (array_key_exists('year',$_POST) && in_array($_POST['year'],$years) ){
-            $year = [$_POST['year']];
-        }
-        //echo Debug::d($year,'year');
-        $series = $gr->getSvodData($q_get_years_with_months,$year);
+
+        $series = $gr->getSvodData($q_get_years_with_months,$years);
+        //echo Debug::d($series,'series');
 
         $this->layout = '_main';
         return $this->render('index',

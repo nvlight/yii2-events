@@ -8,9 +8,14 @@
 
 namespace app\models;
 
+use app\components\Debug;
 use Yii;
 use yii\base\Model;
+//use yii\helpers\Html;
+//use yii\helpers\ArrayHelper;
+use yii\helpers\{Html, ArrayHelper};
 use yii\web\Controller;
+use DateTime;
 
 class Billing extends Model
 {
@@ -68,28 +73,80 @@ class Billing extends Model
     }
 
     //
-    public static function getCoursesI(){
+    public static function getCoursesI()
+    {
+        $course_local_fn = './courses.json';
+        $url4parse = 'https://www.cbr-xml-daily.ru/daily_json.js';
+        if (!@ file_get_contents($course_local_fn) ){
 
-        $url = 'https://www.cbr-xml-daily.ru/daily_json.js';
-        $nd = @file_get_contents($url);
-        //$nd = null;
-
-        $filename = './courses.json';
-        if (!$nd) {
-            $nd = file_get_contents($filename);
-        }else{
-            // # обновить courses.json, если у нас вариант новее, чем был
-
-            //echo sha1($nd) . "<br>";
-            //echo sha1(file_get_contents($filename)) . "<br>";
-            if (sha1($nd) !== sha1(file_get_contents($filename))){
-                if (@file_put_contents($filename, $nd))
-                    Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
-            }
+            $url_inner = @file_get_contents($url4parse);
+            $inner_decode = json_decode($url_inner,1);
+            $inner_decode['my_date'] = Date('Y-m-d');
+            $url_inner = json_encode($inner_decode);
+            @file_put_contents($course_local_fn, $url_inner);
+            Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
+            echo json_encode(['rs' => $url_inner, 'success' => 'yes']);
+            die;
         }
 
-        $new_couser_valute = json_decode($nd,1);
+        //
+        if (is_file($course_local_fn) ){
+            $courses = file_get_contents($course_local_fn);
+            //echo Debug::d(json_decode($courses,1));
+            $courses = json_decode($courses,1);
+            // тут же проверим, свежая ли дата, т.е. дата не сегоднешняя, то
+            $timestamp = $courses['Timestamp'];
+            $course_parse_datatime = Yii::$app->formatter->asDatetime($timestamp,'Y-MM-dd');
+            //echo $course_parse_datatime; echo '<br>';
+            // тут введен параметр my_date, чтобы лучше контролировать дату последнего изменения
+            $course_parse_datatime = $courses['my_date'];
 
-        return ['rs' => $new_couser_valute, 'success' => 'yes'];
+            $curr_datatime  = Date('Y-m-d');
+            //$curr_datatime = '2018-12-19';
+            //echo $curr_datatime; echo '<br>';
+            $diff = abs(strtotime($curr_datatime) - strtotime($course_parse_datatime));
+            // echo 'diff in seconds: ' . $diff;
+            $day_diff = $diff /  ( 3600 * 24 );
+            if ($day_diff >= 1){
+                // update our course with newest!
+                //
+                // echo 'So! we are here!'; die;
+                $url_inner = @file_get_contents($url4parse);
+                //echo json_encode(['success' => 'yes', 'rs' => $url_inner ]); die;
+                $inner_decode = json_decode($url_inner,1);
+                $inner_decode['my_date'] = Date('Y-m-d');
+                $url_inner = json_encode($inner_decode);
+                //echo $url_inner; die;
+                @file_put_contents($course_local_fn, $url_inner);
+                Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
+                echo json_encode(['rs' => $url_inner, 'success' => 'yes']);
+                die;
+            }
+
+            //
+            if (is_array($courses) && array_key_exists('Valute', $courses)){
+                //
+                echo json_encode(['rs' => '', 'success' => 'yes']);
+                die;
+            }
+        }
+        echo json_encode(['rs' => [], 'success' => 'no']); die;
+    }
+
+    //
+    public static function getCoursesCurrent()
+    {
+        $course_local_fn = './courses.json';
+        if ( !is_file($course_local_fn))
+        {
+            return ['rs' => [], 'success' => 'no'];
+        }
+        $courses = file_get_contents($course_local_fn);
+        //echo Debug::d($courses);
+        //$inner_decode = json_decode($courses,1);
+        //$inner_decode['my_date'] = Date('Y-m-d');
+        //$courses = json_encode($inner_decode);
+        $courses = json_decode($courses,1);
+        return ['rs' => $courses, 'success' => 'yes'];
     }
 }

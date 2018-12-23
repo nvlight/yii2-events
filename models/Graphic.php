@@ -10,6 +10,7 @@ namespace app\models;
 
 use yii\db\Query;
 use yii\base\Model;
+use app\components\Debug;
 
 class Graphic extends Model
 {
@@ -97,7 +98,25 @@ class Graphic extends Model
     }
 
     //
-    public function getQueryRs(){
+    public function getYears()
+    {
+        $q_get_year_arrays = (new Query())
+            ->select('DISTINCT year(dtr) year')
+            ->from('event')
+            ->orderBy('year')
+            ->all();
+        $years = [];
+        if ($q_get_year_arrays){
+            foreach($q_get_year_arrays as $k => $v){
+                $years[] = $v['year'];
+            }
+        }
+        //echo Debug::d($years,'$years'); die;
+        return $years;
+    }
+
+    //
+    public function getQueryRs($year){
 
         // получим тут общую сумму по 4-м типам для текущего пользователя
         $q = (new Query)
@@ -113,29 +132,18 @@ class Graphic extends Model
         //echo Debug::d($q); die;
         $ob_rs = $q;
 
-        $q_get_year_arrays = (new Query())
-            ->select('DISTINCT year(dtr) year')
-            ->from('event')
-            ->orderBy('year')
-            ->all();
-        $years = [];
-        if ($q_get_year_arrays){
-            foreach($q_get_year_arrays as $k => $v){
-                $years[] = $v['year'];
-            }
-        }
-        //echo Debug::d($years,'$years');
-
         $q_get_years_with_months = (new Query())
             ->select('year(event.dtr) dtr,month(event.dtr) mnth, monthname(dtr) mnthnm, event.type tp, sum(event.summ) sm, type.name nm, type.color cl')
             ->from('event')
-            ->where(['event.type' => [1,2,3,4], 'event.i_user' => $_SESSION['user']['id']])
+            ->where(['event.type' => [1,2,3,4],
+                'event.i_user' => $_SESSION['user']['id'],
+                'year(event.dtr)' => $year,])
             ->leftJoin('type','type.id=event.type')
             ->groupBy('mnth,tp')
             ->orderBy('dtr,mnth,tp')
             ->all();
-        //echo Debug::d($q_get_years_with_months,'$q_get_years_with_months');
+        //echo Debug::d($q_get_years_with_months,'$q_get_years_with_months'); die;
 
-        return [$ob_rs, $q_get_years_with_months, $years];
+        return [$ob_rs, $q_get_years_with_months];
     }
 }

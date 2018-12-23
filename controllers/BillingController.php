@@ -32,10 +32,16 @@ class BillingController extends \yii\web\Controller
         $remains = User::findOne(['id' => $uid])->remains;
 
         //$courses = Billing::getCourses();
-        $courses = Billing::getCoursesI();
+        $courses = Billing::getCoursesCurrent();
 
         $this->layout = '_main';
         return $this->render('index', compact('remains', 'courses'));
+    }
+
+    // update if need the courses...
+    public function actionCoursesUpdate()
+    {
+        Billing::getCoursesI();
     }
 
     //

@@ -99,7 +99,7 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
                     <div class="form-group">
                         <?php
                             echo Html::dropDownList('year',[],$nw,['class' => 'form-control',
-                                'options' => [ $year[0] => ['Selected' => true], ],
+                                'options' => [ $year => ['Selected' => true], ],
                                 'prompt' => 'Выберите год',
                                 'id' => 'iyear',
                             ]);
