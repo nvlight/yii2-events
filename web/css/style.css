@@ -996,3 +996,10 @@ body > nav.navbar{
 .de_h4h5_fz{
 	font-size: 17px;
 }
+
+#bs-example-navbar-collapse-1{
+	padding-right: 0px;
+	padding-left: 0px;
+	margin-right: -16px;
+	margin-left: -16px;
+}

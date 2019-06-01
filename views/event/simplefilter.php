@@ -48,7 +48,7 @@ $action = Yii::$app->controller->action->id;
                 <div class="col-md-9">
                     <div class="table-responsive">
                         <?php
-                            if ($json['query'] !== null){
+                            if (array_key_exists('query',$json) && $json['query'] !== null){
 
                                 $dataProvider = new ActiveDataProvider([
                                     //'query' => Event::find()->with('category')->with('types'),
@@ -140,7 +140,14 @@ STR;
                                 //echo Debug::d($json['trs'],'trs');
                             }else{
                                 ?>
-                                    <div class="summary">Ничего не найдено</div>
+                                    <div class="summary mb10">Результаты поиска</div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-bordered">
+                                            <tr>
+                                                <th>Ничего не найдено</th>
+                                            </tr>
+                                        </table>
+                                    </div>
                                 <?php
                             }
                         ?>

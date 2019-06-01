@@ -24,6 +24,7 @@ class AppAssetEvents extends AssetBundle
     public $js = [
         //'js/common.js',
         'js/bootstrap-select.min.js',
+        //'js/aslan_main.js'
     ];
     public $depends = [
         'yii\web\YiiAsset',

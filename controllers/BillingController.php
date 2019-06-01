@@ -44,6 +44,17 @@ class BillingController extends \yii\web\Controller
         Billing::getCoursesI();
     }
 
+    // update if need the courses...
+    public function actionCu()
+    {
+        Billing::updateCourses();
+    }
+
+    public function actionIi()
+    {
+        phpinfo(); die;
+    }
+
     //
     public function actionUpdateCourses_________1144511(){
         (new Billing())->updateCourses();
@@ -63,15 +74,30 @@ class BillingController extends \yii\web\Controller
             if ($ulimit){
                 $ulimit->remains = $val;
                 $rs = $ulimit->save();
+                $json = ['success' => 'no', 'message' => 'Во время обновления лимита произошла ошибка!',];
                 if ($rs){
                     $_SESSION['user']['remains'] = $val;
                     $json = ['success' => 'yes', 'message' => 'Лимит успешно обновлен!','is_up' => $rs ];
                 }
-                $json = ['success' => 'no', 'message' => 'Во время обновления лимита произошла ошибка!',];
             }else{
                 $json = ['success' => 'no', 'message' => 'Во время обновления лимита произошла ошибка!',];
             }
             die(json_encode($json));
+
+//            $our_ruls = []; //
+//            $is_we_find_girl = false; $cool_girl = [];
+//            $girls = global_search($current_area);
+//            foreach($girls as $girl){
+//                foreach($our_ruls as $rul){
+//                    if (!check_rule($girl, $rul)){
+//                        continue;
+//                    }
+//                    $is_we_find_girl = true;
+//                    $cool_girl = $girl
+//                }
+//                if ($is_we_find_girl) break;
+//            }
+//            echo Debug::d($girl, 'the cooles ever girl!');
         }
     }
 

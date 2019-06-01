@@ -42,6 +42,7 @@ class EventController extends \yii\web\Controller
      *
      **/
     public function actionHistory2(){
+        //echo 'hi!';
         //
         if (!Authlib::appIsAuth()) { AuthLib::appGoAuth(); }
 
@@ -99,7 +100,7 @@ class EventController extends \yii\web\Controller
         $q_counts = Yii::$app->params['history_post_count'];
         $pages = new Pagination(['totalCount' => $query->count(),'pageSize' => $q_counts,
             'pageSizeParam' => false, 'forcePageParam' => false]);
-        //echo Debug::d($pages,'pages'.$pages->offset); die;
+        echo Debug::d($pages,'pages'.$pages->offset); die;
         $events = $query->offset($pages->offset)
             ->limit($pages->limit)
             ->all();
@@ -165,8 +166,7 @@ class EventController extends \yii\web\Controller
                 'dtr' => SORT_DESC
             ]
         ]);
-        //echo Debug::d($sort,'sort');
-        //
+
         $query = Event::find()->where(['i_user' => $_SESSION['user']['id']])
             ->with('category')
             ->with('types')

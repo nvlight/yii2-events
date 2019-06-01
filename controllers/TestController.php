@@ -50,6 +50,11 @@ class TestController extends \yii\web\Controller
 
     }
 
+    public function actionIi(){
+        phpinfo();
+        return;
+    }
+
     public function actionUserlogin(){
 
         echo ' user login';

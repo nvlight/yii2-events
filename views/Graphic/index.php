@@ -88,27 +88,48 @@ HighchartsAsset::register($this)->withScripts(['highstock', 'modules/exporting',
         ]);
         ?>
         <div class="row">
+            <div class="row">
+                <div class="col-md-12">
+                    <?php //echo Debug::d($year, 'year') ?>
+                </div>
+            </div>
             <div class="col-md-4">
+<!--                <div class="form-group">-->
+<!--                    --><?php
+//                    //echo Debug::d($_POST,'$_POST');
+//                    //echo Debug::d($years,'$years');
+//                    $nw = []; foreach($years as $k => $v) { $nw[$v] = $v; }
+//                    echo Html::label('Выберите год','iyear',['class' => 'control-label']);
+//                    ?>
+<!--                    <div class="form-group">-->
+<!--                        --><?php
+//                            echo Html::dropDownList('year',[],$nw,['class' => 'form-control',
+//                                'options' => [ $year => ['Selected' => true], ],
+//                                'prompt' => 'Выберите год',
+//                                'id' => 'iyear',
+//                            ]);
+//                        ?>
+<!--                    </div>-->
+<!--                </div>-->
+<!--                --><?php
+//                    echo Html::submitButton('изменить',['class' => 'btn btn-primary']);
+//                ?>
                 <div class="form-group">
                     <?php
-                    //echo Debug::d($_POST,'$_POST');
-                    //echo Debug::d($years,'$years');
-                    $nw = []; foreach($years as $k => $v) { $nw[$v] = $v; }
-                    echo Html::label('Выберите год','iyear',['class' => 'control-label']);
+                        $nw = []; foreach($years as $k => $v) { $nw[$v] = $v; }
+                        //echo Debug::d($_REQUEST);
                     ?>
-                    <div class="form-group">
-                        <?php
-                            echo Html::dropDownList('year',[],$nw,['class' => 'form-control',
-                                'options' => [ $year => ['Selected' => true], ],
-                                'prompt' => 'Выберите год',
-                                'id' => 'iyear',
-                            ]);
+                    <?php echo Html::label('Выберите год','iyear',['class' => 'control-label']); ?>
+                    <br>
+                    <?php foreach($nw as $k => $v): ?>
+                        <?php echo Html::a($v,
+                            \yii\helpers\Url::to('graphic/index?year='.$v,true)
+                            //,['class' => 'btn btn-primary']
+                            )
                         ?>
-                    </div>
+                    <?php endForeach; ?>
                 </div>
-                <?php
-                    echo Html::submitButton('изменить',['class' => 'btn btn-primary']);
-                ?>
+
             </div>
         </div>
 

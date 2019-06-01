@@ -56,9 +56,9 @@ if (array_key_exists('1',$rr)) {
     </div>
 
     <nav class="navbar navbar-default visible-sm visible-xs">
-        <div class="container-fluid">
+        <div class="container">
             <!-- Brand и toggle сгруппированы для лучшего отображения на мобильных дисплеях -->
-            <div class="navbar-header p015">
+            <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
                     <span class="sr-only">Toggle navigation</span>
                     <span class="icon-bar"></span>
@@ -232,7 +232,7 @@ if (array_key_exists('1',$rr)) {
     </div>
     <div class="copy">
 		<span>
-			&copy; Martin German. All rights reserved
+			&copy; Martin German <?=Date('Y')?>. All rights reserved
 		</span>
     </div>
 </div>

@@ -9,7 +9,14 @@
 namespace app\controllers;
 
 
-class ForaslanController
+use yii\web\Controller;
+
+class ForaslanController extends Controller
 {
 
+    public function actionIndex()
+    {
+
+        return $this->render('index');
+    }
 }

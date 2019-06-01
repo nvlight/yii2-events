@@ -81,7 +81,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 
             <?php
             //
-            $green_char_codes = ['USD','EUR','CNY','GBP','KRW', 'RUB', 'RUR'];
+            $green_char_codes = ['USD','EUR','CNY','GBP','KRW', 'RUB', 'RUR','AMD'];
             //echo Debug::d($courses,'$courses');
 
             // # дальнейши код был использован для тестирования функционала выборки
@@ -99,11 +99,12 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
             ?>
 
 
-            <?php if ($courses['success'] === 'yes'): ?>
+            <?php if (($courses['success'] === 'yes' ) && array_key_exists('rs', $courses) && (is_array($courses['rs'])) && count($courses['rs']) > 1 ) : ?>
                 <?php
                     $courses2 = $courses['rs'];
                     unset($courses2['Valute']);
                     //echo Debug::d($courses2,'$new_couser_valute'); die;
+                    //echo Debug::d($courses['rs'],'rs');
                 ?>
                 <h5 class="de_h4h5_fz">Время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['Timestamp'],'Y-MM-dd')?></h5>
                 <h5 class="de_h4h5_fz">Предыдущее время обновления: <?php echo Yii::$app->formatter->asDatetime($courses['rs']['PreviousDate'],'Y-MM-dd')?></h5>
@@ -127,17 +128,24 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                             <td>Имя</td>
                             <td>Тек.значение</td>
                             <td>Пред.значение</td>
+                            <td>Кастом значение</td>
+                            <td>Пересчет</td>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach($courses['rs']['Valute'] as $k => $v): ?>
                             <?php if (in_array($k, $green_char_codes)): ?>
                                 <tr>
-                                    <td><?=$v['NumCode']?></td>
-                                    <td><?=$v['CharCode']?></td>
-                                    <td><?=$v['Name']?></td>
-                                    <td><?=$v['Value']/$v['Nominal']?></td>
-                                    <td><?=$v['Previous']/$v['Nominal']?></td>
+                                    <td class="td_schet_<?=$v['ID']?>"><?=$v['NumCode']?></td>
+                                    <td class="td_schet_charcode"><?=$v['CharCode']?></td>
+                                    <td class="td_schet_name"><?=$v['Name']?></td>
+                                    <td class="td_schet_value"><?=$v['Value']/$v['Nominal']?></td>
+                                    <td class="td_schet_previous"><?=$v['Previous']/$v['Nominal']?></td>
+                                    <td class="td_schet_custom">
+                                        <input type="text" class="td_name_custom_search_input_class-<?=$v['NumCode']?>"
+                                               name="td_name_custom_search_input_text-<?=$v['NumCode']?>" value="">
+                                    </td>
+                                    <td class="td_schet_revalue"><span></span></td>
                                 </tr>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -163,14 +171,17 @@ setTimeout(function () {
       url: '/billing/courses-update',
       type: 'GET',
       data: {},
+      dataType: 'json',
       success: function(res,status) {
-        var rs = $.parseJSON(res);
+        //var rs = $.parseJSON(res);
+        rs = res
         if (rs['success'] === 'yes'){
             console.log('success');
         }        
       }
       ,error: function(res) {
-        alert('we got error --- ' + res);
+        //alert('we got error --- ' + res);
+        console.log('we got error --- ' + res)
       }
       ,beforeSend: function(e) {
       }
@@ -190,6 +201,71 @@ $('.user_limit').keydown(function (event) {
         return false;
     }
 });
+
+/* */
+$('[class^=td_name_custom_search_input_class]').keyup(function (event) {
+    //console.log('reval');
+    //console.log($(this));
+    var curr_val = $(this).val() || 0; 
+    // console.log('curr_value:' + curr_val);
+    var parent = $(this).parent().parent();
+    //console.log(parent);
+    var target_curval = parent.find('.td_schet_value').text() || 0;
+    // console.log('target_value:' + target_curval);
+    var new_val =  curr_val * target_curval;
+    new_val = Math.round10(new_val, -2);
+    var target_reval  = parent.find('.td_schet_revalue > span').html(new_val);
+    // console.log('re_value:' + new_val);
+    // console.log('');
+});
+
+// для округление числа на два знака после запятой, приводим следущие функции
+// https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Math/round
+/**
+   * Корректировка округления десятичных дробей.
+   *
+   * @param {String}  type  Тип корректировки.
+   * @param {Number}  value Число.
+   * @param {Integer} exp   Показатель степени (десятичный логарифм основания корректировки).
+   * @returns {Number} Скорректированное значение.
+   */
+  function decimalAdjust(type, value, exp) {
+    // Если степень не определена, либо равна нулю...
+    if (typeof exp === 'undefined' || +exp === 0) {
+      return Math[type](value);
+    }
+    value = +value;
+    exp = +exp;
+    // Если значение не является числом, либо степень не является целым числом...
+    if (isNaN(value) || !(typeof exp === 'number' && exp % 1 === 0)) {
+      return NaN;
+    }
+    // Сдвиг разрядов
+    value = value.toString().split('e');
+    value = Math[type](+(value[0] + 'e' + (value[1] ? (+value[1] - exp) : -exp)));
+    // Обратный сдвиг
+    value = value.toString().split('e');
+    return +(value[0] + 'e' + (value[1] ? (+value[1] + exp) : exp));
+  }
+
+  // Десятичное округление к ближайшему
+  if (!Math.round10) {
+    Math.round10 = function(value, exp) {
+      return decimalAdjust('round', value, exp);
+    };
+  }
+  // Десятичное округление вниз
+  if (!Math.floor10) {
+    Math.floor10 = function(value, exp) {
+      return decimalAdjust('floor', value, exp);
+    };
+  }
+  // Десятичное округление вверх
+  if (!Math.ceil10) {
+    Math.ceil10 = function(value, exp) {
+      return decimalAdjust('ceil', value, exp);
+    };
+  }
 
 /* */
 function updateUserLimit(){

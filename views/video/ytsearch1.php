@@ -184,6 +184,25 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
                         ?>
                     </select>
                 </div>
+                <div class="form-group">
+                    <?php
+                    //echo Debug::d($safeSearch['key'],'$safeSearch[\'key\']',2);
+                    //echo Debug::d($safeSearchArray,'$safeSearchArray',2);
+                    ?>
+                    <label for="videoSafeSearch"><?=$safeSearch['caption']?></label>
+                    <select class="form-control" id="videosafeSearch" name="safeSearch">
+                        <?php
+
+                        foreach($safeSearchArray as $k => $v){
+                            ?>
+                            <option value="<?=Html::encode($k)?>" <?php if ( ($k) === intval($safeSearch['key'])): ?> selected <?php endif; ?> >
+                                <?=Html::encode($v)?>
+                            </option>
+                            <?php
+                        }
+                        ?>
+                    </select>
+                </div>
 <!--                <div class="form-group">-->
 <!--                    <label for="videoType">--><?//=$type['caption']?><!--</label>-->
 <!--                    <select class="form-control" id="videoType" name="type">-->
@@ -198,6 +217,7 @@ $this->registerMetaTag(['name' => 'keywords', 'content' => 'Events,App Events,Ap
 //                        ?>
 <!--                    </select>-->
 <!--                </div>-->
+
                 <div class="form-group">
                     <label for="id_publishedAfter">publishedAfter</label>
                     <?php

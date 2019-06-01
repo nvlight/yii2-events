@@ -50,15 +50,18 @@ class Billing extends Model
     }
 
     //
-    public function updateCourses(){
-
+    public static function updateCourses()
+    {
         $res = false;
         $filename = './courses.json';
+        echo '00';
+        $url = 'https://www.cbr-xml-daily.ru/daily_json.js';
+        $nd = file_get_contents($url);
         try {
             // http://www.cbr.ru/scripts/XML_daily.asp
             // https://www.cbr-xml-daily.ru/daily_json.js
-            $url = 'https://www.cbr-xml-daily.ru/daily_json.js';
             $nd = file_get_contents($url);
+            echo '01';
             if ($nd) {
                 file_put_contents($filename, $nd);
                 $res = true;
@@ -94,6 +97,20 @@ class Billing extends Model
             $courses = file_get_contents($course_local_fn);
             //echo Debug::d(json_decode($courses,1));
             $courses = json_decode($courses,1);
+            // # как оказалось, данные могут быть битыми, т.е. сохраентся только $courses['my_date']
+            // чтобы решить эту проблему, тут же проверим существование ключа Timestamp, if false -> update it!
+            if ( !array_key_exists('Timestamp', $courses)){
+                $url_inner = @file_get_contents($url4parse);
+                $inner_decode = json_decode($url_inner,1);
+                $inner_decode['my_date'] = Date('Y-m-d');
+                $url_inner = json_encode($inner_decode);
+                @file_put_contents($course_local_fn, $url_inner);
+                Yii::$app->session->setFlash('courses','Данные курсов валют были обновлены');
+                if (!array_key_exists('Timestamp', $inner_decode)){
+                    echo json_encode(['rs' => [], 'success' => 'no', 'message' => 'error on update!']); die;
+                }
+                echo json_encode(['rs' => $url_inner, 'success' => 'yes']);
+            }
             // тут же проверим, свежая ли дата, т.е. дата не сегоднешняя, то
             $timestamp = $courses['Timestamp'];
             $course_parse_datatime = Yii::$app->formatter->asDatetime($timestamp,'Y-MM-dd');
@@ -126,7 +143,7 @@ class Billing extends Model
             //
             if (is_array($courses) && array_key_exists('Valute', $courses)){
                 //
-                echo json_encode(['rs' => '', 'success' => 'yes']);
+                echo json_encode(['rs' => '', 'success' => 'yes', 'message' => 'Данные актуальны']);
                 die;
             }
         }

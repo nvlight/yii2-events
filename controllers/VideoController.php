@@ -674,6 +674,14 @@ IFRAME;
         $q['key'] = '';
         $q['caption'] = 'Query string';
         $q['value'] = '';
+        //
+        $safeSearchArray = [
+            'moderate',
+            'none',
+            'strict',
+        ];
+
+
         ///
         $maxResults['key'] = 0;
         $maxResults['caption'] = 'maxResults';
@@ -698,6 +706,14 @@ IFRAME;
         $publishedBefore = date('Y-m-d\Th:i:s\Z');
         //echo $publishedBefore; echo "<br>";
         $publishedAfter = '1970-01-01T00:00:00Z';
+
+        // moderate || none || strict
+        $safeSearch['key'] = 2;
+        $safeSearch['value'] = $safeSearchArray[$safeSearch['key']];
+        //$safeSearch['value'] = 'strict';
+        //echo $safeSearch['value']; die;
+        $safeSearch['caption'] = 'safeSearch';
+
         //
         if(Yii::$app->request->isPost) {
             if (array_key_exists('yt-search-text', $_POST)){
@@ -749,6 +765,11 @@ IFRAME;
                 //echo $publishedAfter; echo "<br>";
                 //die;
             }
+            //
+            if (array_key_exists('safeSearch',$_POST) && array_key_exists( $_POST['safeSearch'], $safeSearchArray ) ){
+                $safeSearch['key'] = $_POST['safeSearch'];
+                $safeSearch['value'] = $safeSearchArray[intval($safeSearch['key'])];
+            }
         }
 
         $part = "snippet";
@@ -759,7 +780,7 @@ IFRAME;
             'type' => 'video',
             //'forMine' => true,
             //'safeSearch' => 'none',
-            'safeSearch' => 'strict',
+            'safeSearch' => $safeSearch['value'],
             //'safeSearch' => 'moderate',
             'type' => $type['value'],
             'order'=> $order['value'],
@@ -790,6 +811,8 @@ IFRAME;
             'maxResults' => $maxResults,
             'publishedBefore' => $publishedBefore,
             'publishedAfter' => $publishedAfter,
+            'safeSearch' => $safeSearch,
+            'safeSearchArray' => $safeSearchArray,
 
         ]);
     }

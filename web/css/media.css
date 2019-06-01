@@ -71,7 +71,10 @@
         top: 5px;
     }
 
-
+    .wrapper .content-line {
+        background-color: #F0F1F6;
+        padding: 15px 15px;
+    }
 }
 
 /* Extra Small Devices, Phones */
