@@ -483,6 +483,7 @@ class VideoController extends Controller
 
         $context = stream_context_create($opts);
         $json_result = file_get_contents ($url,false ,$context);
+        echo Debug::d($json_result); die;
         $json_decode = json_decode($json_result)->items[0];
         //echo Debug::d($json_decode,'json_result',1,1);
         $thumbnails = $json_decode->snippet->thumbnails;
@@ -546,7 +547,7 @@ IFRAME;
     public function actionGetYtVideoByHash($id=''){
 
         if (!Authlib::appIsAuth()) {
-            echo json_decode(['success' => 'no', 'message' => 'auth is required']); die;
+            echo json_decode(['success' => 'no', 'message' => 'auth is required']); die('wow');
         }
 
         if (Yii::$app->request->isAjax){
@@ -705,7 +706,9 @@ IFRAME;
         //
         $publishedBefore = date('Y-m-d\Th:i:s\Z');
         //echo $publishedBefore; echo "<br>";
-        $publishedAfter = '1970-01-01T00:00:00Z';
+
+        //$publishedAfter = '1970-01-01T00:00:00Z';
+        $publishedAfter = date("c", strtotime("1970-03-10"));
 
         // moderate || none || strict
         $safeSearch['key'] = 2;
@@ -751,16 +754,18 @@ IFRAME;
             }
             if (array_key_exists('publishedBefore', $_POST) && mb_strlen($_POST['publishedBefore']) >= 8 ){
                 $publishedBefore = Yii::$app->formatter->asDatetime($_POST['publishedBefore'],DATE_RFC3339);
-                $publishedBefore = Yii::$app->formatter->asDatetime($_POST['publishedBefore'],'Y-MM-dd\Th:i:s');
-                $publishedBefore .= 'Z';
+                $publishedBefore = date("c", strtotime($_POST['publishedBefore']));
+                //$publishedBefore = Yii::$app->formatter->asDatetime($_POST['publishedBefore'],'Y-MM-dd\Th:i:s');
+                //$publishedBefore .= 'Z';
                 //echo $publishedBefore; echo "<br>";
                 //echo $publishedAfter; echo "<br>";
                 //die;
             }
             if (array_key_exists('publishedAfter', $_POST)){
                 $publishedAfter = Yii::$app->formatter->asDatetime($_POST['publishedAfter'],DATE_RFC3339);
-                $publishedAfter = Yii::$app->formatter->asDatetime($_POST['publishedAfter'],'Y-MM-dd\Th:i:s');
-                $publishedAfter .= 'Z';
+                $publishedAfter = date("c", strtotime($_POST['publishedAfter']));
+                //$publishedAfter = Yii::$app->formatter->asDatetime($_POST['publishedAfter'],'Y-MM-dd\Th:i:s');
+                //$publishedAfter .= 'Z';
                 //echo $publishedBefore; echo "<br>";
                 //echo $publishedAfter; echo "<br>";
                 //die;
@@ -772,27 +777,29 @@ IFRAME;
             }
         }
 
-        $part = "snippet";
+        // debug
+        // try change date - after and before
+//        $d1 = date("c", strtotime("1970-03-10"));
+//        $d2 = date("c", strtotime("2015-03-10"));
+//        $publishedAfter  = $d1;
+//        $publishedBefore = $d2;
+
         $filters = [
             'q' => $q['value'],
-            'maxResults' => $maxResults['value'],
-            'videoDuration' => $duration['value'],
-            'type' => 'video',
-            //'forMine' => true,
-            //'safeSearch' => 'none',
             'safeSearch' => $safeSearch['value'],
-            //'safeSearch' => 'moderate',
             'type' => $type['value'],
             'order'=> $order['value'],
-            //'eventType' => 'completed',
             'publishedBefore' => $publishedBefore,
             'publishedAfter' => $publishedAfter,
-
+            'maxResults' => $maxResults['value'],
+            'videoDuration' => $duration['value'],
+            'maxResults' => $maxResults['value'],
         ];
 
         $publishedBefore = mb_substr($publishedBefore,0,10);
         $publishedAfter  = mb_substr($publishedAfter, 0,10);
         //
+        $part = "snippet";
         $rs = $youtube->search->listSearch($part, $filters);
         //echo $publishedBefore; echo "<br>";
         //echo Debug::d($rs,'youtube result',1);
